@@ -1,0 +1,55 @@
+[gd_scene load_steps=2 format=3 uid="uid://t58neqkqi7ul"]
+
+[ext_resource type="Script" path="res://UserInterface/Volume.gd" id="1_pn6gy"]
+
+[node name="SettingsMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CanvasLayer" type="CanvasLayer" parent="VBoxContainer"]
+
+[node name="Label" type="Label" parent="VBoxContainer/CanvasLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -33.5
+offset_top = -40.5
+offset_right = 33.5
+offset_bottom = -17.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "VOLUME"
+
+[node name="volume" type="HSlider" parent="VBoxContainer/CanvasLayer"]
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = 139.0
+offset_top = -8.0
+offset_right = -103.0
+offset_bottom = 8.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+script = ExtResource("1_pn6gy")

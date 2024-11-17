@@ -1,0 +1,83 @@
+[gd_scene load_steps=4 format=3 uid="uid://dbf2t7va3l002"]
+
+[ext_resource type="Texture2D" uid="uid://djo53ep2hv88p" path="res://icon.svg" id="1_jfp8w"]
+[ext_resource type="Script" path="res://LoadMenu.gd" id="1_l4iqt"]
+[ext_resource type="PackedScene" uid="uid://b0ne2ctjlfdqj" path="res://LoadButton.tscn" id="2_v6k2p"]
+
+[node name="LoadMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_l4iqt")
+LoadButton = ExtResource("2_v6k2p")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 89.0
+offset_top = 52.0
+offset_right = 401.0
+offset_bottom = 408.0
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LoadButtons" type="VBoxContainer" parent="Panel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LoadScene" type="Button" parent="."]
+layout_mode = 0
+offset_left = 804.0
+offset_top = 474.0
+offset_right = 856.0
+offset_bottom = 505.0
+text = "LOAD"
+
+[node name="BACK" type="Button" parent="."]
+layout_mode = 0
+offset_left = 100.0
+offset_top = 476.0
+offset_right = 150.0
+offset_bottom = 507.0
+text = "BACK"
+
+[node name="ScreenShot" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 572.0
+offset_top = 19.0
+offset_right = 636.0
+offset_bottom = 83.0
+scale = Vector2(8.41837, 4.99352)
+texture = ExtResource("1_jfp8w")
+expand_mode = 1
+stretch_mode = 4
+
+[node name="Date" type="RichTextLabel" parent="."]
+layout_mode = 0
+offset_left = 682.0
+offset_top = 398.0
+offset_right = 998.0
+offset_bottom = 438.0
+text = "Date"
+fit_content = true
+scroll_active = false
+
+[node name="Name" type="RichTextLabel" parent="."]
+layout_mode = 0
+offset_left = 680.0
+offset_top = 356.0
+offset_right = 1010.0
+offset_bottom = 396.0
+text = "Name"
+fit_content = true
+scroll_active = false
+
+[connection signal="button_down" from="LoadScene" to="." method="_on_load_scene_button_down"]
