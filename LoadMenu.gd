@@ -40,5 +40,4 @@ func LoadImageTexture(path : String):
 func _on_load_scene_button_down() -> void:
 	var world_scene = load("res://World.tscn").instantiate()
 	get_tree().root.add_child(world_scene)
-	hide()
 	SaveManager.load_game(SaveToLoad)
