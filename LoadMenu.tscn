@@ -33,6 +33,10 @@ grow_vertical = 2
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="New" type="Button" parent="Panel/ScrollContainer/LoadButtons"]
+layout_mode = 2
+text = "NEW"
+
 [node name="LoadScene" type="Button" parent="."]
 layout_mode = 0
 offset_left = 804.0
@@ -80,4 +84,14 @@ text = "Name"
 fit_content = true
 scroll_active = false
 
+[node name="Delete" type="Button" parent="."]
+layout_mode = 0
+offset_left = 484.0
+offset_top = 490.0
+offset_right = 549.0
+offset_bottom = 521.0
+text = "DELETE"
+
+[connection signal="pressed" from="Panel/ScrollContainer/LoadButtons/New" to="." method="_on_new_pressed"]
 [connection signal="button_down" from="LoadScene" to="." method="_on_load_scene_button_down"]
+[connection signal="pressed" from="Delete" to="." method="_on_delete_pressed"]

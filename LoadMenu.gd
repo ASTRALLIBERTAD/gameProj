@@ -17,6 +17,7 @@ func _ready() -> void:
 		button.SetupButton(obj)
 		button.text = obj.name
 		$Panel/ScrollContainer/LoadButtons.add_child(button)
+	queue_redraw()
 	pass # Replace with function body.
 
 
@@ -40,4 +41,16 @@ func LoadImageTexture(path : String):
 func _on_load_scene_button_down() -> void:
 	var world_scene = load("res://World.tscn").instantiate()
 	get_tree().root.add_child(world_scene)
+	queue_free()
 	SaveManager.load_game(SaveToLoad)
+
+
+func _on_delete_pressed() -> void:
+	SaveManager.delete_save(SaveToLoad)
+	get_tree().reload_current_scene()
+	queue_redraw()
+	pass # Replace with function body.
+
+
+func _on_new_pressed() -> void:
+	pass # Replace with function body.
