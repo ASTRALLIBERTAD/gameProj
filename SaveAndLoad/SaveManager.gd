@@ -38,6 +38,9 @@ func save_game(name):
 	screenshot.save_png(base_path + "games/" + name + "/" + name + ".png")
 	file.close()
 
+func get_world_name():
+	pass
+
 func load_game(name):
 	LoadGame = name
 	var file_path = base_path + "games/" + name + "/" + name + ".dat"

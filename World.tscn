@@ -8,17 +8,10 @@
 [sub_resource type="GDScript" id="GDScript_ixdq0"]
 script/source = "extends Node2D
 
-
-
-
 func _on_save_pressed() -> void:
 	var date = str(Time.get_datetime_string_from_system())
 	date = date.replace(\":\", \"-\")
-	SaveManager.save_game(\"test-\" + date)
-
-
-func _on_load_pressed() -> void:
-	SaveManager.load_game(\"test\")
+	SaveManager.save_game(\"NN\")
 "
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kog7r"]
@@ -101,12 +94,4 @@ offset_right = -100.0
 offset_bottom = -18.0
 text = "JOIN"
 
-[node name="Load" type="Button" parent="."]
-offset_left = -137.0
-offset_top = -11.0
-offset_right = -85.0
-offset_bottom = 20.0
-text = "LOAD"
-
 [connection signal="pressed" from="Save" to="." method="_on_save_pressed"]
-[connection signal="pressed" from="Load" to="." method="_on_load_pressed"]
