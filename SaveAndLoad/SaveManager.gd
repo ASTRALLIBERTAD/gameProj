@@ -38,9 +38,6 @@ func save_game(name):
 	screenshot.save_png(base_path + "games/" + name + "/" + name + ".png")
 	file.close()
 
-func get_world_name():
-	pass
-
 func load_game(name):
 	LoadGame = name
 	var file_path = base_path + "games/" + name + "/" + name + ".dat"
@@ -71,3 +68,13 @@ func delete_save(name):
 		print("Save game '" + name + "' deleted successfully.")
 	else:
 		print("Save game '" + name + "' not found.")
+
+func get_world_name():
+	return LoadGame
+	
+func auto_save():
+	var world_name = get_world_name()
+	if world_name != "":
+		save_game(world_name)
+	else :
+		print("no world") 
