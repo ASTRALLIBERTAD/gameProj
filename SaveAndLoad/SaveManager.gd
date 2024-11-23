@@ -4,6 +4,11 @@ var base_path = "user://"
 var LoadGame : String
 var player_node: CharacterBody2D 
 
+func world_exist(world_name: String) -> bool:
+	var world_file = base_path + world_name + "/" + world_name +".dat"
+	return FileAccess.file_exists(world_file)
+	
+
 
 func save_game(name):
 	var dir = DirAccess.open(base_path)

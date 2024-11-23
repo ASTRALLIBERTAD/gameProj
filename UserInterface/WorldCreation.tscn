@@ -62,4 +62,5 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 41
 text = "PLAY"
 
+[connection signal="pressed" from="BoxContainer/VBoxContainer/HBoxContainer/BACKBUTTON" to="." method="_on_backbutton_pressed"]
 [connection signal="pressed" from="BoxContainer/VBoxContainer/HBoxContainer/PLAYBUTON" to="." method="_on_playbuton_pressed"]

@@ -1,8 +1,8 @@
 [gd_scene load_steps=8 format=3 uid="uid://d2oibegpqmv2b"]
 
 [ext_resource type="Texture2D" uid="uid://eao47njq38uu" path="res://Assets/brackeys_platformer_assets/brackeys_platformer_assets/sprites/world_tileset.png" id="1_cy2ln"]
-[ext_resource type="PackedScene" uid="uid://b7fyc7kq8s45l" path="res://Player.tscn" id="1_gy5kx"]
-[ext_resource type="PackedScene" uid="uid://v2h65dti34ep" path="res://coin.tscn" id="3_q1b1f"]
+[ext_resource type="PackedScene" uid="uid://b7fyc7kq8s45l" path="res://Player/Player.tscn" id="1_gy5kx"]
+[ext_resource type="PackedScene" uid="uid://v2h65dti34ep" path="res://Collectibles/coin.tscn" id="3_q1b1f"]
 [ext_resource type="PackedScene" uid="uid://cf1y4gylaktvs" path="res://TouchControls.tscn" id="4_dd45r"]
 
 [sub_resource type="GDScript" id="GDScript_ixdq0"]
@@ -14,7 +14,7 @@ func _ready() -> void:
 func _on_save_pressed() -> void:
 	var date = str(Time.get_datetime_string_from_system())
 	date = date.replace(\":\", \"-\")
-	SaveManager.save_game(\"NN\")
+
 
 
 
@@ -96,16 +96,8 @@ metadata/_edit_use_anchors_ = true
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 spawn_path = NodePath("..")
 
-[node name="Save" type="Button" parent="."]
-offset_left = -143.0
-offset_top = -49.0
-offset_right = -100.0
-offset_bottom = -18.0
-text = "JOIN"
-
 [node name="AutoSave" type="Timer" parent="."]
 wait_time = 5.0
 autostart = true
 
-[connection signal="pressed" from="Save" to="." method="_on_save_pressed"]
 [connection signal="timeout" from="AutoSave" to="." method="_on_auto_save_timeout"]

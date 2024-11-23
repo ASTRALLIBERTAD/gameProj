@@ -2,13 +2,9 @@ extends Control
 
 var WorldName
 
-# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	
-	pass # Replace with function body.
+	pass 
 
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	pass
 
@@ -16,6 +12,12 @@ func _process(delta: float) -> void:
 func _on_playbuton_pressed() -> void:
 	var WorldName = $BoxContainer/VBoxContainer/WorldNameInput.text
 	print(WorldName)
+	if WorldName == "":
+		print("ERROR")
+		return
+	if SaveManager.world_exist(WorldName):
+		print("world name already exist")
+		return
 	if !get_tree().change_scene_to_file("res://World.tscn") == null:
 		SaveManager.LoadGame = WorldName
 		SaveManager.save_game(WorldName)
@@ -23,4 +25,8 @@ func _on_playbuton_pressed() -> void:
 		
 	else:
 		print("failed to  save a new game")
+
+
+func _on_backbutton_pressed() -> void:
+	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")
 	pass # Replace with function body.

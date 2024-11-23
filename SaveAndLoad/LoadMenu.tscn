@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://dbf2t7va3l002"]
 
-[ext_resource type="Texture2D" uid="uid://djo53ep2hv88p" path="res://icon.svg" id="1_jfp8w"]
-[ext_resource type="Script" path="res://LoadMenu.gd" id="1_l4iqt"]
-[ext_resource type="PackedScene" uid="uid://b0ne2ctjlfdqj" path="res://LoadButton.tscn" id="2_v6k2p"]
+[ext_resource type="Script" path="res://SaveAndLoad/LoadMenu.gd" id="1_8cngq"]
+[ext_resource type="PackedScene" uid="uid://b0ne2ctjlfdqj" path="res://SaveAndLoad/LoadButton.tscn" id="2_jp13a"]
+[ext_resource type="Texture2D" uid="uid://djo53ep2hv88p" path="res://icon.svg" id="3_6e13g"]
 
 [node name="LoadMenu" type="Control"]
 layout_mode = 3
@@ -11,8 +11,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_l4iqt")
-LoadButton = ExtResource("2_v6k2p")
+script = ExtResource("1_8cngq")
+LoadButton = ExtResource("2_jp13a")
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 0
@@ -60,7 +60,7 @@ offset_top = 19.0
 offset_right = 636.0
 offset_bottom = 83.0
 scale = Vector2(8.41837, 4.99352)
-texture = ExtResource("1_jfp8w")
+texture = ExtResource("3_6e13g")
 expand_mode = 1
 stretch_mode = 4
 
@@ -94,4 +94,5 @@ text = "DELETE"
 
 [connection signal="pressed" from="Panel/ScrollContainer/LoadButtons/New" to="." method="_on_new_pressed"]
 [connection signal="button_down" from="LoadScene" to="." method="_on_load_scene_button_down"]
+[connection signal="pressed" from="BACK" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="Delete" to="." method="_on_delete_pressed"]
