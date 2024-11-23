@@ -18,7 +18,6 @@ config/icon="res://icon.svg"
 [autoload]
 
 SaveManager="*res://SaveAndLoad/SaveManager.gd"
-LoadMenu="*res://LoadMenu.gd"
 
 [display]
 

@@ -11,7 +11,7 @@ script/source = "extends Node2D
 func _on_save_pressed() -> void:
 	var date = str(Time.get_datetime_string_from_system())
 	date = date.replace(\":\", \"-\")
-	SaveManager.save_game(\"\")
+	SaveManager.save_game(\"NN\")
 "
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kog7r"]
