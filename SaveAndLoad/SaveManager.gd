@@ -3,7 +3,7 @@ extends Node
 var base_path = "user://"
 var LoadGame : String
 var player_node: CharacterBody2D 
-
+var SaveToLoad
 
 func save_game(name):
 	var dir = DirAccess.open(base_path)
