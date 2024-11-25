@@ -2,12 +2,6 @@ extends Control
 
 var WorldName
 
-func _ready() -> void:
-	pass 
-
-func _process(delta: float) -> void:
-	pass
-
 
 func _on_playbuton_pressed() -> void:
 	var WorldName = $BoxContainer/VBoxContainer/WorldNameInput.text

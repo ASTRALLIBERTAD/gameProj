@@ -43,6 +43,27 @@ func save_game(name):
 	screenshot.save_png(base_path + "games/" + name + "/" + name + ".png")
 	file.close()
 
+func optimize_autosave(name):
+	var dir = DirAccess.open(base_path)
+	if !dir.dir_exists("games"):
+		dir.make_dir("games")
+	dir = DirAccess.open(base_path + "games")
+	
+	if !dir.dir_exists(name):
+		dir.make_dir(name)
+		
+	var file = FileAccess.open(base_path + "games/" + name + "/" + name + ".dat", FileAccess.WRITE)
+	
+	if player_node != null:
+		file.store_var(player_node.position.x)
+		file.store_var(player_node.position.y)
+	else:
+		print("Error: player_node is not set.")
+	
+	file.close()
+	print("Game saved successfully.")
+	pass
+
 func load_game(name):
 	LoadGame = name
 	var file_path = base_path + "games/" + name + "/" + name + ".dat"
@@ -80,6 +101,6 @@ func get_world_name():
 func auto_save():
 	var world_name = get_world_name()
 	if world_name != "":
-		save_game(world_name)
+		optimize_autosave(world_name)
 	else :
 		print("no world") 
