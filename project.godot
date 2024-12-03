@@ -21,6 +21,8 @@ SaveManager="*res://SaveAndLoad/SaveManager.gd"
 
 [display]
 
+window/size/viewport_width=1154
+window/size/borderless=true
 window/stretch/mode="canvas_items"
 
 [input]

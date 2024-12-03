@@ -14,6 +14,9 @@ script/source = "extends Node2D
 func _ready() -> void:
 	$AutoSave.start()
 
+func _process(delta: float) -> void:
+	var tile_cord = player_cord()
+	$Cord.text = \"(%d,%d )\" % [tile_cord.x, tile_cord.y]
 func _on_save_pressed() -> void:
 	var date = str(Time.get_datetime_string_from_system())
 	date = date.replace(\":\", \"-\")
@@ -24,6 +27,12 @@ func _on_save_pressed() -> void:
 func _on_auto_save_timeout() -> void:
 	SaveManager.auto_save()
 	pass # Replace with function body.
+
+func player_cord():
+	var cord = $TileMap.local_to_map(%Player.global_position)
+	var local_position = $TileMap.to_local(cord)
+	return local_position
+	pass
 "
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kog7r"]
@@ -71,6 +80,7 @@ script = SubResource("GDScript_ixdq0")
 [node name="TileMap" type="TileMap" parent="."]
 tile_set = SubResource("TileSet_c2r7o")
 format = 2
+layer_0/tile_data = PackedInt32Array(65534, 65538, 1, -65536, 524290, 0, 0, 196610, 1, 65536, 196610, 0, 131071, 65538, 0, 131070, 65538, 0, 196606, 524290, 1, 196607, 524290, 0, 131072, 65538, 0)
 
 [node name="Player" parent="." instance=ExtResource("1_gy5kx")]
 unique_name_in_owner = true
@@ -117,7 +127,19 @@ offset_bottom = -14.0
 script = ExtResource("6_6l607")
 
 [node name="Player2" type="Player" parent="."]
-position = Vector2(-56, 0)
+position = Vector2(-108, -52.5)
+scale = Vector2(0.1875, 0.179688)
 texture = ExtResource("7_6ip7a")
+
+[node name="Rustplayer" type="Rustplayer" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Rustplayer"]
+position = Vector2(-54, 39)
+scale = Vector2(0.320313, 0.320313)
+texture = ExtResource("7_6ip7a")
+
+[node name="Cord" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0
 
 [connection signal="timeout" from="AutoSave" to="." method="_on_auto_save_timeout"]
