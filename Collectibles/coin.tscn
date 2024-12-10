@@ -92,7 +92,7 @@ animations = [{
 }],
 "loop": true,
 "name": &"rotatingcoin",
-"speed": 11.0
+"speed": 8.0
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_sv7wk"]
@@ -106,7 +106,8 @@ script = ExtResource("1_7ay75")
 texture_filter = 1
 sprite_frames = SubResource("SpriteFrames_c0u5d")
 animation = &"rotatingcoin"
-frame_progress = 0.0110266
+autoplay = "rotatingcoin"
+frame_progress = 0.817
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_sv7wk")

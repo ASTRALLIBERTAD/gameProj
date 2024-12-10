@@ -2,7 +2,7 @@ extends Node
 
 var base_path = "user://"
 var LoadGame : String
-var player_node: CharacterBody2D 
+var player_node: Rustplayer
 
 func world_exist(world_name: String) -> bool:
 	var world_file = base_path + world_name + "/" + world_name +".dat"
