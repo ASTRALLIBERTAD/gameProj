@@ -21,9 +21,7 @@ func _on_save_pressed() -> void:
 	date = date.replace(\":\", \"-\")
 
 
-func ok():
-	var k = SaveManagerRust.new()
-	k.save_game_rust(\"prince\")
+
 
 func _on_auto_save_timeout() -> void:
 	SaveManager.auto_save()
@@ -34,6 +32,11 @@ func player_cord():
 	var local_position = $TileMap.to_local(cord)
 	return local_position
 	pass
+
+
+func _on_button_pressed() -> void:
+	var sav= SaveManagerRust.new()
+	sav.save_game_rust(\"p\")
 "
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_kog7r"]
@@ -116,6 +119,7 @@ wait_time = 5.0
 autostart = true
 
 [node name="FPSCOUNTER" type="Label" parent="."]
+texture_filter = 1
 offset_top = 26.0
 offset_right = 40.0
 offset_bottom = 49.0
@@ -130,4 +134,12 @@ texture = ExtResource("7_6ip7a")
 offset_right = 40.0
 offset_bottom = 23.0
 
+[node name="Button" type="Button" parent="."]
+offset_left = 25.0
+offset_top = 45.0
+offset_right = 68.0
+offset_bottom = 76.0
+text = "save"
+
 [connection signal="timeout" from="AutoSave" to="." method="_on_auto_save_timeout"]
+[connection signal="pressed" from="Button" to="." method="_on_button_pressed"]
