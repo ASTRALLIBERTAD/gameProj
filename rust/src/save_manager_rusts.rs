@@ -1,8 +1,10 @@
 use std::borrow::Borrow;
 
 use bincode::serialize;
+use std::fs::File;
+use std::io::prelude::*;
 use godot::classes::file_access::ModeFlags;
-use godot::classes::{ node_2d, CharacterBody2D, DirAccess, FileAccess, Node};
+use godot::classes::{ DirAccess, FileAccess, Node};
 use godot::prelude::*;
 
 use serde::{Deserialize, Serialize};
@@ -19,23 +21,20 @@ struct PlayerPosition {
 #[derive(GodotClass)]
 #[class(base = Node, init)]
 pub struct SaveManagerRust {
+
+    player_node_rust: Option<Gd<Rustplayer>>,
     #[base]
     base: Base<Node>,
-    player_node_rust: Option<Gd<Rustplayer>>,
+   
 }
+
 
 #[godot_api]
 impl SaveManagerRust {
 
-
-
-    #[func]
-    fn set_player_node(&mut self, player: Gd<Rustplayer>) {
-        self.player_node_rust = Some(player);
-    }
-
     #[func]
     fn save_game_rust(&self, name: String) {
+        godot_print!("save_game_rust function called for {}", name);
         let base_path = "user://";
         let folder = "games";
         let file_saver = "user://games";
@@ -64,30 +63,86 @@ impl SaveManagerRust {
         if file.is_none() {
             godot_error!("Failed to open file at {}", save_path);
             return;
-        }
+        }        
+   
+    }
+
+    #[func]
+    fn save_player_pos(&mut self, name: String,  player: Gd<Rustplayer>){
+        self.player_node_rust = Some(player);
+        let base_path = "user://";
+        let folder = "games";
+        let name = name;
+        let save_path = format!("{}/{}/{}/{}.dat", base_path, folder, name, name);
+
+        let file  = FileAccess::open(&save_path, ModeFlags::WRITE);
 
         if let Some(mut file) = file {
             if let Some(player) = &self.player_node_rust {
+                // Retrieve player position
                 let position = player.get_global_position();
                 let player_position = PlayerPosition {
                     x: position.x,
                     y: position.y,
                 };
-    
+
+                
+
                 // Serialize the position
-                if let Ok(serialized_data) = bincode::serialize(&player_position) {
-                    // Write the serialized data to the file
-                    file.store_buffer(serialized_data.as_slice());
-                } else {
-                    godot_error!("Failed to serialize player position");
+                match bincode::serialize(&player_position) {
+                    Ok(serialized_data) => {
+                        // Convert Vec<u8> to PackedByteArray
+                        let byte_array = PackedByteArray::from(serialized_data);
+                        file.store_buffer(&byte_array);
+                        godot_print!("Game saved successfully at {}", save_path);
+                    }
+                    Err(_) => {
+                        godot_error!("Failed to serialize player position");
+                    }
+                }}}
+                else {
+                    godot_print!("hi ");    
                 }
-            } else {
-                godot_error!("Player node is not set");
+    }
+
+    #[func]
+    fn load_player_pos(&mut self, name: String, player: Gd<Rustplayer>) {
+        self.player_node_rust = Some(player);
+
+        let base_path = "user://";
+        let folder = "games";
+        let save_path = format!("{}/{}/{}/{}.dat", base_path, folder, name, name);
+
+        // Open the file for reading
+        let file = FileAccess::open(&save_path, ModeFlags::READ);
+
+        // Check if the file was successfully opened
+        if let Some(file) = file {
+            // Read the data from the file into a buffer
+            let data = file.get_buffer(file.get_length() as i64);
+
+            // Convert PackedByteArray to &[u8] for deserialization
+            let data_slice: &[u8] = data.as_slice();
+
+            // Deserialize the player position data
+            match bincode::deserialize::<PlayerPosition>(data_slice) {
+                Ok(player_position) => {
+                    // Set the player's position
+                    if let Some(player) = self.player_node_rust.as_mut() {
+                        player.set_global_position(Vector2::new(player_position.x, player_position.y));
+                        godot_print!("Player position loaded successfully from {}", save_path);
+                    }
+                }
+                Err(_) => {
+                    godot_error!("Failed to deserialize player position from file");
+                }
             }
         } else {
-            godot_error!("Failed to open file at {}", save_path);
+            godot_error!("Failed to open file for loading at {}", save_path);
         }
-    
     }
+
+                    
+                    
 }
                     

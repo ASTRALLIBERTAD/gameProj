@@ -1,7 +1,8 @@
 use std::str::FromStr;
 use godot::classes::{ character_body_2d, CharacterBody2D, ICharacterBody2D, Input};
 use godot::prelude::*;
-
+use std::fs::File;
+use std::io::prelude::*;
 
 
 
@@ -32,13 +33,9 @@ impl ICharacterBody2D for Rustplayer {
         self.base_mut().set_velocity(velocity);
         self.base_mut().move_and_slide();
         
-
-
-
-
-        
     }
-    
+
+  
 
     
 }
