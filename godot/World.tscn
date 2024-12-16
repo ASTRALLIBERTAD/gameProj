@@ -20,9 +20,6 @@ func _on_save_pressed() -> void:
 	var date = str(Time.get_datetime_string_from_system())
 	date = date.replace(\":\", \"-\")
 
-
-
-
 func _on_auto_save_timeout() -> void:
 	SaveManager.auto_save()
 	pass # Replace with function body.
@@ -33,17 +30,17 @@ func player_cord():
 	return local_position
 	pass
 
-
 func _on_button_pressed() -> void:
 	var sav= SaveManagerRust.new()
-	sav.save_game_rust(\"kli\")
-	sav.save_player_pos(\"kli\",%PLAYERS )
+	sav.save_game_rust(\"p\")
+	sav.save_player_pos(\"p\",%PLAYERS )
+	
 	# In your Godot script
-
 
 func _on_loading_pressed() -> void:
 	var lod = SaveManagerRust.new()
-	lod.load_player_pos(\"kli\",%PLAYERS )
+	lod.load_player_pos(\"p\",%PLAYERS )
+	SaveManagerRust.pr()
 	pass # Replace with function body.
 "
 

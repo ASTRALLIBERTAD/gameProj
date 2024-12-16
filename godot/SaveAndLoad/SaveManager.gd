@@ -100,6 +100,7 @@ func get_world_name():
 	
 func auto_save():
 	var world_name = get_world_name()
+	print(world_name)
 	if world_name != "":
 		optimize_autosave(world_name)
 	else :

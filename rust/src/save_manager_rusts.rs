@@ -1,15 +1,11 @@
-use std::borrow::Borrow;
-
-use bincode::serialize;
-use std::fs::File;
-use std::io::prelude::*;
+//use std::borrow::Borrow;
+//use bincode::serialize;
+//use std::fs::File;
+//use std::io::prelude::*;
 use godot::classes::file_access::ModeFlags;
 use godot::classes::{ DirAccess, FileAccess, Node};
 use godot::prelude::*;
-
 use serde::{Deserialize, Serialize};
-
-
 use crate::rustplayer::Rustplayer;
 
 #[derive(Serialize, Deserialize)]
@@ -21,13 +17,13 @@ struct PlayerPosition {
 #[derive(GodotClass)]
 #[class(base = Node, init)]
 pub struct SaveManagerRust {
-
-    player_node_rust: Option<Gd<Rustplayer>>,
+  
     #[base]
     base: Base<Node>,
-   
+    
+    current_world_name: StringName,
+    player_node_rust: Option<Gd<Rustplayer>>,
 }
-
 
 #[godot_api]
 impl SaveManagerRust {
@@ -108,6 +104,8 @@ impl SaveManagerRust {
     #[func]
     fn load_player_pos(&mut self, name: String, player: Gd<Rustplayer>) {
         self.player_node_rust = Some(player);
+        self.current_world_name = format!("{}", name).into();
+        godot_print!("{}", self.current_world_name);
 
         let base_path = "user://";
         let folder = "games";
@@ -127,7 +125,7 @@ impl SaveManagerRust {
             // Deserialize the player position data
             match bincode::deserialize::<PlayerPosition>(data_slice) {
                 Ok(player_position) => {
-                    // Set the player's position
+
                     if let Some(player) = self.player_node_rust.as_mut() {
                         player.set_global_position(Vector2::new(player_position.x, player_position.y));
                         godot_print!("Player position loaded successfully from {}", save_path);
@@ -140,9 +138,28 @@ impl SaveManagerRust {
         } else {
             godot_error!("Failed to open file for loading at {}", save_path);
         }
-    }
 
-                    
+
+    }
+    
+    #[func]
+    fn get_world_name(&self) -> String {
+
+        self.current_world_name.to_string()
+       
+    }
+	#[func]
+    fn pr() {
+
+        let world_name: fn(&SaveManagerRust) -> String  = SaveManagerRust::get_world_name;
+        godot_print!("Current world name: {:?}", world_name);
+
+    }
+    //0x7fff88b788e0
+    //0x7fff88b788e0
+    //0x7fff88b788f0
+    //0x7fff88258980
+    //0x7fff88258980        
                     
 }
                     
