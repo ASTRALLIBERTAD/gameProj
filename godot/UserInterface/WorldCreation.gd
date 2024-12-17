@@ -6,8 +6,7 @@ var WorldName
 func _on_playbuton_pressed() -> void:
 	var WorldName = $BoxContainer/VBoxContainer/WorldNameInput.text
 	print(WorldName)
-	var game = SaveManagerRust.new()
-	game.save_game_rust(WorldName)
+	
 	if WorldName == "":
 		print("ERROR")
 		return
@@ -17,10 +16,12 @@ func _on_playbuton_pressed() -> void:
 	if !get_tree().change_scene_to_file("res://World.tscn") == null:
 		SaveManager.LoadGame = WorldName
 		#SaveManager.save_game(WorldName)
-		
-		
 	else:
 		print("failed to  save a new game")
+	var game = SaveManagerRust.new()
+	game.save_game_rust(WorldName)
+		
+
 
 
 func _on_backbutton_pressed() -> void:

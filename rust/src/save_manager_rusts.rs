@@ -1,3 +1,5 @@
+use std::any::Any;
+
 //use std::borrow::Borrow;
 //use bincode::serialize;
 //use std::fs::File;
@@ -104,7 +106,7 @@ impl SaveManagerRust {
     #[func]
     fn load_player_pos(&mut self, name: String, player: Gd<Rustplayer>) {
         self.player_node_rust = Some(player);
-        self.current_world_name = format!("{}", name).into();
+        self.current_world_name = format!("{:?}", name.type_id()).into();
         godot_print!("{}", self.current_world_name);
 
         let base_path = "user://";
@@ -159,7 +161,13 @@ impl SaveManagerRust {
     //0x7fff88b788e0
     //0x7fff88b788f0
     //0x7fff88258980
-    //0x7fff88258980        
+    //0x7fff88258980     
+    //0x0ae75b6544eb12aa229d856faf4c7de7
+    //0x0ae75b6544eb12aa229d856faf4c7de7
+    //0x7ffa05e68aa0
+    //0x7ffa05e68aa0
+    //0x82930b0819a7447e112bdb54d658b6a5
+    //0x82930b0819a7447e112bdb54d658b6a5
                     
 }
                     
