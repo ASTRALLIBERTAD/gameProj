@@ -12,9 +12,23 @@ func world_exist(world_name: String) -> bool:
 
 func save_game(name):
 	
-	var p = SaveManagerRust.new()
-	p.save_game_rust(name)
-	p.save_player_pos(name, player_node)
+	var dir = DirAccess.open(base_path)
+	if !dir.dir_exists("games"):
+		dir.make_dir("games")
+	dir = DirAccess.open(base_path + "games")
+	
+	if !dir.dir_exists(name):
+		dir.make_dir(name)
+	var file = FileAccess.open(base_path + "games/" + name + "/" + name + ".dat", FileAccess.WRITE)
+	
+	if player_node != null:
+		file.store_var(player_node.position.x)
+		file.store_var(player_node.position.y)
+	else:
+		print("Error: player_node is not set.")
+	
+	file.close()
+	print("Game saved successfully.")
 	
 	var SaveGameInfo = {
 		"name" : name,
@@ -28,20 +42,48 @@ func save_game(name):
 	
 	var screenshot = get_viewport().get_texture().get_image()
 	screenshot.save_png(base_path + "games/" + name + "/" + name + ".png")
-	
+	file.close()
 	
 
 func optimize_autosave(name):
-	var k = SaveManagerRust.new()
-	k.save_game_rust(name)
-	k.save_player_pos(name, player_node)
+	var dir = DirAccess.open(base_path)
+	if !dir.dir_exists("games"):
+		dir.make_dir("games")
+	dir = DirAccess.open(base_path + "games")
+	
+	if !dir.dir_exists(name):
+		dir.make_dir(name)
+		
+	var file = FileAccess.open(base_path + "games/" + name + "/" + name + ".dat", FileAccess.WRITE)
+	
+	if player_node != null:
+		file.store_var(player_node.position.x)
+		file.store_var(player_node.position.y)
+	else:
+		print("Error: player_node is not set.")
+	
+	file.close()
 	print("Game saved successfully.")
 	pass
 
 func load_game(name):
-	LoadGame = name	
-	var i = SaveManagerRust.new()
-	i.load_player_pos(name, player_node)
+	LoadGame = name
+	var file_path = base_path + "games/" + name + "/" + name + ".dat"
+	
+	if FileAccess.file_exists(file_path):
+		var file = FileAccess.open(file_path, FileAccess.READ)
+		
+		if player_node != null:
+			player_node.position.x = file.get_var()
+			player_node.position.y = file.get_var()
+			print("Game loaded successfully.")
+		else:
+			print("Error: player_node is not set.")
+		
+		file.close()
+	else:
+		print("No data file found.")
+
 
 
 func delete_save(name):

@@ -31,17 +31,14 @@ func player_cord():
 	pass
 
 func _on_button_pressed() -> void:
-	var sav= SaveManagerRust.new()
-	
-	sav.save_game_rust(\"i\")
-	sav.save_player_pos(\"i\",%PLAYERS )
+	SaveManager.save_game(\"pk\")
 	
 	# In your Godot script
 
 func _on_loading_pressed() -> void:
 	var lod = SaveManagerRust.new()
-	lod.load_player_pos(\"i\",%PLAYERS )
-	SaveManagerRust.pr()
+	lod.load_player_pos(\"pk\",%PLAYERS )
+	lod.print_world_name()
 	pass # Replace with function body.
 "
 

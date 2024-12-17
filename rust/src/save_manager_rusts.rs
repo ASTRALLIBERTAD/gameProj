@@ -1,4 +1,3 @@
-use std::any::Any;
 
 //use std::borrow::Borrow;
 //use bincode::serialize;
@@ -25,10 +24,15 @@ pub struct SaveManagerRust {
     
     current_world_name: StringName,
     player_node_rust: Option<Gd<Rustplayer>>,
+    
 }
 
 #[godot_api]
 impl SaveManagerRust {
+
+    fn set_player_node_rust(players: Gd<Rustplayer>) -> Gd<Rustplayer> {
+        players
+    }
 
     #[func]
     fn save_game_rust(&self, name: String) {
@@ -66,8 +70,9 @@ impl SaveManagerRust {
     }
 
     #[func]
-    fn save_player_pos(&mut self, name: String,  player: Gd<Rustplayer>){
-        self.player_node_rust = Some(player);
+    fn save_player_pos(&mut self, name: String, players: Gd<Rustplayer>){
+
+        self.player_node_rust = Some(players);
         let base_path = "user://";
         let folder = "games";
         let name = name;
@@ -104,10 +109,8 @@ impl SaveManagerRust {
     }
 
     #[func]
-    fn load_player_pos(&mut self, name: String, player: Gd<Rustplayer>) {
-        self.player_node_rust = Some(player);
-        self.current_world_name = format!("{:?}", name.type_id()).into();
-        godot_print!("{}", self.current_world_name);
+    fn load_player_pos(&mut self, name: String, players: Gd<Rustplayer>) {
+        self.player_node_rust = Some(players);
 
         let base_path = "user://";
         let folder = "games";
@@ -144,30 +147,7 @@ impl SaveManagerRust {
 
     }
     
-    #[func]
-    fn get_world_name(&self) -> String {
-
-        self.current_world_name.to_string()
-       
-    }
-	#[func]
-    fn pr() {
-
-        let world_name: fn(&SaveManagerRust) -> String  = SaveManagerRust::get_world_name;
-        godot_print!("Current world name: {:?}", world_name);
-
-    }
-    //0x7fff88b788e0
-    //0x7fff88b788e0
-    //0x7fff88b788f0
-    //0x7fff88258980
-    //0x7fff88258980     
-    //0x0ae75b6544eb12aa229d856faf4c7de7
-    //0x0ae75b6544eb12aa229d856faf4c7de7
-    //0x7ffa05e68aa0
-    //0x7ffa05e68aa0
-    //0x82930b0819a7447e112bdb54d658b6a5
-    //0x82930b0819a7447e112bdb54d658b6a5
+    
                     
 }
                     

@@ -1,9 +1,6 @@
 use std::str::FromStr;
-use godot::classes::{ character_body_2d, CharacterBody2D, ICharacterBody2D, Input};
+use godot::classes::{  CharacterBody2D, ICharacterBody2D, Input};
 use godot::prelude::*;
-use std::fs::File;
-use std::io::prelude::*;
-
 
 
 #[derive(GodotClass)]
