@@ -10,14 +10,12 @@ pub struct Rustplayer{
     
 }
 
-
 #[godot_api]
 impl ICharacterBody2D for Rustplayer {
     fn init(base: Base<CharacterBody2D>) -> Self {
         godot_print!("hi");
         Self {base, }
     }
-
     
     fn process(&mut self, _delta:f64){
         let speed: f32 = 100.0;
@@ -31,9 +29,6 @@ impl ICharacterBody2D for Rustplayer {
         self.base_mut().move_and_slide();
         
     }
-
-  
-
     
 }
 

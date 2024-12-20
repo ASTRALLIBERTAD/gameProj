@@ -11,10 +11,9 @@ func world_exist(world_name: String) -> bool:
 
 
 func save_game(name):
-	
 	var p = SaveManagerRust.new()
 	p.save_game_rust(name)
-	p.save_player_pos(name, player_node)
+	
 	
 	var SaveGameInfo = {
 		"name" : name,
@@ -29,7 +28,7 @@ func save_game(name):
 	var screenshot = get_viewport().get_texture().get_image()
 	screenshot.save_png(base_path + "games/" + name + "/" + name + ".png")
 	
-	
+	p.save_player_pos(name, player_node)
 
 func optimize_autosave(name):
 	var k = SaveManagerRust.new()

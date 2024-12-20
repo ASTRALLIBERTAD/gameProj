@@ -1,6 +1,7 @@
 mod player;
 mod rustplayer;
 mod save_manager_rusts;
+mod terrain_generation;
 use godot::prelude::*;
 
 pub struct RustExtension;

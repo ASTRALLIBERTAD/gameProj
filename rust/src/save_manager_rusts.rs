@@ -1,4 +1,6 @@
 
+use std::any::Any;
+
 //use std::borrow::Borrow;
 //use bincode::serialize;
 //use std::fs::File;
@@ -30,13 +32,8 @@ pub struct SaveManagerRust {
 #[godot_api]
 impl SaveManagerRust {
 
-    fn set_player_node_rust(players: Gd<Rustplayer>) -> Gd<Rustplayer> {
-        players
-    }
-
     #[func]
     fn save_game_rust(&self, name: String) {
-        godot_print!("save_game_rust function called for {}", name);
         let base_path = "user://";
         let folder = "games";
         let file_saver = "user://games";
@@ -73,6 +70,8 @@ impl SaveManagerRust {
     fn save_player_pos(&mut self, name: String, players: Gd<Rustplayer>){
 
         self.player_node_rust = Some(players);
+        self.current_world_name = format!("{:?}", name.type_id()).into();
+        godot_print!("{}", self.current_world_name);
         let base_path = "user://";
         let folder = "games";
         let name = name;
@@ -146,7 +145,6 @@ impl SaveManagerRust {
 
 
     }
-    
     
                     
 }
