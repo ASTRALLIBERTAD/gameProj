@@ -1,6 +1,8 @@
-[gd_scene load_steps=13 format=3 uid="uid://d2oibegpqmv2b"]
+[gd_scene load_steps=16 format=3 uid="uid://d2oibegpqmv2b"]
 
 [ext_resource type="Texture2D" uid="uid://eao47njq38uu" path="res://Assets/brackeys_platformer_assets/brackeys_platformer_assets/sprites/world_tileset.png" id="1_cy2ln"]
+[ext_resource type="Texture2D" uid="uid://dvfmmac5i680p" path="res://Assets/Hana Caraka - Topdown Tileset [sample]/Tileset/Dirt - simplified.png" id="2_tn3g8"]
+[ext_resource type="Texture2D" uid="uid://dcxxui0j4nb2o" path="res://Assets/Hana Caraka - Topdown Tileset [sample]/Tileset/Winter - simplified.png" id="3_7vh7w"]
 [ext_resource type="PackedScene" uid="uid://v2h65dti34ep" path="res://Collectibles/coin.tscn" id="3_q1b1f"]
 [ext_resource type="PackedScene" uid="uid://cf1y4gylaktvs" path="res://TouchControls.tscn" id="4_dd45r"]
 [ext_resource type="PackedScene" uid="uid://bpi3sbit45l5" path="res://Player/players.tscn" id="4_dqyd3"]
@@ -10,43 +12,133 @@
 [sub_resource type="GDScript" id="GDScript_ixdq0"]
 script/source = "extends Node2D
 
-@export var nose_height: NoiseTexture2D 
-var noise : Noise
-var width: int = 200
-var height: int = 200
+@export var noise_texture: NoiseTexture2D 
 
+
+@export var render_distance = 4
 @onready var tile_set = $TileMap
+var noise = FastNoiseLite.new()
+
+@onready var player = $PLAYERS
+
+var tile_size: int = 32
+var chunk_size: int = 50
+var view_distance: int = 16
+
+var loaded_chunks = {}
+var chunk_nodes = {}
 
 var source_id = 0
-var land = Vector2(0, 1)
-var water = Vector2(4, 10)
+var land = Vector2i(1, 1)
+var water = Vector2i(0, 11)
+var cloud = Vector2i(3, 9)
+var snow = Vector2i(1,1)
 
 
 func _ready() -> void:
-	noise = nose_height.noise
+	noise.noise_type = FastNoiseLite.TYPE_PERLIN
+	noise.seed = randi()
+	noise.frequency = 0.03
+	noise.domain_warp_amplitude = 1.0
+	
+	
+	view_distance = (chunk_size / 2) - 1
+	last_player_pos = player.position
+    preload_surrounding_chunks(0, 0)
+	player.position = Vector2((chunk_size * tile_size) / 2, (chunk_size * tile_size) / 2)
+	
+	
+	
+	#update_visible_chunks()
 	$AutoSave.start()
-	world_terrain()
+	load_chunk(0,0)
 
-func world_terrain():
-	for x in range(-width/2, height/2):
-		for y in range(-height/2 , width/2):
-			var noise_val: float = noise.get_noise_2d(x, y)
-			if noise_val > 0.0:
-				tile_set.set_cell( Vector2(x,y), source_id, land)
-				#land
-				
-			elif noise_val < 0.0:
-				tile_set.set_cell( Vector2(x,y), source_id, water)
-				#water
-				
-	pass
+func preload_surrounding_chunks(center_x, center_y):
+    for x in range(-1, 2):
+        for y in range(-1, 2):
+            var chunk_key = str(center_x + x) + "," + str(center_y + y)
+            if not chunk_cache.has(chunk_key):
+                chunk_load_queue.push_back(Vector2(center_x + x, center_y + y))
 
+
+func load_chunk(x, y):
+	var chunk_key = str(x) + "," + str(y)
+    if chunk_cache.has(chunk_key):
+        return
+        
+    # Generate chunk
+    var cells = []
+    for _x in range(chunk_size):
+        for _y in range(chunk_size):
+            var current_tile_position = Vector2i(_x+x*chunk_size, _y+y*chunk_size)
+            var atlas_position = Vector2i()
+            var id = noise.get_noise_2d(current_tile_position.x, current_tile_position.y)
+            
+            if id < -0.15:
+                atlas_position = water
+            elif id > 0.2:
+                atlas_position = land
+            else:
+                atlas_position = snow
+                
+            cells.append({"pos": current_tile_position, "atlas": atlas_position})
+    
+    # Apply chunk
+    for cell in cells:
+        tile_set.set_cell(0, cell["pos"], 0, cell["atlas"])
+    
+    # Cache chunk
+    chunk_cache[chunk_key] = cells
 func _process(delta: float) -> void:
 	var tile_cord = player_cord()
 	$Cord.text = \"(%d,%d )\" % [tile_cord.x, tile_cord.y]
 func _on_save_pressed() -> void:
 	var date = str(Time.get_datetime_string_from_system())
 	date = date.replace(\":\", \"-\")
+	
+func _physics_process(delta: float) -> void:
+	var world_size = tile_set.get_used_rect() as Rect2i
+	var world_size_start = world_size.position
+	var world_size_end = world_size.end
+	var player_position_positive = (player.position / tile_size) + Vector2(view_distance, view_distance)
+	var player_position_negative = (player.position / tile_size) - Vector2(view_distance, view_distance)
+	
+	
+	
+	if player_position_positive.x > world_size_end.x:
+		load_chunk(world_size_start.x+1, world_size_start.y)
+	elif player_position_negative.x < world_size_start.x:
+		load_chunk(world_size_start.x-1, world_size_start.y)
+	if player_position_positive.y > world_size_end.y:
+		load_chunk(world_size_start.x, world_size_start.y+1)
+	elif player_position_negative.y < world_size_start.y:
+		load_chunk(world_size_start.x, world_size_start.y-1)
+
+
+	var player_movement = player.position - last_player_pos
+    last_player_pos = player.position
+    
+    var chunk_x = int(player.position.x / (chunk_size * tile_size))
+    var chunk_y = int(player.position.y / (chunk_size * tile_size))
+    
+    # Prioritize chunks in movement direction
+    var direction = player_movement.normalized()
+    var next_chunk = Vector2(
+        chunk_x + sign(direction.x),
+        chunk_y + sign(direction.y)
+    )
+    
+    if not chunk_cache.has(str(next_chunk.x) + "," + str(next_chunk.y)):
+        chunk_load_queue.push_front(next_chunk)
+    
+    # Process chunk queue
+    while not chunk_load_queue.is_empty():
+        var next_pos = chunk_load_queue.pop_front()
+        load_chunk(next_pos.x, next_pos.y)
+        break  # Only process one chunk per frame
+
+		
+	
 
 func _on_auto_save_timeout() -> void:
 	SaveManager.auto_save()
@@ -70,30 +162,38 @@ func _on_loading_pressed() -> void:
 	pass 
 "
 
-[sub_resource type="Gradient" id="Gradient_twiff"]
-interpolation_mode = 1
-offsets = PackedFloat32Array(0.35814, 0.413953, 0.581395, 0.772093)
-colors = PackedColorArray(0.0509804, 0.25098, 0, 1, 0.341068, 0.172188, 2.40654e-08, 1, 0.027451, 0.0352941, 0.490196, 1, 0.501536, 0.661371, 0.738608, 1)
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_p3ueq"]
+noise_type = 3
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_u8whl"]
-frequency = 0.0288
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_j2mqi"]
-color_ramp = SubResource("Gradient_twiff")
-noise = SubResource("FastNoiseLite_u8whl")
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_1vwnx"]
+noise = SubResource("FastNoiseLite_p3ueq")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_51jcw"]
 texture = ExtResource("1_cy2ln")
+0:1/animation_columns = 1
 0:1/0 = 0
-4:10/0 = 0
+0:11/animation_columns = 1
+0:11/0 = 0
+3:9/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_1urad"]
+texture = ExtResource("2_tn3g8")
+1:1/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jw6bw"]
+texture = ExtResource("3_7vh7w")
+1:1/0 = 0
+1:1/0/z_index = 1
 
 [sub_resource type="TileSet" id="TileSet_goddv"]
 sources/0 = SubResource("TileSetAtlasSource_51jcw")
+sources/1 = SubResource("TileSetAtlasSource_1urad")
+sources/2 = SubResource("TileSetAtlasSource_jw6bw")
 
 [node name="World" type="Node2D"]
 position = Vector2(-1, 0)
 script = SubResource("GDScript_ixdq0")
-nose_height = SubResource("NoiseTexture2D_j2mqi")
+noise_texture = SubResource("NoiseTexture2D_1vwnx")
 
 [node name="TileMap" type="TileMapLayer" parent="."]
 tile_set = SubResource("TileSet_goddv")
