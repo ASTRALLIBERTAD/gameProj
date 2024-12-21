@@ -1,16 +1,15 @@
-use godot::classes::{ITileMapLayer, TileMapLayer};
-use noise::OpenSimplex;
+use godot::classes::{ITileMap, TileMap};
 use godot::prelude::*;
 
 #[derive(GodotClass)]
-#[class(base=TileMapLayer)]
+#[class(base=TileMap)]
 pub struct Terrain {
-    base: Base<TileMapLayer>,
+    base: Base<TileMap>,
 }
 
 #[godot_api]
-impl ITileMapLayer for Terrain {
-    fn init(base: Base<TileMapLayer>) -> Self {
+impl ITileMap for Terrain {
+    fn init(base: Base<TileMap>) -> Self {
         Self { base }
     }
 }
@@ -18,7 +17,9 @@ impl ITileMapLayer for Terrain {
 #[godot_api]
 impl Terrain {
 
-  
-   
+    #[func]
+    fn generate_tiles() {
+
+    }
     
 }
