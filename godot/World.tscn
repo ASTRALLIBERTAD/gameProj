@@ -1,6 +1,7 @@
-[gd_scene load_steps=13 format=3 uid="uid://d2oibegpqmv2b"]
+[gd_scene load_steps=11 format=3 uid="uid://d2oibegpqmv2b"]
 
 [ext_resource type="Texture2D" uid="uid://eao47njq38uu" path="res://Assets/brackeys_platformer_assets/brackeys_platformer_assets/sprites/world_tileset.png" id="1_cy2ln"]
+[ext_resource type="Script" path="res://Tile_map.gd" id="2_8usi7"]
 [ext_resource type="PackedScene" uid="uid://v2h65dti34ep" path="res://Collectibles/coin.tscn" id="3_q1b1f"]
 [ext_resource type="PackedScene" uid="uid://cf1y4gylaktvs" path="res://TouchControls.tscn" id="4_dd45r"]
 [ext_resource type="PackedScene" uid="uid://bpi3sbit45l5" path="res://Player/players.tscn" id="4_dqyd3"]
@@ -9,37 +10,14 @@
 
 [sub_resource type="GDScript" id="GDScript_ixdq0"]
 script/source = "extends Node2D
-
-@export var nose_height: NoiseTexture2D 
-var noise : Noise
-var width: int = 200
-var height: int = 200
-
 @onready var tile_set = $TileMap
 
-var source_id = 0
-var land = Vector2(0, 1)
-var water = Vector2(4, 10)
 
 
 func _ready() -> void:
-	noise = nose_height.noise
 	$AutoSave.start()
-	world_terrain()
 
-func world_terrain():
-	for x in range(-width/2, height/2):
-		for y in range(-height/2 , width/2):
-			var noise_val: float = noise.get_noise_2d(x, y)
-			if noise_val > 0.0:
-				tile_set.set_cell( Vector2(x,y), source_id, land)
-				#land
-				
-			elif noise_val < 0.0:
-				tile_set.set_cell( Vector2(x,y), source_id, water)
-				#water
-				
-	pass
+
 
 func _process(delta: float) -> void:
 	var tile_cord = player_cord()
@@ -70,18 +48,6 @@ func _on_loading_pressed() -> void:
 	pass 
 "
 
-[sub_resource type="Gradient" id="Gradient_twiff"]
-interpolation_mode = 1
-offsets = PackedFloat32Array(0.35814, 0.413953, 0.581395, 0.772093)
-colors = PackedColorArray(0.0509804, 0.25098, 0, 1, 0.341068, 0.172188, 2.40654e-08, 1, 0.027451, 0.0352941, 0.490196, 1, 0.501536, 0.661371, 0.738608, 1)
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_u8whl"]
-frequency = 0.0288
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_j2mqi"]
-color_ramp = SubResource("Gradient_twiff")
-noise = SubResource("FastNoiseLite_u8whl")
-
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_51jcw"]
 texture = ExtResource("1_cy2ln")
 0:1/0 = 0
@@ -93,10 +59,10 @@ sources/0 = SubResource("TileSetAtlasSource_51jcw")
 [node name="World" type="Node2D"]
 position = Vector2(-1, 0)
 script = SubResource("GDScript_ixdq0")
-nose_height = SubResource("NoiseTexture2D_j2mqi")
 
 [node name="TileMap" type="TileMapLayer" parent="."]
 tile_set = SubResource("TileSet_goddv")
+script = ExtResource("2_8usi7")
 
 [node name="coin" parent="." instance=ExtResource("3_q1b1f")]
 position = Vector2(65, 0)
