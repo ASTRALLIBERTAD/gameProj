@@ -1,4 +1,3 @@
-
 use godot::classes::{ ITileMapLayer, FastNoiseLite, TileMapLayer};
 use godot::global::randi;
 
@@ -17,6 +16,7 @@ pub struct Terrain1 {
     height: i32,
     width: i32,
     loaded_chunks: Vec<Vector2>,
+    player: Gd<Rustplayer>,
 }
 
 #[godot_api]
@@ -31,19 +31,11 @@ impl ITileMapLayer for Terrain1 {
             height: 32,
             width: 32,
             loaded_chunks: Vec::new(),
+            player: Rustplayer::new_alloc(),
             
         }
     }
-
-    
-
-    
-}
-
-#[godot_api]
-impl Terrain1 {
-    #[func]
-    fn eady(&mut self) {
+    fn ready(&mut self) {
         self.moisture.set_seed(randi() as i32);
         self.temperature.set_seed(randi() as i32);
         self.altitude.set_seed(randi() as i32);
@@ -51,18 +43,28 @@ impl Terrain1 {
         self.altitude.set_frequency(0.01);
         
     }
-    #[func]
-    fn ocess(&mut self, tile_map1: Gd<TileMapLayer>, player: Gd<Rustplayer>) {
-        let sls = tile_map1.local_to_map(player.get_global_mouse_position());
+
+    
+    fn process(&mut self, delta: f64) {
+        let ok = self.player.get_global_position();
+        let sls = self.base_mut().local_to_map(ok);
         self.generate_chunk(sls);
-        godot_print!("Player position: {:?}", player);
         
     }
   
+    
+    
+
+    
+}
+
+#[godot_api]
+impl Terrain1 {
+  
     #[func]
     fn generate_chunk(&mut self, pos: Vector2i) {
-        godot_print!("Generating chunk at position: {:?}", pos);
-        let water = Vector2i::new(0, 0);
+        
+        let water = Vector2i::new(0, 11);
         let land = Vector2i::new(1, 0);
         let width = self.width;
 
@@ -72,20 +74,21 @@ impl Terrain1 {
                 let temp = self.temperature.get_noise_2d((pos.x - (width / 2) as i32 + x) as f32, (pos.y - (self.height / 2) as i32 + y) as f32) * 10.0;
                 let alt = self.altitude.get_noise_2d((pos.x - (width / 2) as i32 + x) as f32, (pos.y - (self.height / 2) as i32 + y) as f32) * 10.0;
                 let position = Vector2i::new(pos.x - (width / 2) as i32 + x, pos.y - (self.height / 2) as i32 + y);
-
+                let pos_vec2 = Vector2::new(pos.x as f32, pos.y as f32);
+                if !self.loaded_chunks.contains(&pos_vec2) {
+                    self.loaded_chunks.push(pos_vec2);
+                }
                 
-                if alt < 0.0 {
-                    let ok = self.base_mut().set_cell_ex(position)
+                if alt < 0.1 {
+                    self.base_mut().set_cell_ex(position)
                     .source_id(1)
                     .atlas_coords(water)
                     .done();
-                    godot_print!("Water: {:?}", ok);
 
                 } else if alt > 0.0 {
                     self.base_mut().set_cell_ex(position)
                     .source_id(1)
                     .atlas_coords(land)
-                    .alternative_tile(0)
                     .done();
                     
                 }
