@@ -46,12 +46,13 @@ func generate_chunk(pos):
 			# Gets values from 0 -> 20... Then we will multiply by 3/20 in order to remap it to 0 -> 3
 			# vvv
 			if alt < 0: # Arbitrary sea level value (choosing 0 will mean roughly 1/2 the world is ocean)
-				set_cell( Vector2i(pos.x - (width/2) + x, pos.y - (height/2) + y), 0, Vector2(4, 10)) # Change x value where I've wrote three to whatever the x-coord of your oceans are
+				set_cell( Vector2i(pos.x - (width/2) + x, pos.y - (height/2) + y), 0, Vector2(4, 10)) 
 			else: # You can add other logic like making beaches by setting x-coord to whatever beach atlas x-coord is when the alt is between 0 and 0.5 or something
 				set_cell( Vector2i(pos.x - (width/2) + x, pos.y - (height/2) + y), 0, Vector2(0,1))
+		
 			
 			
-			if Vector2i(pos.x, pos.y) not in loaded_chunks:
+			if Vector2i(pos.x, pos.y) not in loaded_chunks: 
 				loaded_chunks.append(Vector2i(pos.x, pos.y))
 
 func unload_distant_chunks(player_pos):
