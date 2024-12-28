@@ -103,7 +103,7 @@ impl SaveManagerRust {
                     }
                 }}}
                 else {
-                    godot_print!("hi ");    
+                    godot_print!("hi");    
                 }
     }
 

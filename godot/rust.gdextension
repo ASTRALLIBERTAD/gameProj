@@ -5,3 +5,5 @@ compatibility_minimum = 4.1
 [libraries]
 windows.debug.x86_64 =   "res://../rust/target/debug/rust.dll"
 windows.release.x86_64 = "res://../rust/target/release/rust.dll" 
+android.debug.arm64 = "res://lib/librust.so"
+android.release.arm64 = "res://lib/librust.so"

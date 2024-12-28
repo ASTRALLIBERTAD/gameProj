@@ -30,8 +30,8 @@ impl ITileMapLayer for Terrain1 {
             moisture: FastNoiseLite::new_gd(),
             temperature: FastNoiseLite::new_gd(),
             altitude: FastNoiseLite::new_gd(),
-            height: 20,
-            width: 20,
+            height: 24,
+            width: 24,
             loaded_chunks: Vec::new(),
             player: Rustplayer::new_alloc(),
             
