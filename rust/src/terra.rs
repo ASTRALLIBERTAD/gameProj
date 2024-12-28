@@ -16,6 +16,9 @@ pub struct Terrain1 {
     height: i32,
     width: i32,
     loaded_chunks: Vec<Vector2>,
+    
+
+    #[export]
     player: Gd<Rustplayer>,
 }
 
@@ -33,6 +36,7 @@ impl ITileMapLayer for Terrain1 {
             loaded_chunks: Vec::new(),
             player: Rustplayer::new_alloc(),
             
+    
         }
     }
     fn ready(&mut self) {
@@ -45,21 +49,21 @@ impl ITileMapLayer for Terrain1 {
     }
 
     
-    fn process(&mut self, delta: f64) {
-        let ok = self.player.get_global_position();
-        let sls = self.base_mut().local_to_map(ok);
+    fn physics_process(&mut self, delta: f64) {
+        
+        let ypo = self.player.get_global_position();
+        godot_print!("Player position: {:?}", ypo);
+        let sls = self.base_mut().local_to_map(ypo );
         self.generate_chunk(sls);
         
     }
   
-    
-    
-
-    
 }
 
 #[godot_api]
 impl Terrain1 {
+
+
   
     #[func]
     fn generate_chunk(&mut self, pos: Vector2i) {

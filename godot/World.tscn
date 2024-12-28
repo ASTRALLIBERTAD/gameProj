@@ -12,13 +12,14 @@
 script/source = "extends Node2D
 @onready var tile_set = $Terrain1
 
+
+
 var water = Vector2(0,0)
 
 func _ready() -> void:
 	$AutoSave.start()
 	var player_tile_pos = tile_set.local_to_map(%PLAYERS.position)
 	var k = Terrain1.new()
-	
 	
 	
 	
@@ -218,7 +219,8 @@ sources/1 = SubResource("TileSetAtlasSource_ccpnp")
 position = Vector2(-1, 0)
 script = SubResource("GDScript_ixdq0")
 
-[node name="Terrain1" type="Terrain1" parent="."]
+[node name="Terrain1" type="Terrain1" parent="." node_paths=PackedStringArray("node")]
+node = NodePath("../PLAYERS")
 tile_set = SubResource("TileSet_o07my")
 
 [node name="coin" parent="." instance=ExtResource("3_q1b1f")]
