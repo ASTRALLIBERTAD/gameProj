@@ -219,8 +219,8 @@ sources/1 = SubResource("TileSetAtlasSource_ccpnp")
 position = Vector2(-1, 0)
 script = SubResource("GDScript_ixdq0")
 
-[node name="Terrain1" type="Terrain1" parent="." node_paths=PackedStringArray("node")]
-node = NodePath("../PLAYERS")
+[node name="Terrain1" type="Terrain1" parent="." node_paths=PackedStringArray("player")]
+player = NodePath("../PLAYERS")
 tile_set = SubResource("TileSet_o07my")
 
 [node name="coin" parent="." instance=ExtResource("3_q1b1f")]

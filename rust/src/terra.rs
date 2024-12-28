@@ -1,8 +1,7 @@
 use godot::classes::{ ITileMapLayer, FastNoiseLite, TileMapLayer};
 use godot::global::randi;
-
+use godot::obj::NewAlloc;
 use godot::prelude::*;
-
 use crate::rustplayer::Rustplayer;
 
 #[derive(GodotClass)]
@@ -31,8 +30,8 @@ impl ITileMapLayer for Terrain1 {
             moisture: FastNoiseLite::new_gd(),
             temperature: FastNoiseLite::new_gd(),
             altitude: FastNoiseLite::new_gd(),
-            height: 32,
-            width: 32,
+            height: 20,
+            width: 20,
             loaded_chunks: Vec::new(),
             player: Rustplayer::new_alloc(),
             
@@ -49,10 +48,10 @@ impl ITileMapLayer for Terrain1 {
     }
 
     
-    fn physics_process(&mut self, delta: f64) {
+    fn process(&mut self, delta: f64) {
         
-        let ypo = self.player.get_global_position();
-        godot_print!("Player position: {:?}", ypo);
+        let ypo = self.player.get_position();
+
         let sls = self.base_mut().local_to_map(ypo );
         self.generate_chunk(sls);
         
@@ -62,8 +61,6 @@ impl ITileMapLayer for Terrain1 {
 
 #[godot_api]
 impl Terrain1 {
-
-
   
     #[func]
     fn generate_chunk(&mut self, pos: Vector2i) {
