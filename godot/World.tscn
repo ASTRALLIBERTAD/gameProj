@@ -47,7 +47,10 @@ func _on_button_pressed() -> void:
 
 func _on_loading_pressed() -> void:
 	print(OS.get_user_data_dir())
-	$po.text = OS.get_user_data_dir()
+	var yt = SaveManager.get_os()
+	$po.text = yt
+	
+	$osl.text = OS.get_name()
 	pass 
 "
 
@@ -285,6 +288,12 @@ offset_left = -178.0
 offset_top = -35.0
 offset_right = 154.0
 offset_bottom = -12.0
+
+[node name="osl" type="Label" parent="."]
+offset_left = -152.0
+offset_top = 20.0
+offset_right = -7.0
+offset_bottom = 43.0
 
 [connection signal="timeout" from="AutoSave" to="." method="_on_auto_save_timeout"]
 [connection signal="pressed" from="Button" to="." method="_on_button_pressed"]

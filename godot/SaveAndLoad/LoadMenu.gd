@@ -5,11 +5,11 @@ var SaveToLoad
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	var dir = DirAccess.get_directories_at("user://games")
+	var dir = DirAccess.get_directories_at( SaveManager.get_os() + "/games")
 	for i in dir:
 		var button : Button = LoadButton.instantiate()
 		button.LoadButtonDown.connect(OnLoadButtonDown)
-		var file_path = "user://games/%s/%s_saveGame.json" % [i, i]
+		var file_path = SaveManager.get_os() +"/games/%s/%s_saveGame.json" % [i, i]
 		
 		var file = FileAccess.open( file_path, FileAccess.READ)
 		var content = file.get_as_text()

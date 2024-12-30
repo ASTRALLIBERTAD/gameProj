@@ -12,8 +12,6 @@ config_version=5
 
 config/name="proj"
 run/main_scene="res://MainMenu.tscn"
-config/use_custom_user_dir=true
-config/custom_user_dir_name="/storage/emulated/0/Android/data/com.example.proj/files/"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 config/icon="res://Assets/PixelUIButtons/PlayButton.png"
 

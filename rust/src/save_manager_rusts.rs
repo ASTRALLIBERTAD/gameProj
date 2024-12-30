@@ -1,5 +1,7 @@
 
 use std::any::Any;
+use std::env::consts::OS;
+
 
 //use std::borrow::Borrow;
 //use bincode::serialize;
@@ -10,6 +12,7 @@ use godot::classes::{ DirAccess, FileAccess, Node};
 use godot::prelude::*;
 use serde::{Deserialize, Serialize};
 use crate::rustplayer::Rustplayer;
+use std::env;
 
 #[derive(Serialize, Deserialize)]
 struct PlayerPosition {
@@ -32,14 +35,32 @@ pub struct SaveManagerRust {
 #[godot_api]
 impl SaveManagerRust {
 
+    fn get_os(&self) -> &str {
+        let mut baser: &str = "";
+        if OS == "windows" {
+            baser = "user://";
+            godot_print!("windows");
+        }
+        if OS == "android" {
+            baser = "/storage/emulated/0/Android/data/com.example.proj/files/";
+            godot_print!("android");
+            
+        }
+        godot_print!("{}", baser);
+        return &baser;
+       
+
+    }
+    
+
     #[func]
     fn save_game_rust(&self, name: String) {
-        let base_path = "user://";
+        let base_path = self.get_os();
         let folder = "games";
-        let file_saver = "user://games";
+        let file_saver = format!("{}/{}", base_path, folder);
         let name = name;
         let games_path = format!("{}/{}/{}", base_path, folder, name);
-        let save_path = format!("{}/{}/{}/{}.dat", base_path, folder, name, name);     
+        
            
         let mut dir = DirAccess::open(base_path).expect("okkk"); 
  
@@ -47,7 +68,7 @@ impl SaveManagerRust {
                 dir.make_dir(folder);
             } 
         
-        dir = DirAccess::open(file_saver).expect("not opened");
+        dir = DirAccess::open(&file_saver).expect("not opened");
 
         if !dir.dir_exists(&name){
             dir.make_dir(&name);
@@ -67,7 +88,7 @@ impl SaveManagerRust {
         self.player_node_rust = Some(players);
         self.current_world_name = format!("{:?}", name.type_id()).into();
         godot_print!("{}", self.current_world_name);
-        let base_path = "user://";
+        let base_path = self.get_os();
         let folder = "games";
         let name = name;
         let save_path = format!("{}/{}/{}/{}.dat", base_path, folder, name, name);
@@ -106,7 +127,7 @@ impl SaveManagerRust {
     fn load_player_pos(&mut self, name: String, players: Gd<Rustplayer>) {
         self.player_node_rust = Some(players);
 
-        let base_path = "user://";
+        let base_path = self.get_os();
         let folder = "games";
         let save_path = format!("{}/{}/{}/{}.dat", base_path, folder, name, name);
 
