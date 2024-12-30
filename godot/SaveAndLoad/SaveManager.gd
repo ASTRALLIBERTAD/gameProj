@@ -9,36 +9,40 @@ func world_exist(world_name: String) -> bool:
 	return FileAccess.file_exists(world_file)
 	
 
-
-func save_game(name):
+func save_game():
+	var world_name = get_world_name()
 	var p = SaveManagerRust.new()
-	p.save_game_rust(name)
+	p.save_player_pos(world_name, player_node)
 	
+	print(world_name)
 	
 	var SaveGameInfo = {
-		"name" : name,
-		"imgPath" : base_path + "games/" + name + "/" + name + ".png",
+		"name" : world_name,
+		"imgPath" : base_path + "games/" + world_name + "/" + world_name + ".png",
 		"dateTime" : Time.get_unix_time_from_system()
 	}
 	var SaveGameJson = JSON.stringify(SaveGameInfo)
 	
-	var SaveGameFile = FileAccess.open(base_path + "games/" + name + "/" + name + "_saveGame.json", FileAccess.WRITE)
+	var SaveGameFile = FileAccess.open(base_path + "games/" + world_name + "/" + world_name + "_saveGame.json", FileAccess.WRITE)
 	SaveGameFile.store_string(SaveGameJson)
 	
 	var screenshot = get_viewport().get_texture().get_image()
-	screenshot.save_png(base_path + "games/" + name + "/" + name + ".png")
+	screenshot.save_png(base_path + "games/" + world_name + "/" + world_name + ".png")
 	
-	p.save_player_pos(name, player_node)
 
 func optimize_autosave(name):
 	var k = SaveManagerRust.new()
-	k.save_game_rust(name)
 	k.save_player_pos(name, player_node)
 	print("Game saved successfully.")
 	pass
 
+func save(name: String):
+	var t = SaveManagerRust.new()
+	t.save_game_rust(name)
+	pass
+
 func load_game(name):
-	LoadGame = name	
+	LoadGame = name
 	var i = SaveManagerRust.new()
 	i.load_player_pos(name, player_node)
 

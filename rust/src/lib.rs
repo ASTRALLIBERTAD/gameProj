@@ -1,7 +1,7 @@
 mod player;
 mod rustplayer;
 mod save_manager_rusts;
-mod terra;
+mod terrain;
 
 use godot::prelude::*;
 

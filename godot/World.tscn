@@ -13,17 +13,10 @@ script/source = "extends Node2D
 @onready var tile_set = $Terrain1
 
 
-
-var water = Vector2(0,0)
-
 func _ready() -> void:
 	$AutoSave.start()
-	var player_tile_pos = tile_set.local_to_map(%PLAYERS.position)
 	var k = Terrain1.new()
 	
-	
-	
-
 
 
 func _process(delta: float) -> void:
@@ -35,6 +28,7 @@ func _process(delta: float) -> void:
 func _on_save_pressed() -> void:
 	var date = str(Time.get_datetime_string_from_system())
 	date = date.replace(\":\", \"-\")
+	SaveManager.save_game()
 
 func _on_auto_save_timeout() -> void:
 	SaveManager.auto_save()
@@ -46,15 +40,14 @@ func player_cord():
 	return local_position
 	pass
 
-func _on_button_pressed(name) -> void:
-	SaveManager.save_game(name)
+func _on_button_pressed() -> void:
+	SaveManager.save_game()
 	
 	# In your Godot script
 
 func _on_loading_pressed() -> void:
-	var lod = SaveManagerRust.new()
-	lod.load_player_pos(\"pk\",%PLAYERS )
-	lod.print_world_name()
+	print(OS.get_user_data_dir())
+	$po.text = OS.get_user_data_dir()
 	pass 
 "
 
@@ -286,6 +279,12 @@ offset_top = 55.0
 offset_right = -21.0
 offset_bottom = 86.0
 text = "loading"
+
+[node name="po" type="Label" parent="."]
+offset_left = -178.0
+offset_top = -35.0
+offset_right = 154.0
+offset_bottom = -12.0
 
 [connection signal="timeout" from="AutoSave" to="." method="_on_auto_save_timeout"]
 [connection signal="pressed" from="Button" to="." method="_on_button_pressed"]

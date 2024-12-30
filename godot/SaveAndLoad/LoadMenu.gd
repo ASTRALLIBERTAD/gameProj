@@ -16,16 +16,16 @@ func _ready() -> void:
 		var obj = JSON.parse_string(content)
 		button.SetupButton(obj)
 		button.text = obj.name
-		$Panel/ScrollContainer/LoadButtons.add_child(button)
+		$CanvasLayer/Panel/ScrollContainer/LoadButtons.add_child(button)
 	queue_redraw()
 	pass # Replace with function body.
 
 
 func OnLoadButtonDown(date, saveName, imagePath):
-	$Name.text = saveName
-	$Date.text = date
+	$CanvasLayer/Name.text = saveName
+	$CanvasLayer/Date.text = date
 	SaveToLoad = saveName
-	$ScreenShot.texture = LoadImageTexture(imagePath)
+	$CanvasLayer/ScreenShot.texture = LoadImageTexture(imagePath)
 	pass
 
 func LoadImageTexture(path : String):

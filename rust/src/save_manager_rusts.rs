@@ -39,9 +39,7 @@ impl SaveManagerRust {
         let file_saver = "user://games";
         let name = name;
         let games_path = format!("{}/{}/{}", base_path, folder, name);
-        let save_path = format!("{}/{}/{}/{}.dat", base_path, folder, name, name);
-        
-        let file  = FileAccess::open(&save_path, ModeFlags::WRITE);     
+        let save_path = format!("{}/{}/{}/{}.dat", base_path, folder, name, name);     
            
         let mut dir = DirAccess::open(base_path).expect("okkk"); 
  
@@ -59,10 +57,7 @@ impl SaveManagerRust {
             return;
         }
 
-        if file.is_none() {
-            godot_error!("Failed to open file at {}", save_path);
-            return;
-        }        
+
    
     }
 
