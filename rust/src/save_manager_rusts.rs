@@ -12,7 +12,7 @@ use godot::classes::{ DirAccess, FileAccess, Node};
 use godot::prelude::*;
 use serde::{Deserialize, Serialize};
 use crate::rustplayer::Rustplayer;
-use std::env;
+
 
 #[derive(Serialize, Deserialize)]
 struct PlayerPosition {
@@ -62,7 +62,7 @@ impl SaveManagerRust {
         let games_path = format!("{}/{}/{}", base_path, folder, name);
         
            
-        let mut dir = DirAccess::open(base_path).expect("okkk"); 
+        let mut dir = DirAccess::open(base_path).expect("ok"); 
  
         if !dir.dir_exists(folder) {
                 dir.make_dir(folder);

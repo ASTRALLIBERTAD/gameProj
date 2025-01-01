@@ -9,7 +9,7 @@ func _ready() -> void:
 	for i in dir:
 		var button : Button = LoadButton.instantiate()
 		button.LoadButtonDown.connect(OnLoadButtonDown)
-		var file_path = SaveManager.get_os() +"/games/%s/%s_saveGame.json" % [i, i]
+		var file_path = SaveManager.get_os() + "/games/%s/%s_saveGame.json" % [i, i]
 		
 		var file = FileAccess.open( file_path, FileAccess.READ)
 		var content = file.get_as_text()

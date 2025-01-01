@@ -1,5 +1,5 @@
 use godot::classes::{ ITileMapLayer, FastNoiseLite, TileMapLayer};
-use godot::global::randi;
+use godot::global::{randi, sqrt};
 use godot::obj::NewAlloc;
 use godot::prelude::*;
 use crate::rustplayer::Rustplayer;
@@ -14,7 +14,7 @@ pub struct Terrain1 {
     altitude: Gd<FastNoiseLite>,
     height: i32,
     width: i32,
-    loaded_chunks: Vec<Vector2>,
+    loaded_chunks: Array<Vector2i>,
     
 
     #[export]
@@ -32,7 +32,7 @@ impl ITileMapLayer for Terrain1 {
             altitude: FastNoiseLite::new_gd(),
             height: 25,
             width: 25,
-            loaded_chunks: Vec::new(),
+            loaded_chunks: Array::new(),
             player: Rustplayer::new_alloc(),
             
     
@@ -48,12 +48,14 @@ impl ITileMapLayer for Terrain1 {
     }
 
     
-    fn process(&mut self, delta: f64) {
+    fn process(&mut self, _delta: f64) {
         
         let ypo = self.player.get_position();
 
         let sls = self.base_mut().local_to_map(ypo );
         self.generate_chunk(sls);
+
+        self.unload_distant_chunks( sls);
         
     }
   
@@ -61,24 +63,23 @@ impl ITileMapLayer for Terrain1 {
 
 #[godot_api]
 impl Terrain1 {
+    
   
-    #[func]
+    
     fn generate_chunk(&mut self, pos: Vector2i) {
-        
+    
         let water = Vector2i::new(0, 11);
         let land = Vector2i::new(1, 0);
-        let width = self.width;
+        
 
         for x in 0..self.width {
             for y in 0..self.height {
-                let moist = self.moisture.get_noise_2d((pos.x - (width / 2) as i32 + x) as f32, (pos.y - (self.height / 2) as i32 + y) as f32) * 10.0;
-                let temp = self.temperature.get_noise_2d((pos.x - (width / 2) as i32 + x) as f32, (pos.y - (self.height / 2) as i32 + y) as f32) * 10.0;
-                let alt = self.altitude.get_noise_2d((pos.x - (width / 2) as i32 + x) as f32, (pos.y - (self.height / 2) as i32 + y) as f32) * 10.0;
-                let position = Vector2i::new(pos.x - (width / 2) as i32 + x, pos.y - (self.height / 2) as i32 + y);
-                let pos_vec2 = Vector2::new(pos.x as f32, pos.y as f32);
-                if !self.loaded_chunks.contains(&pos_vec2) {
-                    self.loaded_chunks.push(pos_vec2);
-                }
+                let moist = self.moisture.get_noise_2d((pos.x - (self.width / 2) as i32 + x) as f32, (pos.y - (self.height / 2) as i32 + y) as f32) * 10.0;
+                let temp = self.temperature.get_noise_2d((pos.x - (self.width / 2) as i32 + x) as f32, (pos.y - (self.height / 2) as i32 + y) as f32) * 10.0;
+                let alt = self.altitude.get_noise_2d((pos.x - (self.width / 2) as i32 + x) as f32, (pos.y - (self.height / 2) as i32 + y) as f32) * 10.0;
+                let position = Vector2i::new(pos.x - (self.width / 2) as i32 + x, pos.y - (self.height / 2) as i32 + y);
+                
+                
                 
                 if alt < 0.1 {
                     self.base_mut().set_cell_ex(position)
@@ -94,8 +95,8 @@ impl Terrain1 {
                     
                 }
 
-                if !self.loaded_chunks.contains(&Vector2 { x: x as f32, y: y as f32 }) {
-                    self.loaded_chunks.push(Vector2 { x: x as f32, y: y as f32 });
+                if !self.loaded_chunks.contains(Vector2i { x: pos.x as i32, y: pos.y as i32 }) {
+                    self.loaded_chunks.push(Vector2i { x: pos.x as i32, y: pos.y as i32 });
                 }
 
                 
@@ -103,8 +104,66 @@ impl Terrain1 {
             
         }
     }
+
+
+
+
+    fn clear_chunk(&mut self, pos: Vector2i) {
+        
+          
+        for x in 0..self.width {
+
+            for y in 0..self.height {
+                let width = self.width;
+                let height = self.height;
+                self.base_mut().set_cell_ex(Vector2i::new(pos.x as i32 - (width / 2) as i32 + x, pos.y as i32- (height / 2) as i32 + y))
+                .source_id(-1)
+                .atlas_coords(Vector2i::new(-1, -1))
+                .alternative_tile(-1)
+                .done();
+            
+        }
+    }}
+
+
+    fn unload_distant_chunks(&mut self, pos: Vector2i) {
+        let unload_distance_threshold = (self.width as f32 * 2.0) + 1.0;
+        
+        for chunk in self.loaded_chunks.iter_shared().collect::<Vec<Vector2i>>() {
+            let dist = self.get_dist(chunk, pos);
+            if dist > unload_distance_threshold as f64 {
+                self.clear_chunk(chunk);
+                self.loaded_chunks.erase(chunk);
+            }
+            
+        }
+
+        
+
+    }
+
     
-    
+
+
+    fn get_dist(&mut self, p1: Vector2i, p2: Vector2i) -> f64 {
+            let resultant = p1 - p2;
+            return sqrt((resultant.x as f64).powi(2) + (resultant.y as f64).powi(2));
+        }
+        
+
+
 }
+
+    
+
+    
+	    
+
+
+    
+
+    
+    
+
 
 

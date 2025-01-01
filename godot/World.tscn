@@ -15,7 +15,6 @@ script/source = "extends Node2D
 
 func _ready() -> void:
 	$AutoSave.start()
-	var k = Terrain1.new()
 	
 
 
@@ -42,7 +41,7 @@ func player_cord():
 
 func _on_button_pressed() -> void:
 	SaveManager.save_game()
-	
+	$Control/TouchControls.visible = false
 	# In your Godot script
 
 func _on_loading_pressed() -> void:
