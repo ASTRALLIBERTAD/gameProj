@@ -1,0 +1,32 @@
+[gd_scene load_steps=2 format=3 uid="uid://q1serq0kttih"]
+
+[ext_resource type="Script" path="res://PauseMenu/pause_menu.gd" id="1_ftu0b"]
+
+[node name="PauseMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+script = ExtResource("1_ftu0b")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Coordinates" type="Label" parent="CanvasLayer"]
+offset_top = 182.0
+offset_right = 116.0
+offset_bottom = 216.0
+
+[node name="TabContainer" type="TabContainer" parent="."]
+z_index = -1
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -91.0
+offset_bottom = 48.0
+grow_horizontal = 0
+tabs_position = 1

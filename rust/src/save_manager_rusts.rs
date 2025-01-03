@@ -121,6 +121,7 @@ impl SaveManagerRust {
                 else {
                     godot_print!("hi");    
                 }
+        
     }
 
     #[func]

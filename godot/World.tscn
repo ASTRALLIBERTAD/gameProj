@@ -24,10 +24,6 @@ func _process(delta: float) -> void:
 	
 	var ol = Terrain1.new()
 	
-func _on_save_pressed() -> void:
-	var date = str(Time.get_datetime_string_from_system())
-	date = date.replace(\":\", \"-\")
-	SaveManager.save_game()
 
 func _on_auto_save_timeout() -> void:
 	SaveManager.auto_save()
@@ -40,8 +36,11 @@ func player_cord():
 	pass
 
 func _on_button_pressed() -> void:
+	var date = str(Time.get_datetime_string_from_system())
+	date = date.replace(\":\", \"-\")
 	SaveManager.save_game()
 	$Control/TouchControls.visible = false
+	get_tree().paused = true
 	# In your Godot script
 
 func _on_loading_pressed() -> void:
@@ -50,6 +49,7 @@ func _on_loading_pressed() -> void:
 	$po.text = yt
 	
 	$osl.text = OS.get_name()
+	get_tree().paused = false
 	pass 
 "
 
@@ -235,6 +235,7 @@ position = Vector2(42.1139, 9.49407)
 position = Vector2(88, 20)
 
 [node name="Control" type="Control" parent="."]
+process_mode = 1
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
@@ -276,6 +277,7 @@ text = "save"
 [node name="SaveManagerRust" type="SaveManagerRust" parent="."]
 
 [node name="loading" type="Button" parent="."]
+process_mode = 3
 offset_left = -87.0
 offset_top = 55.0
 offset_right = -21.0

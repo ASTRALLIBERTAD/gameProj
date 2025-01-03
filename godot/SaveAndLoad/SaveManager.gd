@@ -4,6 +4,8 @@ var base_path: String
 var LoadGame : String
 var player_node: Rustplayer
 
+
+
 func get_os() -> String:
 	if OS.get_name() == "Windows":
 		base_path = "user://"

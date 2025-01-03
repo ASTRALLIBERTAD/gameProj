@@ -13,7 +13,6 @@ pub struct Rustplayer{
 #[godot_api]
 impl ICharacterBody2D for Rustplayer {
     fn init(base: Base<CharacterBody2D>) -> Self {
-        godot_print!("hi");
         Self {base, }
     }
     
