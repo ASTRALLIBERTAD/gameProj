@@ -57,5 +57,5 @@ func _on_new_pressed() -> void:
 	pass # Replace with function body.
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://MainMenu.tscn")
+	get_tree().change_scene_to_file("res://Main/MainMenu.tscn")
 	pass # Replace with function body.

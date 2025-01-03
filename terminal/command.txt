@@ -5,7 +5,3 @@ cargo build --release
 
 
 
-let scene = load::<PackedScene>("res://Player/players.tscn");
-        
-        let instance = scene.instantiate().unwrap();
-        self.base_mut().add_child(&instance);

@@ -109,7 +109,7 @@ impl SaveManagerRust {
                 // Serialize the position
                 match bincode::serialize(&player_position) {
                     Ok(serialized_data) => {
-                        // Convert Vec<u8> to PackedByteArray
+                        
                         let byte_array = PackedByteArray::from(serialized_data);
                         file.store_buffer(&byte_array);
                         godot_print!("Game saved successfully at {}", save_path);

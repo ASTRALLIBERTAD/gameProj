@@ -24,7 +24,6 @@ pub struct Terrain1 {
 #[godot_api]
 impl ITileMapLayer for Terrain1 {
     fn init(base: Base<TileMapLayer>) -> Self {
-        godot_print!("Initializing Terrain");
         Self {
             base,
             moisture: FastNoiseLite::new_gd(),
@@ -35,7 +34,6 @@ impl ITileMapLayer for Terrain1 {
             loaded_chunks: Array::new(),
             player: Rustplayer::new_alloc(),
             
-    
         }
     }
     fn ready(&mut self) {
@@ -74,8 +72,8 @@ impl Terrain1 {
 
         for x in 0..self.width {
             for y in 0..self.height {
-                let moist = self.moisture.get_noise_2d((pos.x - (self.width / 2) as i32 + x) as f32, (pos.y - (self.height / 2) as i32 + y) as f32) * 10.0;
-                let temp = self.temperature.get_noise_2d((pos.x - (self.width / 2) as i32 + x) as f32, (pos.y - (self.height / 2) as i32 + y) as f32) * 10.0;
+                let _moist = self.moisture.get_noise_2d((pos.x - (self.width / 2) as i32 + x) as f32, (pos.y - (self.height / 2) as i32 + y) as f32) * 10.0;
+                let _temp = self.temperature.get_noise_2d((pos.x - (self.width / 2) as i32 + x) as f32, (pos.y - (self.height / 2) as i32 + y) as f32) * 10.0;
                 let alt = self.altitude.get_noise_2d((pos.x - (self.width / 2) as i32 + x) as f32, (pos.y - (self.height / 2) as i32 + y) as f32) * 10.0;
                 let position = Vector2i::new(pos.x - (self.width / 2) as i32 + x, pos.y - (self.height / 2) as i32 + y);
                 

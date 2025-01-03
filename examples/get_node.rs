@@ -1,5 +1,9 @@
 //this method get nodes from PackedScene using rust
 
+//let scene = load::<PackedScene>("res://Player/players.tscn");
+        
+//let instance = scene.instantiate().unwrap();
+//self.base_mut().add_child(&instance);
 
 use godot::classes::{ ITileMapLayer, Label, TileMapLayer};
 use godot::obj::NewGd;
@@ -22,7 +26,6 @@ pub struct Tilesm{
 impl ITileMapLayer for Tilesm{
 
     fn init(base: Base<TileMapLayer>) -> Self {
-        godot_print!("Initializing Terrain");
         Self {
             
             base, 

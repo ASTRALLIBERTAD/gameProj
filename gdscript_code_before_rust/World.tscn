@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://q1serq0kttih" path="res://PauseMenu/PauseMenu.tscn" id="1_nfq2w"]
 [ext_resource type="Texture2D" uid="uid://eao47njq38uu" path="res://Assets/brackeys_platformer_assets/brackeys_platformer_assets/sprites/world_tileset.png" id="2_04q42"]
 [ext_resource type="PackedScene" uid="uid://v2h65dti34ep" path="res://Collectibles/coin.tscn" id="3_q1b1f"]
-[ext_resource type="PackedScene" uid="uid://cf1y4gylaktvs" path="res://UserInterface/TouchControls.tscn" id="4_dd45r"]
+[ext_resource type="PackedScene" uid="uid://cf1y4gylaktvs" path="res://TouchControls.tscn" id="4_dd45r"]
 [ext_resource type="PackedScene" uid="uid://bpi3sbit45l5" path="res://Player/players.tscn" id="4_dqyd3"]
 [ext_resource type="Script" path="res://FpsCounter.gd" id="5_dged2"]
 [ext_resource type="Texture2D" uid="uid://djo53ep2hv88p" path="res://icon.svg" id="7_6ip7a"]
@@ -16,7 +16,7 @@ script/source = "extends Node2D
 
 func _ready() -> void:
 	$AutoSave.start()
-
+	var k = get_node(\"/root/World/PauseMenu/CanvasLayer/Coordinates\") as Label
 	
 
 func _process(delta: float) -> void:
@@ -24,7 +24,6 @@ func _process(delta: float) -> void:
 	var k = get_node(\"/root/World/PauseMenu/CanvasLayer/Coordinates\") as Label
 	k.text = \"Coordinates: %d,%d\" % [tile_cord.x, tile_cord.y]
 	var ol = Terrain1.new()
-	
 	
 
 func _on_auto_save_timeout() -> void:
@@ -216,10 +215,6 @@ sources/1 = SubResource("TileSetAtlasSource_ccpnp")
 position = Vector2(-1, 0)
 script = SubResource("GDScript_ixdq0")
 
-[node name="osl" type="Label" parent="."]
-offset_right = 40.0
-offset_bottom = 23.0
-
 [node name="Terrain1" type="Terrain1" parent="." node_paths=PackedStringArray("player")]
 player = NodePath("../PLAYERS")
 tile_set = SubResource("TileSet_o07my")
@@ -279,6 +274,8 @@ offset_top = 45.0
 offset_right = 68.0
 offset_bottom = 76.0
 text = "save"
+
+[node name="SaveManagerRust" type="SaveManagerRust" parent="."]
 
 [node name="loading" type="Button" parent="."]
 process_mode = 3

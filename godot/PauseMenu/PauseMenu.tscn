@@ -15,18 +15,27 @@ script = ExtResource("1_ftu0b")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="Coordinates" type="Label" parent="CanvasLayer"]
-offset_top = 182.0
-offset_right = 116.0
-offset_bottom = 216.0
-
-[node name="TabContainer" type="TabContainer" parent="."]
-z_index = -1
-layout_mode = 1
+[node name="SaveGame" type="Button" parent="CanvasLayer"]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -91.0
-offset_bottom = 48.0
+offset_left = -8.0
+offset_bottom = 8.0
 grow_horizontal = 0
-tabs_position = 1
+theme_override_font_sizes/font_size = 50
+text = "Save
+"
+
+[node name="Coordinates" type="Label" parent="CanvasLayer"]
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 16.0
+offset_top = -97.0
+offset_right = 157.0
+offset_bottom = -20.0
+grow_vertical = 2
+theme_override_font_sizes/font_size = 40
+justification_flags = 131
+
+[connection signal="pressed" from="CanvasLayer/SaveGame" to="." method="_on_save_game_pressed"]
