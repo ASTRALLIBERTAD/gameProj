@@ -72,7 +72,6 @@ func _on_menu_pressed() -> void:
 func _on_save_pressed() -> void:
 	%TouchControls.visible = false
 	%Panel.visible = false
-	get_tree().paused = false
 	%SavingTime.start()
 	pass # Replace with function body.
 
@@ -294,7 +293,7 @@ offset_right = 40.0
 offset_bottom = 49.0
 script = ExtResource("5_dged2")
 
-[node name="Player2" type="Player" parent="."]
+[node name="test" type="Player" parent="."]
 position = Vector2(-108, -52.5)
 scale = Vector2(0.1875, 0.179688)
 texture = ExtResource("7_6ip7a")
