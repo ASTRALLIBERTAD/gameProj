@@ -2,12 +2,10 @@ use std::str::FromStr;
 use godot::classes::{  CharacterBody2D, ICharacterBody2D, Input};
 use godot::prelude::*;
 
-
 #[derive(GodotClass)]
 #[class(base=CharacterBody2D)]
 pub struct Rustplayer{
     base: Base<CharacterBody2D>,
-    
 }
 
 #[godot_api]
@@ -30,5 +28,3 @@ impl ICharacterBody2D for Rustplayer {
     }
     
 }
-
-

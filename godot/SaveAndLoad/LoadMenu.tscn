@@ -62,7 +62,6 @@ offset_bottom = 83.0
 scale = Vector2(8.41837, 4.99352)
 texture = ExtResource("3_6e13g")
 expand_mode = 1
-stretch_mode = 4
 
 [node name="Date" type="RichTextLabel" parent="CanvasLayer"]
 offset_left = 682.0

@@ -1,7 +1,5 @@
-
 use std::any::Any;
 use std::env::consts::OS;
-
 
 //use std::borrow::Borrow;
 //use bincode::serialize;
@@ -26,7 +24,6 @@ pub struct SaveManagerRust {
   
     #[base]
     base: Base<Node>,
-    
     current_world_name: StringName,
     player_node_rust: Option<Gd<Rustplayer>>,
     
@@ -43,13 +40,10 @@ impl SaveManagerRust {
         }
         if OS == "android" {
             baser = "/storage/emulated/0/Android/data/com.example.proj/files/";
-            godot_print!("android");
-            
+            godot_print!("android");  
         }
         godot_print!("{}", baser);
         return &baser;
-       
-
     }
     
 
@@ -59,27 +53,21 @@ impl SaveManagerRust {
         let folder = "games";
         let file_saver = format!("{}/{}", base_path, folder);
         let name = name;
-        let games_path = format!("{}/{}/{}", base_path, folder, name);
-        
+        let games_path = format!("{}/{}/{}", base_path, folder, name);        
            
         let mut dir = DirAccess::open(base_path).expect("ok"); 
  
         if !dir.dir_exists(folder) {
                 dir.make_dir(folder);
-            } 
-        
+        } 
         dir = DirAccess::open(&file_saver).expect("not opened");
 
         if !dir.dir_exists(&name){
             dir.make_dir(&name);
         }
-
         if dir != DirAccess::open(&games_path).expect("failed to open"){
             return;
         }
-
-
-   
     }
 
     #[func]
@@ -103,9 +91,6 @@ impl SaveManagerRust {
                     x: position.x,
                     y: position.y,
                 };
-
-                
-
                 // Serialize the position
                 match bincode::serialize(&player_position) {
                     Ok(serialized_data) => {
@@ -117,11 +102,12 @@ impl SaveManagerRust {
                     Err(_) => {
                         godot_error!("Failed to serialize player position");
                     }
-                }}}
-                else {
-                    godot_print!("hi");    
                 }
-        
+            }
+        }
+        else {
+            godot_print!("hi");    
+        }
     }
 
     #[func]
@@ -159,10 +145,6 @@ impl SaveManagerRust {
         } else {
             godot_error!("Failed to open file for loading at {}", save_path);
         }
-
-
     }
-    
-                    
 }
                     

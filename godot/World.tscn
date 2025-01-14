@@ -1,6 +1,5 @@
-[gd_scene load_steps=13 format=3 uid="uid://d2oibegpqmv2b"]
+[gd_scene load_steps=12 format=3 uid="uid://d2oibegpqmv2b"]
 
-[ext_resource type="PackedScene" uid="uid://q1serq0kttih" path="res://PauseMenu/PauseMenu.tscn" id="1_nfq2w"]
 [ext_resource type="Texture2D" uid="uid://eao47njq38uu" path="res://Assets/brackeys_platformer_assets/brackeys_platformer_assets/sprites/world_tileset.png" id="2_04q42"]
 [ext_resource type="PackedScene" uid="uid://v2h65dti34ep" path="res://Collectibles/coin.tscn" id="3_q1b1f"]
 [ext_resource type="PackedScene" uid="uid://cf1y4gylaktvs" path="res://UserInterface/TouchControls.tscn" id="4_dd45r"]
@@ -21,9 +20,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	var tile_cord = player_cord()
-	var k = get_node(\"/root/World/PauseMenu/CanvasLayer/Coordinates\") as Label
-	k.text = \"Coordinates: %d,%d\" % [tile_cord.x, tile_cord.y]
-	var ol = Terrain1.new()
+	%coords.text = \"Coordinates: %d,%d\" % [tile_cord.x, tile_cord.y]
 	
 	
 
@@ -35,6 +32,7 @@ func player_cord():
 	var cord = tile_set.local_to_map($PLAYERS.global_position)
 	var local_position = tile_set.to_local(cord)
 	return local_position
+	#done in Rust
 	pass
 
 func _on_button_pressed() -> void:
@@ -53,6 +51,37 @@ func _on_loading_pressed() -> void:
 	$osl.text = OS.get_name()
 	get_tree().paused = false
 	pass 
+
+
+func _on_saving_time_timeout() -> void:
+	get_tree().paused = false
+	SaveManager.save_game()
+	get_tree().change_scene_to_file(\"res://SaveAndLoad/LoadMenu.tscn\")
+	queue_free()
+	queue_redraw()
+	pass # Replace with function body.
+
+
+func _on_menu_pressed() -> void:
+	%TouchControls.visible = false
+	get_tree().paused = true
+	%Panel.visible = true
+	pass # Replace with function body.
+
+
+func _on_save_pressed() -> void:
+	%TouchControls.visible = false
+	%Panel.visible = false
+	get_tree().paused = false
+	%SavingTime.start()
+	pass # Replace with function body.
+
+
+func _on_back_pressed() -> void:
+	%TouchControls.visible = true
+	%Panel.visible = false
+	get_tree().paused = false
+	pass # Replace with function body.
 "
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_a480t"]
@@ -241,7 +270,7 @@ position = Vector2(42.1139, 9.49407)
 position = Vector2(88, 20)
 
 [node name="Control" type="Control" parent="."]
-process_mode = 1
+unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
@@ -249,6 +278,7 @@ offset_bottom = 40.0
 metadata/_edit_use_anchors_ = true
 
 [node name="TouchControls" parent="Control" instance=ExtResource("4_dd45r")]
+unique_name_in_owner = true
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 spawn_path = NodePath("..")
@@ -294,14 +324,78 @@ offset_top = -35.0
 offset_right = 154.0
 offset_bottom = -12.0
 
-[node name="PauseMenu" parent="." instance=ExtResource("1_nfq2w")]
+[node name="PauseMenu2" type="Control" parent="."]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SavingTime" type="Timer" parent="PauseMenu2"]
+unique_name_in_owner = true
+
+[node name="CanvasLayer" type="CanvasLayer" parent="PauseMenu2"]
+
+[node name="coords" type="Label" parent="PauseMenu2/CanvasLayer"]
+unique_name_in_owner = true
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -11.5
+offset_right = 40.0
+offset_bottom = 11.5
+grow_vertical = 2
+theme_override_font_sizes/font_size = 40
+
+[node name="MENU" type="Button" parent="PauseMenu2/CanvasLayer"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -128.0
+offset_bottom = 63.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 40
+text = "MENU"
+
+[node name="Panel" type="Panel" parent="PauseMenu2/CanvasLayer"]
 unique_name_in_owner = true
 visible = false
-offset_left = -425.0
-offset_top = 66.0
-offset_right = -425.0
-offset_bottom = 66.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PauseMenu2/CanvasLayer/Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="save" type="Button" parent="PauseMenu2/CanvasLayer/Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "SAVE"
+
+[node name="Back" type="Button" parent="PauseMenu2/CanvasLayer/Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "BACK"
 
 [connection signal="timeout" from="AutoSave" to="." method="_on_auto_save_timeout"]
 [connection signal="pressed" from="Button" to="." method="_on_button_pressed"]
 [connection signal="pressed" from="loading" to="." method="_on_loading_pressed"]
+[connection signal="timeout" from="PauseMenu2/SavingTime" to="." method="_on_saving_time_timeout"]
+[connection signal="pressed" from="PauseMenu2/CanvasLayer/MENU" to="." method="_on_menu_pressed"]
+[connection signal="pressed" from="PauseMenu2/CanvasLayer/Panel/VBoxContainer/save" to="." method="_on_save_pressed"]
+[connection signal="pressed" from="PauseMenu2/CanvasLayer/Panel/VBoxContainer/Back" to="." method="_on_back_pressed"]
