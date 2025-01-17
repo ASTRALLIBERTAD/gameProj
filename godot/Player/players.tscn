@@ -127,7 +127,8 @@ animations = [{
 radius = 9.0
 height = 18.0
 
-[node name="PLAYERS" type="Rustplayer"]
+[node name="PLAYERS" type="Rustplayer" node_paths=PackedStringArray("sprite")]
+sprite = NodePath("AnimatedSprite2D")
 script = ExtResource("1_ly0sm")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]

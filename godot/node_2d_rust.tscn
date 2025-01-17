@@ -1,5 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://bv1w4xn3krv2j"]
+[gd_scene load_steps=4 format=3 uid="uid://bv1w4xn3krv2j"]
 
+[ext_resource type="Script" path="res://node_2d_rust.gd" id="1_3b3xi"]
 [ext_resource type="PackedScene" uid="uid://bpi3sbit45l5" path="res://Player/players.tscn" id="1_ilun3"]
 
 [sub_resource type="TileSet" id="TileSet_xcvpn"]
@@ -7,6 +8,7 @@
 [node name="Node2dRust" type="Node2dRust" node_paths=PackedStringArray("players", "tile")]
 players = NodePath("PLAYERS")
 tile = NodePath("TileMapLayer")
+script = ExtResource("1_3b3xi")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -21,7 +23,23 @@ grow_vertical = 2
 theme_override_font_sizes/font_size = 70
 text = "pol"
 
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer"]
+offset_left = 23.0
+offset_top = -94.0
+offset_right = 63.0
+offset_bottom = -54.0
+scale = Vector2(3.73422, 2.63768)
+
 [node name="PLAYERS" parent="." instance=ExtResource("1_ilun3")]
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
 tile_set = SubResource("TileSet_xcvpn")
+
+[node name="Button" type="Button" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 8.0
+grow_horizontal = 2
+text = "ihih"
+
+[connection signal="pressed" from="Button" to="." method="_on_button_pressed"]

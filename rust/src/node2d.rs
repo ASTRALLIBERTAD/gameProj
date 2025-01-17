@@ -1,4 +1,4 @@
-use godot::classes::{INode2D, Label, Node2D, TileMapLayer, Timer};
+use godot::classes::{INode2D, Label, Node2D, TileMapLayer};
 use godot::obj::NewAlloc;
 use godot::prelude::*;
 
@@ -9,6 +9,8 @@ use crate::rustplayer::Rustplayer;
 pub struct Node2dRust {
     #[base]
     base: Base<Node2D>,
+
+
 
     #[export]
     players: Gd<Rustplayer>,
@@ -28,8 +30,8 @@ impl INode2D for Node2dRust {
         }
     }
     fn ready(&mut self){
-        let mut r =self.base_mut().get_node_as::<Timer>("/root/World/AutoSave");
-        r.set_autostart(true);
+
+        
     }
     fn physics_process(&mut self, _delta: f64) {
         let mut r =self.base_mut().get_node_as::<Label>("/root/Node2dRust/CanvasLayer/Label");
@@ -47,5 +49,5 @@ impl Node2dRust {
         let cord = tile.local_to_map(self.get_players().get_global_position());
         let ko = tile.to_local(Vector2::new(cord.x as f32, cord.y as f32));
         return ko;
-    }   
+    }
 }

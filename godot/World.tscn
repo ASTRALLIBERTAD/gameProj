@@ -20,7 +20,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	var tile_cord = player_cord()
-	%coords.text = \"Coordinates: %d,%d\" % [tile_cord.x, tile_cord.y]
+	%coords.text = \"Coordinates: %d,%d\" % [tile_cord.x, tile_cord.y * -1]
 	
 	
 
@@ -244,23 +244,27 @@ sources/1 = SubResource("TileSetAtlasSource_ccpnp")
 position = Vector2(-1, 0)
 script = SubResource("GDScript_ixdq0")
 
-[node name="osl" type="Label" parent="."]
-offset_right = 40.0
-offset_bottom = 23.0
-
 [node name="Terrain1" type="Terrain1" parent="." node_paths=PackedStringArray("player")]
 player = NodePath("../PLAYERS")
 tile_set = SubResource("TileSet_o07my")
+
+[node name="AutoSave" type="Timer" parent="."]
+wait_time = 5.0
+autostart = true
+
+[node name="PLAYERS" parent="." instance=ExtResource("4_dqyd3")]
+unique_name_in_owner = true
+position = Vector2(0, 25)
+
+[node name="osl" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0
 
 [node name="coin" parent="." instance=ExtResource("3_q1b1f")]
 position = Vector2(65, 0)
 
 [node name="coin2" parent="." instance=ExtResource("3_q1b1f")]
 position = Vector2(123, 0)
-
-[node name="PLAYERS" parent="." instance=ExtResource("4_dqyd3")]
-unique_name_in_owner = true
-position = Vector2(0, 25)
 
 [node name="coin3" parent="." instance=ExtResource("3_q1b1f")]
 position = Vector2(42.1139, 9.49407)
@@ -278,20 +282,6 @@ metadata/_edit_use_anchors_ = true
 
 [node name="TouchControls" parent="Control" instance=ExtResource("4_dd45r")]
 unique_name_in_owner = true
-
-[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
-spawn_path = NodePath("..")
-
-[node name="AutoSave" type="Timer" parent="."]
-wait_time = 5.0
-autostart = true
-
-[node name="FPSCOUNTER" type="Label" parent="."]
-texture_filter = 1
-offset_top = 26.0
-offset_right = 40.0
-offset_bottom = 49.0
-script = ExtResource("5_dged2")
 
 [node name="test" type="Player" parent="."]
 position = Vector2(-108, -52.5)
@@ -323,7 +313,7 @@ offset_top = -35.0
 offset_right = 154.0
 offset_bottom = -12.0
 
-[node name="PauseMenu2" type="Control" parent="."]
+[node name="PauseMenu" type="Control" parent="."]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -332,23 +322,32 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="SavingTime" type="Timer" parent="PauseMenu2"]
+[node name="SavingTime" type="Timer" parent="PauseMenu"]
 unique_name_in_owner = true
 
-[node name="CanvasLayer" type="CanvasLayer" parent="PauseMenu2"]
+[node name="CanvasLayer" type="CanvasLayer" parent="PauseMenu"]
 
-[node name="coords" type="Label" parent="PauseMenu2/CanvasLayer"]
-unique_name_in_owner = true
+[node name="VBoxContainer" type="VBoxContainer" parent="PauseMenu/CanvasLayer"]
 anchors_preset = 4
 anchor_top = 0.5
 anchor_bottom = 0.5
-offset_top = -11.5
+offset_top = -57.0
 offset_right = 40.0
-offset_bottom = 11.5
+offset_bottom = 57.0
 grow_vertical = 2
+
+[node name="FPSCOUNTER" type="Label" parent="PauseMenu/CanvasLayer/VBoxContainer"]
+texture_filter = 1
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+script = ExtResource("5_dged2")
+
+[node name="coords" type="Label" parent="PauseMenu/CanvasLayer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
 theme_override_font_sizes/font_size = 40
 
-[node name="MENU" type="Button" parent="PauseMenu2/CanvasLayer"]
+[node name="MENU" type="Button" parent="PauseMenu/CanvasLayer"]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -358,7 +357,7 @@ grow_horizontal = 0
 theme_override_font_sizes/font_size = 40
 text = "MENU"
 
-[node name="Panel" type="Panel" parent="PauseMenu2/CanvasLayer"]
+[node name="Panel" type="Panel" parent="PauseMenu/CanvasLayer"]
 unique_name_in_owner = true
 visible = false
 anchors_preset = 15
@@ -367,7 +366,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PauseMenu2/CanvasLayer/Panel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="PauseMenu/CanvasLayer/Panel"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -381,12 +380,12 @@ offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="save" type="Button" parent="PauseMenu2/CanvasLayer/Panel/VBoxContainer"]
+[node name="save" type="Button" parent="PauseMenu/CanvasLayer/Panel/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "SAVE"
 
-[node name="Back" type="Button" parent="PauseMenu2/CanvasLayer/Panel/VBoxContainer"]
+[node name="Back" type="Button" parent="PauseMenu/CanvasLayer/Panel/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "BACK"
@@ -394,7 +393,7 @@ text = "BACK"
 [connection signal="timeout" from="AutoSave" to="." method="_on_auto_save_timeout"]
 [connection signal="pressed" from="Button" to="." method="_on_button_pressed"]
 [connection signal="pressed" from="loading" to="." method="_on_loading_pressed"]
-[connection signal="timeout" from="PauseMenu2/SavingTime" to="." method="_on_saving_time_timeout"]
-[connection signal="pressed" from="PauseMenu2/CanvasLayer/MENU" to="." method="_on_menu_pressed"]
-[connection signal="pressed" from="PauseMenu2/CanvasLayer/Panel/VBoxContainer/save" to="." method="_on_save_pressed"]
-[connection signal="pressed" from="PauseMenu2/CanvasLayer/Panel/VBoxContainer/Back" to="." method="_on_back_pressed"]
+[connection signal="timeout" from="PauseMenu/SavingTime" to="." method="_on_saving_time_timeout"]
+[connection signal="pressed" from="PauseMenu/CanvasLayer/MENU" to="." method="_on_menu_pressed"]
+[connection signal="pressed" from="PauseMenu/CanvasLayer/Panel/VBoxContainer/save" to="." method="_on_save_pressed"]
+[connection signal="pressed" from="PauseMenu/CanvasLayer/Panel/VBoxContainer/Back" to="." method="_on_back_pressed"]
