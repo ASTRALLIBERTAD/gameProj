@@ -31,10 +31,10 @@ impl ICharacterBody2D for Rustplayer {
        
         let velocity = direction * speed;
 
-        if direction.x == -1.0 {
+        if input.is_action_just_pressed( &StringName::from_str("left").unwrap()) {
             self.sprite.set_flip_h(true);
         } 
-        if direction.x == 1.0 {
+        if input.is_action_just_pressed( &StringName::from_str("right").unwrap()) {
             self.sprite.set_flip_h(false);
         }
         self.base_mut().set_velocity(velocity);
