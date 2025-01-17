@@ -1,5 +1,6 @@
 [gd_scene load_steps=12 format=3 uid="uid://d2oibegpqmv2b"]
 
+[ext_resource type="Script" path="res://World.gd" id="1_aftjc"]
 [ext_resource type="Texture2D" uid="uid://eao47njq38uu" path="res://Assets/brackeys_platformer_assets/brackeys_platformer_assets/sprites/world_tileset.png" id="2_04q42"]
 [ext_resource type="PackedScene" uid="uid://v2h65dti34ep" path="res://Collectibles/coin.tscn" id="3_q1b1f"]
 [ext_resource type="PackedScene" uid="uid://cf1y4gylaktvs" path="res://UserInterface/TouchControls.tscn" id="4_dd45r"]
@@ -7,81 +8,6 @@
 [ext_resource type="Script" path="res://FpsCounter.gd" id="5_dged2"]
 [ext_resource type="Texture2D" uid="uid://djo53ep2hv88p" path="res://icon.svg" id="7_6ip7a"]
 [ext_resource type="Texture2D" uid="uid://clmqosmyhqmw5" path="res://Assets/brackeys_platformer_assets/brackeys_platformer_assets/sprites/platforms.png" id="8_15ixb"]
-
-[sub_resource type="GDScript" id="GDScript_ixdq0"]
-script/source = "extends Node2D
-@onready var tile_set = $Terrain1
-
-
-func _ready() -> void:
-	$AutoSave.start()
-
-	
-
-func _process(delta: float) -> void:
-	var tile_cord = player_cord()
-	%coords.text = \"Coordinates: %d,%d\" % [tile_cord.x, tile_cord.y * -1]
-	
-	
-
-func _on_auto_save_timeout() -> void:
-	SaveManager.auto_save()
-	pass # Replace with function body.
-
-func player_cord():
-	var cord = tile_set.local_to_map($PLAYERS.global_position)
-	var local_position = tile_set.to_local(cord)
-	return local_position
-	#done in Rust
-	pass
-
-func _on_button_pressed() -> void:
-	var date = str(Time.get_datetime_string_from_system())
-	date = date.replace(\":\", \"-\")
-	SaveManager.save_game()
-	$Control/TouchControls.visible = false
-	get_tree().paused = true
-	# In your Godot script
-
-func _on_loading_pressed() -> void:
-	print(OS.get_user_data_dir())
-	var yt = SaveManager.get_os()
-	$po.text = yt
-	
-	$osl.text = OS.get_name()
-	get_tree().paused = false
-	pass 
-
-
-func _on_saving_time_timeout() -> void:
-	get_tree().paused = false
-	SaveManager.save_game()
-	get_tree().change_scene_to_file(\"res://SaveAndLoad/LoadMenu.tscn\")
-	queue_free()
-	queue_redraw()
-	pass # Replace with function body.
-
-
-func _on_menu_pressed() -> void:
-	%TouchControls.visible = false
-	get_tree().paused = true
-	%Panel.visible = true
-	pass # Replace with function body.
-
-
-func _on_save_pressed() -> void:
-	%TouchControls.visible = false
-	%Panel.visible = false
-	%SavingTime.start()
-	pass # Replace with function body.
-
-
-func _on_back_pressed() -> void:
-	%TouchControls.visible = true
-	%Panel.visible = false
-	get_tree().paused = false
-	pass # Replace with function body.
-"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_a480t"]
 texture = ExtResource("8_15ixb")
@@ -240,9 +166,12 @@ texture = ExtResource("2_04q42")
 sources/0 = SubResource("TileSetAtlasSource_a480t")
 sources/1 = SubResource("TileSetAtlasSource_ccpnp")
 
-[node name="World" type="Node2D"]
+[node name="World" type="Node2dRust" node_paths=PackedStringArray("players", "tile", "coords")]
+players = NodePath("PLAYERS")
+tile = NodePath("Terrain1")
+coords = NodePath("PauseMenu/CanvasLayer/VBoxContainer/coords")
 position = Vector2(-1, 0)
-script = SubResource("GDScript_ixdq0")
+script = ExtResource("1_aftjc")
 
 [node name="Terrain1" type="Terrain1" parent="." node_paths=PackedStringArray("player")]
 player = NodePath("../PLAYERS")

@@ -10,12 +10,14 @@ pub struct Node2dRust {
     #[base]
     base: Base<Node2D>,
 
-
-
     #[export]
     players: Gd<Rustplayer>,
+
     #[export]
     tile: Gd<TileMapLayer>,
+
+    #[export]
+    coords: Gd<Label>,
     
 }
 
@@ -27,6 +29,7 @@ impl INode2D for Node2dRust {
             base,
             players: Rustplayer::new_alloc(),
             tile: TileMapLayer::new_alloc(),
+            coords: Label::new_alloc(),
         }
     }
     fn ready(&mut self){
@@ -34,10 +37,11 @@ impl INode2D for Node2dRust {
         
     }
     fn physics_process(&mut self, _delta: f64) {
-        let mut r =self.base_mut().get_node_as::<Label>("/root/Node2dRust/CanvasLayer/Label");
-        let y = self.player_cord();
-        let k = format!("{}, {}", y.x, y.y);
-        r.set_text(&k);
+        
+        let cord = self.player_cord();
+        let k = format!("coordinates :{}, {}", cord.x, cord.y * -1.0 );
+        self.coords.set_text(&k);
+
     }
 }
 
