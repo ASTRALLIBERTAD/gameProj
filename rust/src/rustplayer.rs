@@ -1,5 +1,6 @@
 use std::str::FromStr;
 use godot::classes::{  AnimatedSprite2D, CharacterBody2D, ICharacterBody2D, Input};
+use godot::global::sqrt;
 use godot::prelude::*;
 
 #[derive(GodotClass)]
@@ -35,9 +36,6 @@ impl ICharacterBody2D for Rustplayer {
         } 
         if direction.x == 1.0 {
             self.sprite.set_flip_h(false);
-        }
-        if direction.y + direction.x == -1.0 {
-            self.sprite.set_flip_h(true);
         }
         self.base_mut().set_velocity(velocity);
         self.base_mut().move_and_slide();
