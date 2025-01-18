@@ -1,4 +1,4 @@
-use godot::classes::{INode2D, Label, Node2D, TileMapLayer};
+use godot::classes::{ INode2D, Label, Node2D, TileMapLayer};
 use godot::obj::NewAlloc;
 use godot::prelude::*;
 
@@ -18,7 +18,8 @@ pub struct Node2dRust {
 
     #[export]
     coords: Gd<Label>,
-    
+
+
 }
 
 #[godot_api]
@@ -34,12 +35,19 @@ impl INode2D for Node2dRust {
     }
     fn ready(&mut self){
 
-        
+
     }
     fn physics_process(&mut self, _delta: f64) {
+
+        
         
         let cord = self.player_cord();
-        let k = format!("coordinates :{}, {}", cord.x, cord.y * -1.0 );
+        let y_value = if cord.y == 0.0 {
+            cord.y * 1.0
+        } else {
+            cord.y * -1.0
+        };
+        let k = format!("coordinates :{}, {:?}", cord.x, y_value as i32);
         self.coords.set_text(&k);
 
     }
@@ -51,6 +59,8 @@ impl Node2dRust {
     fn player_cord(&mut self) -> Vector2{
         let tile = self.tile.clone();
         let cord = tile.local_to_map(self.get_players().get_global_position());
+
+
         let ko = tile.to_local(Vector2::new(cord.x as f32, cord.y as f32));
         return ko;
     }

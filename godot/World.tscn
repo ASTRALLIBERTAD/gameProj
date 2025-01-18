@@ -1,8 +1,7 @@
-[gd_scene load_steps=12 format=3 uid="uid://d2oibegpqmv2b"]
+[gd_scene load_steps=11 format=3 uid="uid://d2oibegpqmv2b"]
 
 [ext_resource type="Script" path="res://World.gd" id="1_aftjc"]
 [ext_resource type="Texture2D" uid="uid://eao47njq38uu" path="res://Assets/brackeys_platformer_assets/brackeys_platformer_assets/sprites/world_tileset.png" id="2_04q42"]
-[ext_resource type="PackedScene" uid="uid://v2h65dti34ep" path="res://Collectibles/coin.tscn" id="3_q1b1f"]
 [ext_resource type="PackedScene" uid="uid://cf1y4gylaktvs" path="res://UserInterface/TouchControls.tscn" id="4_dd45r"]
 [ext_resource type="PackedScene" uid="uid://bpi3sbit45l5" path="res://Player/players.tscn" id="4_dqyd3"]
 [ext_resource type="Script" path="res://FpsCounter.gd" id="5_dged2"]
@@ -188,18 +187,6 @@ position = Vector2(0, 25)
 [node name="osl" type="Label" parent="."]
 offset_right = 40.0
 offset_bottom = 23.0
-
-[node name="coin" parent="." instance=ExtResource("3_q1b1f")]
-position = Vector2(65, 0)
-
-[node name="coin2" parent="." instance=ExtResource("3_q1b1f")]
-position = Vector2(123, 0)
-
-[node name="coin3" parent="." instance=ExtResource("3_q1b1f")]
-position = Vector2(42.1139, 9.49407)
-
-[node name="coin4" parent="." instance=ExtResource("3_q1b1f")]
-position = Vector2(88, 20)
 
 [node name="Control" type="Control" parent="."]
 unique_name_in_owner = true

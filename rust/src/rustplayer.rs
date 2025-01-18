@@ -1,6 +1,5 @@
 use std::str::FromStr;
 use godot::classes::{  AnimatedSprite2D, CharacterBody2D, ICharacterBody2D, Input};
-use godot::global::sqrt;
 use godot::prelude::*;
 
 #[derive(GodotClass)]
