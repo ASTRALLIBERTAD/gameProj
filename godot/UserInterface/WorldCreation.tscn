@@ -66,15 +66,12 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_constants/separation = 79
 
-[node name="BACKBUTTON" type="Button" parent="BoxContainer/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 41
-text = "BACK"
-
 [node name="PLAYBUTON" type="Button" parent="BoxContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 41
 text = "PLAY"
 
-[connection signal="pressed" from="BoxContainer/VBoxContainer/HBoxContainer/BACKBUTTON" to="." method="_on_backbutton_pressed"]
+[node name="Timer" type="Timer" parent="."]
+
 [connection signal="pressed" from="BoxContainer/VBoxContainer/HBoxContainer/PLAYBUTON" to="." method="_on_playbuton_pressed"]
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

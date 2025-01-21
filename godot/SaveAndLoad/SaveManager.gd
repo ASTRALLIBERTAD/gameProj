@@ -10,7 +10,6 @@ func get_os() -> String:
 	if OS.get_name() == "Android":
 		base_path = "/storage/emulated/0/Android/data/com.example.proj/files/"  
 	return base_path
-	
 
 func world_exist(world_name: String) -> bool:
 	
@@ -23,6 +22,13 @@ func save_game():
 	var p = SaveManagerRust.new()
 	p.save_player_pos(world_name, player_node)
 	
+	print(world_name)
+	var screenshot = get_viewport().get_texture().get_image()
+	screenshot.save_png(get_os() + "games/" + world_name + "/" + world_name + ".png")
+	
+
+func save_world(name):
+	var world_name = get_world_name()
 	print(world_name)
 	
 	var SaveGameInfo = {

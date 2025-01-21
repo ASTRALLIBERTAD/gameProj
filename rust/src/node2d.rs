@@ -19,7 +19,6 @@ pub struct Node2dRust {
     #[export]
     coords: Gd<Label>,
 
-
 }
 
 #[godot_api]
@@ -33,13 +32,11 @@ impl INode2D for Node2dRust {
             coords: Label::new_alloc(),
         }
     }
-    fn ready(&mut self){
 
-
-    }
     fn physics_process(&mut self, _delta: f64) {
 
         let cord = self.player_cord();
+        
         let y_value = if cord.y == 0.0 {
             cord.y * 1.0
         } else {
