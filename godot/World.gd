@@ -19,9 +19,15 @@ func _on_saving_time_timeout() -> void:
 	get_tree().paused = false
 	SaveManager.save_game()
 	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")
-	queue_free()
-	queue_redraw()
 	
+	var metadata_path = SaveManager.get_os() + "games/" + SaveManager.LoadGame + "/metadata.json"
+	if not FileAccess.file_exists(metadata_path):
+		SaveManager.create_metadata_file(SaveManager.LoadGame)
+		queue_redraw()
+		
+	else :
+		queue_free()
+		queue_redraw()
 
 func _on_menu_pressed() -> void:
 	%TouchControls.visible = false
