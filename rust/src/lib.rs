@@ -3,6 +3,7 @@ mod rustplayer;
 mod save_manager_rusts;
 mod terrain;
 mod node2d;
+mod node2d1;
 
 use godot::prelude::*;
 

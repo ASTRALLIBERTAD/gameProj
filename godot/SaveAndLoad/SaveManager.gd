@@ -4,8 +4,6 @@ var base_path: String
 var LoadGame : String
 var player_node: Rustplayer
 
-
-
 func get_os() -> String:
 	if OS.get_name() == "Windows":
 		base_path = "user://"
@@ -57,7 +55,6 @@ func load_game(name):
 	var i = SaveManagerRust.new()
 	i.load_player_pos(name, player_node)
 
-
 func delete_save(name):
 	var dir_path = get_os() + "games/" + name
 	var dir = DirAccess.open(dir_path)
@@ -72,7 +69,7 @@ func delete_save(name):
 
 func get_world_name():
 	return LoadGame
-	
+
 func auto_save():
 	var world_name = get_world_name()
 	print(world_name)

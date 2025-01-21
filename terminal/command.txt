@@ -2,6 +2,5 @@
 cargo ndk -t arm64-v8a -o path build --release
 cargo build --release
 
-
-
-
+[error]
+Unhandled exception at 0x00007FFDE990F3C9 (ntdll.dll) in Godot_v4.3-stable_win64.exe: 0xC0000374: A heap has been corrupted (parameters: 0x00007FFDE99797F0).

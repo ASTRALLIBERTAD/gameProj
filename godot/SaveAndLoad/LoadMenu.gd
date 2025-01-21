@@ -3,7 +3,6 @@ extends Control
 @export var LoadButton : PackedScene
 var SaveToLoad
 
-# Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	var dir = DirAccess.get_directories_at( SaveManager.get_os() + "/games")
 	for i in dir:
@@ -44,13 +43,11 @@ func _on_load_scene_button_down() -> void:
 	queue_free()
 	SaveManager.load_game(SaveToLoad)
 
-
 func _on_delete_pressed() -> void:
 	SaveManager.delete_save(SaveToLoad)
 	get_tree().reload_current_scene()
 	queue_redraw()
 	pass # Replace with function body.
-
 
 func _on_new_pressed() -> void:
 	get_tree().change_scene_to_file("res://UserInterface/WorldCreation.tscn")
