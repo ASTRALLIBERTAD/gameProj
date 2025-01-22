@@ -3,6 +3,7 @@ extends Node
 var base_path: String
 var LoadGame : String
 var player_node: Rustplayer
+var WorldSeed: int
 
 func get_os() -> String:
 	if OS.get_name() == "Windows":
@@ -42,7 +43,8 @@ func save_world(name):
 	var SaveGameInfo = {
 		"name" : world_name,
 		"imgPath" : get_os() + "games/" + world_name + "/" + world_name + ".png",
-		"dateTime" : Time.get_unix_time_from_system()
+		"dateTime" : Time.get_unix_time_from_system(),
+		"seed": WorldSeed
 	}
 	var SaveGameJson = JSON.stringify(SaveGameInfo)
 	

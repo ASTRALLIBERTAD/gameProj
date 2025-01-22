@@ -39,6 +39,7 @@ theme_override_font_sizes/font_size = 45
 text = "ENTER WORLD SEED"
 
 [node name="Seed" type="LineEdit" parent="BoxContainer/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 36
@@ -53,6 +54,7 @@ theme_override_font_sizes/font_size = 45
 text = "ENTER WORLD NAME"
 
 [node name="WorldNameInput" type="LineEdit" parent="BoxContainer/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 36

@@ -1,12 +1,8 @@
 use std::any::Any;
 use std::env::consts::OS;
 
-//use std::borrow::Borrow;
-//use bincode::serialize;
-//use std::fs::File;
-//use std::io::prelude::*;
 use godot::classes::file_access::ModeFlags;
-use godot::classes::{ DirAccess, FileAccess, Node, TileMapLayer};
+use godot::classes::{ DirAccess, FileAccess, Node};
 use godot::prelude::*;
 use serde::{Deserialize, Serialize};
 use crate::rustplayer::Rustplayer;
@@ -25,7 +21,6 @@ pub struct SaveManagerRust {
     #[base]
     base: Base<Node>,
     current_world_name: StringName,
-    tile_for_player: Option<Gd<TileMapLayer>>,
     
 }
 
