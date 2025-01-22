@@ -38,7 +38,6 @@ impl ITileMapLayer for Terrain1 {
     fn ready(&mut self) {
         self.moisture.set_seed(randi() as i32);
         self.temperature.set_seed(randi() as i32);
-        self.altitude.set_seed(randi() as i32);
         self.altitude.set_frequency(0.01)
     }
     
@@ -56,7 +55,13 @@ impl ITileMapLayer for Terrain1 {
 #[godot_api]
 impl Terrain1 {  
     
+    #[func]
+    fn seed_world(&mut self, seed: i32) {
+        self.altitude.set_seed(seed);
+    }
+
     fn generate_chunk(&mut self, pos: Vector2i) {
+        
     
         let water = Vector2i::new(0, 11);
         let land = Vector2i::new(1, 0);

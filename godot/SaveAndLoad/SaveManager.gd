@@ -66,10 +66,13 @@ func save(name: String):
 	t.save_game_rust(name)
 	pass
 
-func load_game(name):
+func load_game(name, seeds):
 	LoadGame = name
 	var i = SaveManagerRust.new()
 	i.load_player_pos(name, player_node)
+	var sed = Terrain1.new()
+	sed.seed_world(seeds)
+
 
 func delete_save(name):
 	var dir_path = get_os() + "games/" + name

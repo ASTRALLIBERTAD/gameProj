@@ -41,10 +41,10 @@ theme_override_fonts/font = ExtResource("3_iysqx")
 text = "NEW"
 
 [node name="LoadScene" type="Button" parent="CanvasLayer"]
-offset_left = 804.0
-offset_top = 474.0
-offset_right = 856.0
-offset_bottom = 505.0
+offset_left = 806.0
+offset_top = 504.0
+offset_right = 918.0
+offset_bottom = 565.0
 theme_override_font_sizes/font_size = 38
 text = "LOAD"
 
@@ -82,6 +82,24 @@ offset_right = 1010.0
 offset_bottom = 396.0
 theme_override_fonts/normal_font = ExtResource("3_iysqx")
 text = "Name"
+fit_content = true
+scroll_active = false
+
+[node name="Seed" type="RichTextLabel" parent="CanvasLayer"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -476.0
+offset_top = -216.0
+offset_right = -146.0
+offset_bottom = -176.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_fonts/normal_font = ExtResource("3_iysqx")
+text = "Seed
+"
 fit_content = true
 scroll_active = false
 

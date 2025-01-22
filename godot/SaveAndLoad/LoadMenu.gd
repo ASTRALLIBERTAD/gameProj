@@ -2,6 +2,7 @@ extends Control
 
 @export var LoadButton : PackedScene
 var SaveToLoad
+var GameTerrain
 
 func _ready() -> void:
 	var dir = DirAccess.get_directories_at( SaveManager.get_os() + "/games")
@@ -20,10 +21,12 @@ func _ready() -> void:
 	pass # Replace with function body.
 
 
-func OnLoadButtonDown(date, saveName, imagePath):
+func OnLoadButtonDown(date, saveName, imagePath, seedGame):
 	$CanvasLayer/Name.text = saveName
 	$CanvasLayer/Date.text = date
+	$CanvasLayer/Seed.text = str(seedGame)
 	SaveToLoad = saveName
+	GameTerrain = seedGame
 	$CanvasLayer/ScreenShot.texture = LoadImageTexture(imagePath)
 	pass
 
@@ -41,7 +44,7 @@ func _on_load_scene_button_down() -> void:
 	var world_scene = load("res://World.tscn").instantiate()
 	get_tree().root.add_child(world_scene)
 	queue_free()
-	SaveManager.load_game(SaveToLoad)
+	SaveManager.load_game(SaveToLoad, int(GameTerrain))
 
 func _on_delete_pressed() -> void:
 	SaveManager.delete_save(SaveToLoad)
