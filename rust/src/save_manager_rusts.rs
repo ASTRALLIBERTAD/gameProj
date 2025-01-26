@@ -1,6 +1,5 @@
 use std::any::Any;
 use std::env::consts::OS;
-
 use godot::classes::file_access::ModeFlags;
 use godot::classes::{ DirAccess, FileAccess, Node};
 use godot::prelude::*;
@@ -114,7 +113,7 @@ impl SaveManagerRust {
     }
 
     #[func]
-    fn load_player_pos(&mut self, name: String, players: Option<Gd<Rustplayer>>) {
+    pub fn load_player_pos(&mut self, name: String, players: Option<Gd<Rustplayer>>) {
 
         let base_path = self.get_os();
         let folder = "games";
@@ -135,8 +134,7 @@ impl SaveManagerRust {
             match bincode::deserialize::<PlayerPosition>(data_slice) {
                 Ok(player_position) => {
 
-                    if let Some(mut player) = players {
-                        player.set_global_position(Vector2::new(player_position.x, player_position.y));
+                    if let Some(mut player) = players {                        player.set_global_position(Vector2::new(player_position.x, player_position.y));
                         godot_print!("Player position loaded successfully from {}", save_path);
                     }
                 }
@@ -147,6 +145,11 @@ impl SaveManagerRust {
         } else {
             godot_error!("Failed to open file for loading at {}", save_path);
         }
+
+
+
+
+
     }
 }
                     

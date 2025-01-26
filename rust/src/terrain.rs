@@ -1,4 +1,4 @@
-use godot::classes::{ ITileMapLayer, FastNoiseLite, TileMapLayer};
+use godot::classes::{ CharacterBody2D, FastNoiseLite, ITileMapLayer, TileMapLayer};
 use godot::global::{randi, sqrt};
 use godot::obj::NewAlloc;
 use godot::prelude::*;
@@ -14,10 +14,17 @@ pub struct Terrain1 {
     altitude: Gd<FastNoiseLite>,
     height: i32,
     width: i32,
-    loaded_chunks: Array<Vector2i>,    
+    
+    loaded_chunks: Array<Vector2i>,  
+
+    
+    manual: OnReady<i32>,  
 
     #[export]
-    player: Gd<Rustplayer>,
+    player: Gd<PackedScene>,
+
+    #[export]
+    seeds: i32,
 }
 
 #[godot_api]
@@ -31,19 +38,30 @@ impl ITileMapLayer for Terrain1 {
             height: 25,
             width: 25,
             loaded_chunks: Array::new(),
-            player: Rustplayer::new_alloc(),
+            player: PackedScene::new_gd(),
+            seeds: i32::default(),
+            manual: OnReady::manual(),
+
         }
     }
 
     fn ready(&mut self) {
+
+        let r = self.get_player().instantiate().unwrap();
+        self.base_mut().add_child(&r);
         self.moisture.set_seed(randi() as i32);
         self.temperature.set_seed(randi() as i32);
-        self.altitude.set_frequency(0.01)
+        self.altitude.set_frequency(0.01);
+        
+        let k= self.altitude.set_seed(self.seeds);
+        godot_print!("seeder: {:?}", k);
+        godot_print!("godot {}", self.seeds);
+
     }
     
     fn process(&mut self, _delta: f64) {
-        
-        let ypo = self.player.get_position();
+        let y =self.get_player().instantiate().unwrap().get_node_as::<CharacterBody2D>("/root/PLAYERS");
+        let ypo = y.get_position();
 
         let sls = self.base_mut().local_to_map(ypo );
         self.generate_chunk(sls);
@@ -54,10 +72,13 @@ impl ITileMapLayer for Terrain1 {
 
 #[godot_api]
 impl Terrain1 {  
-    
     #[func]
-    fn seed_world(&mut self, seed: i32) {
-        self.altitude.set_seed(seed);
+    fn set_manual_seeds(&mut self, val: i32) {
+        godot_print!("new seed: {}", val);
+        self.manual.init(val);
+        self.set_seeds(*self.manual);
+        
+        godot_print!("new seed: {:?}", self.manual);
     }
 
     fn generate_chunk(&mut self, pos: Vector2i) {

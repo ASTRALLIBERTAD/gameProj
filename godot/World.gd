@@ -2,6 +2,9 @@ extends Node2dRust
 
 func _ready() -> void:
 	$AutoSave.start()
+	var i = terras.instantiate()
+	add_child(i)
+
 
 func _on_auto_save_timeout() -> void:
 	SaveManager.auto_save()

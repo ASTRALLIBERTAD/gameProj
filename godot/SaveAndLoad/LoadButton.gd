@@ -13,7 +13,6 @@ func SetupButton(data):
 	ImagePath = data.imgPath
 	SeedGame = data.seed
 
-
 func _on_button_down() -> void:
 	LoadButtonDown.emit(Date, SaveName, ImagePath, SeedGame)
 	pass # Replace with function body.
