@@ -10,6 +10,7 @@ func _ready() -> void:
 		var button : Button = LoadButton.instantiate()
 		button.LoadButtonDown.connect(OnLoadButtonDown)
 		var file_path = SaveManager.get_os() + "/games/%s/%s_saveGame.json" % [i, i]
+		
 		var file = FileAccess.open( file_path, FileAccess.READ)
 		var content = file.get_as_text()
 		var obj = JSON.parse_string(content)
@@ -17,15 +18,15 @@ func _ready() -> void:
 		button.text = obj.name
 		$CanvasLayer/Panel/ScrollContainer/LoadButtons.add_child(button)
 	queue_redraw()
-	
 	pass # Replace with function body.
+
 
 func OnLoadButtonDown(date, saveName, imagePath, seedGame):
 	$CanvasLayer/Name.text = saveName
 	$CanvasLayer/Date.text = date
 	$CanvasLayer/Seed.text = str(seedGame)
 	SaveToLoad = saveName
-	GameTerrain = int(seedGame)
+	GameTerrain = seedGame
 	$CanvasLayer/ScreenShot.texture = LoadImageTexture(imagePath)
 	pass
 
@@ -38,16 +39,12 @@ func LoadImageTexture(path : String):
 		return
 	return ImageTexture.create_from_image(loadedImage)
 
+
 func _on_load_scene_button_down() -> void:
-	var world_scene = preload("res://World.tscn").instantiate()
+	var world_scene = load("res://World.tscn").instantiate()
 	get_tree().root.add_child(world_scene)
 	queue_free()
-	SaveManager.WorldSeed = GameTerrain
-	
-	var o = Terrain1.new()
-	o.set_manual_seeds(GameTerrain)
-	
-	SaveManager.load_game(SaveToLoad)
+	SaveManager.load_game(SaveToLoad, int(GameTerrain))
 
 func _on_delete_pressed() -> void:
 	SaveManager.delete_save(SaveToLoad)

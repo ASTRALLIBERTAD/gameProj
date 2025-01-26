@@ -3,7 +3,7 @@ extends Node
 var base_path: String
 var LoadGame : String
 var player_node: Rustplayer
-@onready var WorldSeed: int
+var WorldSeed: int
 
 func get_os() -> String:
 	if OS.get_name() == "Windows":
@@ -59,20 +59,20 @@ func optimize_autosave(name):
 	var k = SaveManagerRust.new()
 	k.save_player_pos(name, player_node)
 	print("Game saved successfully.")
-	print(WorldSeed)
-	print(ok())
 	pass
-
 
 func save(name: String):
 	var t = SaveManagerRust.new()
 	t.save_game_rust(name)
 	pass
 
-func load_game(name):
+func load_game(name, seeds):
 	LoadGame = name
 	var i = SaveManagerRust.new()
 	i.load_player_pos(name, player_node)
+	var sed = Terrain1.new()
+	sed.seed_world(seeds)
+
 
 func delete_save(name):
 	var dir_path = get_os() + "games/" + name
@@ -88,9 +88,6 @@ func delete_save(name):
 
 func get_world_name():
 	return LoadGame
-
-func ok():
-	WorldSeed
 
 func auto_save():
 	var world_name = get_world_name()

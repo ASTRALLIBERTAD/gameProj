@@ -32,6 +32,7 @@ func _on_playbuton_pressed() -> void:
 	else:
 		print("failed to  save a new game")
 	
+	
 	var game = SaveManagerRust.new()
 	game.save_game_rust(WorldName)
 
