@@ -14,10 +14,10 @@ pub struct Terrain1 {
     altitude: Gd<FastNoiseLite>,
     height: i32,
     width: i32,
-    loaded_chunks: Array<Vector2i>,    
+    loaded_chunks: Array<Vector2i>,
 
     #[export]
-    player: Gd<Rustplayer>,
+    seeds: i32, 
 }
 
 #[godot_api]
@@ -31,24 +31,31 @@ impl ITileMapLayer for Terrain1 {
             height: 25,
             width: 25,
             loaded_chunks: Array::new(),
-            player: Rustplayer::new_alloc(),
+            seeds: i32::default(),
         }
     }
 
     fn ready(&mut self) {
+        self.base_mut().get_tree().unwrap().get_root().unwrap().get_node_as::<Rustplayer>("/root/main/World/PLAYERS");
         self.moisture.set_seed(randi() as i32);
         self.temperature.set_seed(randi() as i32);
-        self.altitude.set_frequency(0.01)
+        self.altitude.set_frequency(0.01);
+        self.altitude.set_seed(self.seeds);
+        godot_print!("{}", self.seeds);
+
     }
     
     fn process(&mut self, _delta: f64) {
         
-        let ypo = self.player.get_position();
+        let label = self.base_mut().get_tree().unwrap().get_root().unwrap().get_node_as::<Rustplayer>("/root/main/World/PLAYERS");
+        let ypo = label.get_position();
 
         let sls = self.base_mut().local_to_map(ypo );
         self.generate_chunk(sls);
 
         self.unload_distant_chunks( sls);   
+        godot_print!(" okkk: {}", self.seeds)
+
     }
 }
 
@@ -56,8 +63,11 @@ impl ITileMapLayer for Terrain1 {
 impl Terrain1 {  
     
     #[func]
-    fn seed_world(&mut self, seed: i32) {
-        self.altitude.set_seed(seed);
+    fn seed_seed(&mut self, seed: i32)-> i32 {
+        self.seeds = seed;
+
+        godot_print!("{}", self.seeds);
+        return self.seeds;
     }
 
     fn generate_chunk(&mut self, pos: Vector2i) {

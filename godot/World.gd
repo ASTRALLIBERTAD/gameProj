@@ -2,6 +2,9 @@ extends Node2dRust
 
 func _ready() -> void:
 	$AutoSave.start()
+	var o = get_node("/root/main/Terrain/Terrain1") as Terrain1
+	o.seeds = SaveManager.WorldSeed
+
 
 func _on_auto_save_timeout() -> void:
 	SaveManager.auto_save()

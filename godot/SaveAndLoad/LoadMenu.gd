@@ -2,7 +2,7 @@ extends Control
 
 @export var LoadButton : PackedScene
 var SaveToLoad
-var GameTerrain
+var GameTerrain: int
 
 func _ready() -> void:
 	var dir = DirAccess.get_directories_at( SaveManager.get_os() + "/games")
@@ -45,6 +45,7 @@ func _on_load_scene_button_down() -> void:
 	get_tree().root.add_child(world_scene)
 	queue_free()
 	SaveManager.load_game(SaveToLoad, int(GameTerrain))
+ 
 
 func _on_delete_pressed() -> void:
 	SaveManager.delete_save(SaveToLoad)

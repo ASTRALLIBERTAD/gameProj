@@ -4,6 +4,7 @@ mod save_manager_rusts;
 mod terrain;
 mod node2d;
 mod control;
+mod trial;
 
 use godot::prelude::*;
 

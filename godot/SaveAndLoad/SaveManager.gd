@@ -71,7 +71,7 @@ func load_game(name, seeds):
 	var i = SaveManagerRust.new()
 	i.load_player_pos(name, player_node)
 	var sed = Terrain1.new()
-	sed.seed_world(seeds)
+	sed.seed_seed(seeds)
 
 
 func delete_save(name):

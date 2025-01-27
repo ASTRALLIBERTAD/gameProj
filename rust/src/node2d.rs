@@ -3,6 +3,7 @@ use godot::obj::NewAlloc;
 use godot::prelude::*;
 
 use crate::rustplayer::Rustplayer;
+use crate::terrain::Terrain1;
 
 #[derive(GodotClass)]
 #[class(base=Node2D)]
@@ -12,9 +13,6 @@ pub struct Node2dRust {
 
     #[export]
     players: Gd<Rustplayer>,
-
-    #[export]
-    tile: Gd<TileMapLayer>,
 
     #[export]
     coords: Gd<Label>,
@@ -28,7 +26,6 @@ impl INode2D for Node2dRust {
         { 
             base,
             players: Rustplayer::new_alloc(),
-            tile: TileMapLayer::new_alloc(),
             coords: Label::new_alloc(),
         }
     }
@@ -47,16 +44,17 @@ impl INode2D for Node2dRust {
         self.coords.set_text(&k);
 
     }
+
 }
 
 #[godot_api]
-impl Node2dRust {
-    
+impl Node2dRust {    
     fn player_cord(&mut self) -> Vector2{
-        let tile = self.tile.clone();
-        let cord = tile.local_to_map(self.get_players().get_global_position());
+        let scene = self.base_mut().get_tree().unwrap().get_root().unwrap().get_node_as::<Terrain1>("/root/main/Terrain/Terrain1");
 
-        let ko = tile.to_local(Vector2::new(cord.x as f32, cord.y as f32));
+        let cord = scene.local_to_map(self.get_players().get_global_position());
+
+        let ko = scene.to_local(Vector2::new(cord.x as f32, cord.y as f32));
         return ko;
     }
 }
