@@ -1,7 +1,7 @@
 mod player;
 mod rustplayer;
 mod save_manager_rusts;
-mod terrain;
+pub mod terrain;
 mod node2d;
 mod control;
 mod trial;

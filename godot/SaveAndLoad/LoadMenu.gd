@@ -5,6 +5,8 @@ var SaveToLoad
 var GameTerrain: int
 
 func _ready() -> void:
+	if get_tree().root.has_node("/root/main"):
+		get_tree().root.get_node("/root/main").queue_free()
 	var dir = DirAccess.get_directories_at( SaveManager.get_os() + "/games")
 	for i in dir:
 		var button : Button = LoadButton.instantiate()
@@ -45,6 +47,9 @@ func _on_load_scene_button_down() -> void:
 	get_tree().root.add_child(world_scene)
 	queue_free()
 	SaveManager.load_game(SaveToLoad, int(GameTerrain))
+	var u = get_node("/root/main/Terrain/Terrain1") as Terrain1
+	u.seed_seed(GameTerrain)
+	
  
 
 func _on_delete_pressed() -> void:

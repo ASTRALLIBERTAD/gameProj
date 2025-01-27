@@ -2,9 +2,6 @@ extends Node2dRust
 
 func _ready() -> void:
 	$AutoSave.start()
-	var o = get_node("/root/main/Terrain/Terrain1") as Terrain1
-	o.seeds = SaveManager.WorldSeed
-
 
 func _on_auto_save_timeout() -> void:
 	SaveManager.auto_save()
@@ -20,17 +17,19 @@ func _on_loading_pressed() -> void:
 
 func _on_saving_time_timeout() -> void:
 	get_tree().paused = false
+	get_tree().reload_current_scene()
 	SaveManager.save_game()
-	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")
+	
 	
 	var metadata_path = SaveManager.get_os() + "games/" + SaveManager.LoadGame + "/metadata.json"
 	if not FileAccess.file_exists(metadata_path):
 		SaveManager.create_metadata_file(SaveManager.LoadGame)
 		queue_redraw()
-		
+		get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")
 	else :
 		queue_free()
 		queue_redraw()
+		get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")
 
 func _on_menu_pressed() -> void:
 	%TouchControls.visible = false

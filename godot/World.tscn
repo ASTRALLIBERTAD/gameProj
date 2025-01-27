@@ -1,12 +1,14 @@
-[gd_scene load_steps=6 format=3 uid="uid://d2oibegpqmv2b"]
+[gd_scene load_steps=7 format=3 uid="uid://d2oibegpqmv2b"]
 
 [ext_resource type="Script" path="res://World.gd" id="1_aftjc"]
+[ext_resource type="PackedScene" uid="uid://mnm8rs3ffkxt" path="res://world/terrain_1.tscn" id="1_uyt7b"]
 [ext_resource type="PackedScene" uid="uid://cf1y4gylaktvs" path="res://UserInterface/TouchControls.tscn" id="4_dd45r"]
 [ext_resource type="PackedScene" uid="uid://bpi3sbit45l5" path="res://Player/players.tscn" id="4_dqyd3"]
 [ext_resource type="Script" path="res://FpsCounter.gd" id="5_dged2"]
 [ext_resource type="Texture2D" uid="uid://djo53ep2hv88p" path="res://icon.svg" id="7_6ip7a"]
 
 [node name="main" type="PlayerNode"]
+teraas = ExtResource("1_uyt7b")
 
 [node name="World" type="Node2dRust" parent="." node_paths=PackedStringArray("players", "coords")]
 players = NodePath("PLAYERS")

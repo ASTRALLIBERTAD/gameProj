@@ -1,6 +1,5 @@
 use godot::classes::{ ITileMapLayer, FastNoiseLite, TileMapLayer};
 use godot::global::{randi, sqrt};
-use godot::obj::NewAlloc;
 use godot::prelude::*;
 use crate::rustplayer::Rustplayer;
 
@@ -8,16 +7,16 @@ use crate::rustplayer::Rustplayer;
 #[class(base=TileMapLayer)]
 pub struct Terrain1 {
     #[base]
-    base: Base<TileMapLayer>,
-    moisture: Gd<FastNoiseLite>,
-    temperature: Gd<FastNoiseLite>,
-    altitude: Gd<FastNoiseLite>,
-    height: i32,
-    width: i32,
-    loaded_chunks: Array<Vector2i>,
+    pub base: Base<TileMapLayer>,
+    pub moisture: Gd<FastNoiseLite>,
+    pub temperature: Gd<FastNoiseLite>,
+    pub altitude: Gd<FastNoiseLite>,
+    pub height: i32,
+    pub width: i32,
+    pub loaded_chunks: Array<Vector2i>,
 
     #[export]
-    seeds: i32, 
+    pub seedser: i32, 
 }
 
 #[godot_api]
@@ -31,7 +30,7 @@ impl ITileMapLayer for Terrain1 {
             height: 25,
             width: 25,
             loaded_chunks: Array::new(),
-            seeds: i32::default(),
+            seedser: i32::default(),
         }
     }
 
@@ -40,12 +39,13 @@ impl ITileMapLayer for Terrain1 {
         self.moisture.set_seed(randi() as i32);
         self.temperature.set_seed(randi() as i32);
         self.altitude.set_frequency(0.01);
-        self.altitude.set_seed(self.seeds);
-        godot_print!("{}", self.seeds);
+
 
     }
     
     fn process(&mut self, _delta: f64) {
+
+        self.altitude.set_seed(self.seedser);
         
         let label = self.base_mut().get_tree().unwrap().get_root().unwrap().get_node_as::<Rustplayer>("/root/main/World/PLAYERS");
         let ypo = label.get_position();
@@ -54,7 +54,6 @@ impl ITileMapLayer for Terrain1 {
         self.generate_chunk(sls);
 
         self.unload_distant_chunks( sls);   
-        godot_print!(" okkk: {}", self.seeds)
 
     }
 }
@@ -64,10 +63,8 @@ impl Terrain1 {
     
     #[func]
     fn seed_seed(&mut self, seed: i32)-> i32 {
-        self.seeds = seed;
-
-        godot_print!("{}", self.seeds);
-        return self.seeds;
+        self.seedser = seed;
+        return self.seedser;
     }
 
     fn generate_chunk(&mut self, pos: Vector2i) {

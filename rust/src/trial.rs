@@ -5,12 +5,15 @@ use godot::prelude::*;
 #[class(base=Node)]
 pub struct PlayerNode {
     base: Base<Node>,
+    
 }
 
 #[godot_api]
 impl INode for PlayerNode {
     fn init(base: Base<Node>) -> Self {
-        Self { base,
+        Self {
+            base,
+
         }
     }
 
