@@ -1,19 +1,126 @@
-[gd_scene load_steps=7 format=3 uid="uid://d2oibegpqmv2b"]
+[gd_scene load_steps=22 format=3 uid="uid://d2oibegpqmv2b"]
 
 [ext_resource type="Script" path="res://World.gd" id="1_aftjc"]
-[ext_resource type="PackedScene" uid="uid://mnm8rs3ffkxt" path="res://world/terrain_1.tscn" id="1_uyt7b"]
+[ext_resource type="Script" path="res://Player/pet.gd" id="2_cqywi"]
+[ext_resource type="Texture2D" uid="uid://ikadhrdwx0jg" path="res://Assets/brackeys_platformer_assets/brackeys_platformer_assets/sprites/slime_green.png" id="3_f47mf"]
 [ext_resource type="PackedScene" uid="uid://cf1y4gylaktvs" path="res://UserInterface/TouchControls.tscn" id="4_dd45r"]
 [ext_resource type="PackedScene" uid="uid://bpi3sbit45l5" path="res://Player/players.tscn" id="4_dqyd3"]
 [ext_resource type="Script" path="res://FpsCounter.gd" id="5_dged2"]
 [ext_resource type="Texture2D" uid="uid://djo53ep2hv88p" path="res://icon.svg" id="7_6ip7a"]
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_u4irb"]
+atlas = ExtResource("3_f47mf")
+region = Rect2(0, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lwdgc"]
+atlas = ExtResource("3_f47mf")
+region = Rect2(24, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_204y6"]
+atlas = ExtResource("3_f47mf")
+region = Rect2(48, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xj3ct"]
+atlas = ExtResource("3_f47mf")
+region = Rect2(72, 0, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dy0tf"]
+atlas = ExtResource("3_f47mf")
+region = Rect2(0, 24, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_112s6"]
+atlas = ExtResource("3_f47mf")
+region = Rect2(24, 24, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8rcuy"]
+atlas = ExtResource("3_f47mf")
+region = Rect2(48, 24, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_owwbp"]
+atlas = ExtResource("3_f47mf")
+region = Rect2(72, 24, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gwy4g"]
+atlas = ExtResource("3_f47mf")
+region = Rect2(0, 48, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8ftxo"]
+atlas = ExtResource("3_f47mf")
+region = Rect2(24, 48, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_clcv8"]
+atlas = ExtResource("3_f47mf")
+region = Rect2(48, 48, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fw1rt"]
+atlas = ExtResource("3_f47mf")
+region = Rect2(72, 48, 24, 24)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wkavc"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_u4irb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lwdgc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_204y6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xj3ct")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dy0tf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_112s6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8rcuy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_owwbp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gwy4g")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8ftxo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_clcv8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fw1rt")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6js52"]
+size = Vector2(14, 9)
+
 [node name="main" type="PlayerNode"]
-teraas = ExtResource("1_uyt7b")
 
 [node name="World" type="Node2dRust" parent="." node_paths=PackedStringArray("players", "coords")]
 players = NodePath("PLAYERS")
 coords = NodePath("PauseMenu/CanvasLayer/VBoxContainer/coords")
 script = ExtResource("1_aftjc")
+
+[node name="Pet" type="CharacterBody2D" parent="World"]
+position = Vector2(-144, -39)
+script = ExtResource("2_cqywi")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="World/Pet"]
+sprite_frames = SubResource("SpriteFrames_wkavc")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Pet"]
+position = Vector2(0, 7.5)
+shape = SubResource("RectangleShape2D_6js52")
+disabled = true
 
 [node name="AutoSave" type="Timer" parent="World"]
 wait_time = 5.0
