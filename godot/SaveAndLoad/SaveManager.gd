@@ -28,14 +28,6 @@ func save_game():
 	screenshot.save_png(get_os() + "games/" + world_name + "/" + world_name + ".png")
 	
 
-func create_metadata_file(world_name: String):
-	var metadata = {"DO NOT DELETE THIS FILE": world_name}
-	var t = JSON.stringify(metadata)
-	var file = FileAccess.open(SaveManager.get_os() + "games/" + world_name + "/metadata.json", FileAccess.WRITE)
-	
-	file.store_string(t)
-	file.close()
-
 func save_world(name):
 	var world_name = get_world_name()
 	print(world_name)

@@ -22,14 +22,9 @@ func _on_saving_time_timeout() -> void:
 	get_tree().reload_current_scene()
 	SaveManager.save_game()
 	
-	var metadata_path = SaveManager.get_os() + "games/" + SaveManager.LoadGame + "/metadata.json"
-	if not FileAccess.file_exists(metadata_path):
-		scene.change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")
-		queue_redraw()
-	else :
-		if !get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn") == null:
-			queue_free()
-			queue_redraw()
+	scene.change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")
+	queue_redraw()
+	queue_free()
 
 func _on_menu_pressed() -> void:
 	%TouchControls.visible = false
