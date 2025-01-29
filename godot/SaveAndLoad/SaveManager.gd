@@ -28,6 +28,7 @@ func save_game():
 	screenshot.save_png(get_os() + "games/" + world_name + "/" + world_name + ".png")
 	
 
+
 func save_world(name):
 	var world_name = get_world_name()
 	print(world_name)
@@ -58,12 +59,10 @@ func save(name: String):
 	t.save_game_rust(name)
 	pass
 
-func load_game(name, seeds):
+func load_game(name):
 	LoadGame = name
 	var i = SaveManagerRust.new()
 	i.load_player_pos(name, player_node)
-	var sed = Terrain1.new()
-	sed.seed_seed(seeds)
 
 
 func delete_save(name):

@@ -46,11 +46,10 @@ func _on_load_scene_button_down() -> void:
 	var world_scene = load("res://World.tscn").instantiate()
 	get_tree().root.add_child(world_scene)
 	queue_free()
-	SaveManager.load_game(SaveToLoad, int(GameTerrain))
+	SaveManager.load_game(SaveToLoad)
 	var u = get_node("/root/main/Terrain/Terrain1") as Terrain1
 	u.seed_seed(GameTerrain)
 	
- 
 
 func _on_delete_pressed() -> void:
 	SaveManager.delete_save(SaveToLoad)

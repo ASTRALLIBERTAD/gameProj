@@ -20,10 +20,10 @@ func _on_playbuton_pressed() -> void:
 		elif GameSeed == "":
 			var lp = RandomNumberGenerator.new()
 			var t = hash(lp)
-			SaveManager.WorldSeed = t 
+			SaveManager.WorldSeed = clamp(t, -2147483648, 2147483647)
 		else:
 			var t = hash(GameSeed)
-			SaveManager.WorldSeed = t
+			SaveManager.WorldSeed = clamp(t, -2147483648, 2147483647)
 		var game = SaveManagerRust.new()
 		
 		game.save_game_rust(WorldName)

@@ -304,6 +304,7 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "BACK"
 
+[connection signal="timeout" from="World/AutoSave" to="World" method="_on_auto_save_timeout"]
 [connection signal="timeout" from="World/PauseMenu/SavingTime" to="World" method="_on_saving_time_timeout"]
 [connection signal="pressed" from="World/PauseMenu/CanvasLayer/MENU" to="World" method="_on_menu_pressed"]
 [connection signal="pressed" from="World/PauseMenu/CanvasLayer/Panel/VBoxContainer/save" to="World" method="_on_save_pressed"]
