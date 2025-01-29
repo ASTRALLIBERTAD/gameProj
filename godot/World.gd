@@ -1,5 +1,7 @@
 extends Node2dRust
 
+@onready var scene = get_tree()
+
 func _ready() -> void:
 	$AutoSave.start()
 
@@ -21,9 +23,8 @@ func _on_saving_time_timeout() -> void:
 	SaveManager.save_game()
 	
 	var metadata_path = SaveManager.get_os() + "games/" + SaveManager.LoadGame + "/metadata.json"
-	await get_tree().process_frame
 	if not FileAccess.file_exists(metadata_path):
-		get_tree().change_scene_to_file.bind("res://Main/MainMenu.tscn").call_deferred()
+		scene.change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")
 		queue_redraw()
 	else :
 		if !get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn") == null:

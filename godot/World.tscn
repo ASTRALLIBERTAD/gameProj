@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://d2oibegpqmv2b"]
+[gd_scene load_steps=29 format=3 uid="uid://d2oibegpqmv2b"]
 
 [ext_resource type="Script" path="res://World.gd" id="1_aftjc"]
 [ext_resource type="Script" path="res://Player/pet.gd" id="2_cqywi"]
@@ -151,44 +151,6 @@ animations = [{
 "speed": 5.0
 }]
 
-[sub_resource type="Animation" id="Animation_fsyyc"]
-resource_name = "run"
-length = 0.3
-loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("AnimatedSprite2D:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.0333333, 0.0666667, 0.1, 0.133333, 0.166667, 0.2, 0.233333, 0.266667, 0.3),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
-"update": 1,
-"values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-}
-
-[sub_resource type="Animation" id="Animation_anbdw"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("AnimatedSprite2D:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [0]
-}
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_pha7l"]
-_data = {
-"RESET": SubResource("Animation_anbdw"),
-"run": SubResource("Animation_fsyyc")
-}
-
 [node name="main" type="PlayerNode"]
 
 [node name="World" type="Node2dRust" parent="." node_paths=PackedStringArray("players", "coords")]
@@ -207,14 +169,10 @@ shape = SubResource("RectangleShape2D_6js52")
 disabled = true
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="World/Pet"]
+texture_filter = 1
 sprite_frames = SubResource("SpriteFrames_k5rcs")
 animation = &"idle"
 autoplay = "run"
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="World/Pet"]
-libraries = {
-"": SubResource("AnimationLibrary_pha7l")
-}
 
 [node name="AutoSave" type="Timer" parent="World"]
 wait_time = 5.0
