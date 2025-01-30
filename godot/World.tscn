@@ -305,8 +305,32 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "BACK"
 
+[node name="add player" type="Button" parent="World"]
+offset_left = -130.0
+offset_top = -8.0
+offset_right = -73.0
+offset_bottom = 23.0
+text = "connect"
+
+[node name="host" type="Button" parent="World"]
+offset_left = -102.0
+offset_top = -46.0
+offset_right = -59.0
+offset_bottom = -15.0
+text = "host"
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="World"]
+_spawnable_scenes = PackedStringArray("res://Player/multiplayers.tscn")
+spawn_path = NodePath("..")
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("res://world/terrain_1.tscn")
+spawn_path = NodePath("..")
+
 [connection signal="timeout" from="World/AutoSave" to="World" method="_on_auto_save_timeout"]
 [connection signal="timeout" from="World/PauseMenu/SavingTime" to="World" method="_on_saving_time_timeout"]
 [connection signal="pressed" from="World/PauseMenu/CanvasLayer/MENU" to="World" method="_on_menu_pressed"]
 [connection signal="pressed" from="World/PauseMenu/CanvasLayer/Panel/VBoxContainer/save" to="World" method="_on_save_pressed"]
 [connection signal="pressed" from="World/PauseMenu/CanvasLayer/Panel/VBoxContainer/Back" to="World" method="_on_back_pressed"]
+[connection signal="pressed" from="World/add player" to="World" method="_on_add_player_pressed"]
+[connection signal="pressed" from="World/host" to="World" method="_on_host_pressed"]

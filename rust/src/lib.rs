@@ -6,7 +6,7 @@ mod terrain;
 mod node2d;
 mod control;
 mod node;
-
+mod multiplayer;
 
 use godot::prelude::*;
 

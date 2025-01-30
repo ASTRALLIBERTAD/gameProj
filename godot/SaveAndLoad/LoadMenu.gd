@@ -64,3 +64,8 @@ func _on_new_pressed() -> void:
 func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file("res://Main/MainMenu.tscn")
 	pass # Replace with function body.
+
+
+func _on_multiplayer_pressed() -> void:
+	get_tree().change_scene_to_file("res://world/multiplayer.tscn")
+	pass # Replace with function body.

@@ -111,7 +111,15 @@ offset_bottom = 521.0
 theme_override_font_sizes/font_size = 37
 text = "DELETE"
 
+[node name="multiplayer" type="Button" parent="CanvasLayer"]
+offset_left = 268.0
+offset_top = 552.0
+offset_right = 420.0
+offset_bottom = 595.0
+text = "MULTIPLAYER"
+
 [connection signal="pressed" from="CanvasLayer/Panel/ScrollContainer/LoadButtons/New" to="." method="_on_new_pressed"]
 [connection signal="button_down" from="CanvasLayer/LoadScene" to="." method="_on_load_scene_button_down"]
 [connection signal="pressed" from="CanvasLayer/BACK" to="." method="_on_back_pressed"]
 [connection signal="pressed" from="CanvasLayer/Delete" to="." method="_on_delete_pressed"]
+[connection signal="pressed" from="CanvasLayer/multiplayer" to="." method="_on_multiplayer_pressed"]
