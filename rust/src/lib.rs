@@ -1,10 +1,12 @@
-mod player;
+mod pet;
+mod example;
 mod rustplayer;
 mod save_manager_rusts;
-pub mod terrain;
+mod terrain;
 mod node2d;
 mod control;
-mod trial;
+mod node;
+
 
 use godot::prelude::*;
 

@@ -21,7 +21,6 @@ func _on_saving_time_timeout() -> void:
 	get_tree().paused = false
 	get_tree().reload_current_scene()
 	SaveManager.save_game()
-	
 	scene.change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")
 	queue_redraw()
 	queue_free()
@@ -35,6 +34,7 @@ func _on_menu_pressed() -> void:
 func _on_save_pressed() -> void:
 	%TouchControls.visible = false
 	%Panel.visible = false
+	%CanvasLayer.visible = false
 	%SavingTime.start()
 	pass # Replace with function body.
 

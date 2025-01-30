@@ -5,6 +5,7 @@ var LoadGame : String
 var player_node: Rustplayer
 var WorldSeed: int
 
+
 func get_os() -> String:
 	if OS.get_name() == "Windows":
 		base_path = "user://"
@@ -13,7 +14,6 @@ func get_os() -> String:
 	return base_path
 
 func world_exist(world_name: String) -> bool:
-	
 	var world_file = get_os() + world_name + "/" + world_name +".dat"
 	return FileAccess.file_exists(world_file)
 	

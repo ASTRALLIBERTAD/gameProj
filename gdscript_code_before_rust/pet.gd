@@ -11,9 +11,7 @@ var is_following := true  # Tracks whether the pet should follow
 func _physics_process(delta):
 	if not player:
 		return
-
 	var distance_to_player = global_position.distance_to(player.global_position)
-
 	if is_following:
 		if distance_to_player > stop_threshold:
 			$AnimatedSprite2D.play("run")
@@ -38,7 +36,7 @@ func stop_moving():
 func start_follow_delay():
 	is_following = true
 	await get_tree().create_timer(follow_delay).timeout  # Smooth delay before following
-	
+
 func flip_sprite():
 	if player.global_position.x < global_position.x:
 		$AnimatedSprite2D.flip_h = true  # Face left
