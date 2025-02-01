@@ -1,3 +1,6 @@
+use std::net::{SocketAddr, UdpSocket};
+use std::str;
+
 use godot::classes::{ INode2D, Label, Node2D};
 use godot::obj::NewAlloc;
 use godot::prelude::*;
@@ -29,6 +32,8 @@ impl INode2D for Node2dRust {
             coords: Label::new_alloc(),
         }
     }
+    fn ready(&mut self) {
+    }
 
     fn physics_process(&mut self, _delta: f64) {
 
@@ -57,4 +62,10 @@ impl Node2dRust {
         let ko = scene.to_local(Vector2::new(cord.x as f32, cord.y as f32));
         return ko;
     }
+    
+    
+
 }
+
+
+

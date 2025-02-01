@@ -1,6 +1,11 @@
-use godot::classes::{ ITileMapLayer, FastNoiseLite, TileMapLayer};
+use std::ptr::null;
+
+use godot::classes::multiplayer_api::RpcMode;
+use godot::classes::{ MultiplayerApi, FastNoiseLite, ITileMapLayer, TileMapLayer};
 use godot::global::{randi, sqrt};
 use godot::prelude::*;
+use godot::register::RpcConfig;
+use crate::multiplayer::{self, MultiPlayerRust};
 use crate::rustplayer::Rustplayer;
 
 #[derive(GodotClass)]
@@ -40,10 +45,10 @@ impl ITileMapLayer for Terrain1 {
         self.temperature.set_seed(randi() as i32);
         self.altitude.set_frequency(0.01);
 
-
     }
     
     fn process(&mut self, _delta: f64) {
+        
 
         self.altitude.set_seed(self.seedser);
         
@@ -53,7 +58,30 @@ impl ITileMapLayer for Terrain1 {
         let sls = self.base_mut().local_to_map(ypo );
         self.generate_chunk(sls);
 
-        self.unload_distant_chunks( sls);   
+        self.unload_distant_chunks( sls);
+
+        let tree = self.base_mut().get_tree().unwrap();
+        let root = tree.get_root().unwrap();
+        let mut multiplayer = tree.get_multiplayer().unwrap();
+        let peers = multiplayer.get_peers();
+        if multiplayer.is_server(){
+            for i in peers.to_vec() {
+                let pyr = format!("/root/main/World/{}", i);
+                let y= root.get_node_as::<MultiPlayerRust>(&pyr);
+                    if y.is_instance_valid() {
+                        let r = y.get_global_position();
+                        let f = self.base_mut().local_to_map(r);
+                        self.generate_chunk(f);
+                        self.unload_distant_chunks(f);
+                        godot_print!("Player {} is valid", i);
+                    } else {
+                        godot_print!("Player {} is not valid", i);
+                }
+            }
+        }
+        else {
+            godot_print!("not")
+        }
 
     }
 }
@@ -66,6 +94,7 @@ impl Terrain1 {
         self.seedser = seed;
         return self.seedser;
     }
+
 
     fn generate_chunk(&mut self, pos: Vector2i) {
         

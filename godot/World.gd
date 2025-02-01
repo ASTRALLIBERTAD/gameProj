@@ -2,16 +2,14 @@ extends Node2dRust
 
 @onready var scene = get_tree()
 var peer = ENetMultiplayerPeer.new()
-
+var t = PacketPeerUDP.new()
 func _ready() -> void:
-	
 	$AutoSave.start()
 
 func add_player(pid):
 	var plyr = preload("res://Player/multiplayers.tscn").instantiate()
 	plyr.name = str(pid)
 	add_child(plyr)
-	
 
 func _on_auto_save_timeout() -> void:
 	SaveManager.auto_save()
@@ -54,17 +52,16 @@ func _on_back_pressed() -> void:
 
 
 func _on_add_player_pressed() -> void:
-	peer.create_client("192.168.100.15", 55555)
+	peer.create_client("localhost", 55555)
 	multiplayer.multiplayer_peer = peer
 	pass # Replace with function body.
 
 func _on_host_pressed() -> void:
-	peer.create_server(55555)
+	peer.create_server(55555, 3)
 	multiplayer.multiplayer_peer = peer
 	multiplayer.peer_connected.connect(
 	func(pid):
-		print("hiiiiiis")
+		print("pid")
 		add_player(pid)
-			
 		)
 	pass # Replace with function body.

@@ -1,10 +1,10 @@
 use std::str::FromStr;
-use godot::classes::{  AnimatedSprite2D, CharacterBody2D, ICharacterBody2D, Input};
+use godot::classes::{AnimatedSprite2D, CharacterBody2D, ICharacterBody2D, Input};
 use godot::prelude::*;
 
 #[derive(GodotClass)]
 #[class(base=CharacterBody2D)]
-pub struct MultiPlayer{
+pub struct MultiPlayerRust{
     #[base]
     base: Base<CharacterBody2D>,
 
@@ -16,7 +16,7 @@ pub struct MultiPlayer{
 }
 
 #[godot_api]
-impl ICharacterBody2D for MultiPlayer {
+impl ICharacterBody2D for MultiPlayerRust {
     fn init(base: Base<CharacterBody2D>) -> Self {
         Self {
             base, 
