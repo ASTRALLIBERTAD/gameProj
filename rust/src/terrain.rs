@@ -1,11 +1,8 @@
-use std::ptr::null;
-
-use godot::classes::multiplayer_api::RpcMode;
-use godot::classes::{ MultiplayerApi, FastNoiseLite, ITileMapLayer, TileMapLayer};
+use godot::classes::{FastNoiseLite, ITileMapLayer, TileMapLayer};
 use godot::global::{randi, sqrt};
+use godot::obj::WithBaseField;
 use godot::prelude::*;
-use godot::register::RpcConfig;
-use crate::multiplayer::{self, MultiPlayerRust};
+use crate::multiplayer::MultiPlayerRust;
 use crate::rustplayer::Rustplayer;
 
 #[derive(GodotClass)]
@@ -64,6 +61,7 @@ impl ITileMapLayer for Terrain1 {
         let root = tree.get_root().unwrap();
         let mut multiplayer = tree.get_multiplayer().unwrap();
         let peers = multiplayer.get_peers();
+        
         if multiplayer.is_server(){
             for i in peers.to_vec() {
                 let pyr = format!("/root/main/World/{}", i);
@@ -79,9 +77,6 @@ impl ITileMapLayer for Terrain1 {
                 }
             }
         }
-        else {
-            godot_print!("not")
-        }
 
     }
 }
@@ -95,7 +90,24 @@ impl Terrain1 {
         return self.seedser;
     }
 
+    #[func]
+    fn tile(&mut self, pid:i32){
+        let tree = self.base_mut().get_tree().unwrap();
+        let root = tree.get_root().unwrap();
+        let pyr = format!("/root/main/World/{}", pid);
+        let y= root.get_node_as::<MultiPlayerRust>(&pyr);
+        if y.is_instance_valid() {
+            let r = y.get_global_position();
+            let f = self.base_mut().local_to_map(r);
+            self.generate_chunk(f);
+            self.unload_distant_chunks(f);
+            godot_print!("Player klkl {} is valid", pid);
+        } else {
+                godot_print!("Player klkl {} is not valid", pid);
+        }
+            
 
+    }
     fn generate_chunk(&mut self, pos: Vector2i) {
         
     
