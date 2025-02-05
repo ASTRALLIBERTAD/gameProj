@@ -7,7 +7,7 @@ mod node2d;
 mod control;
 mod node;
 mod multiplayer;
-mod rl;
+mod igor;
 
 use godot::prelude::*;
 

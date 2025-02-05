@@ -660,6 +660,7 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "godot",
+ "ndarray",
  "rand 0.9.0",
  "serde",
  "tch",
