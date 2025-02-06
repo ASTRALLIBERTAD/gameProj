@@ -1,0 +1,134 @@
+[gd_scene load_steps=16 format=3 uid="uid://gtqicsa77g0h"]
+
+[ext_resource type="Script" path="res://3d/agent.gd" id="1_t5v1p"]
+[ext_resource type="Script" path="res://3d/character_body_3d.gd" id="2_7b288"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_xu4ug"]
+sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+
+[sub_resource type="Sky" id="Sky_6irbx"]
+sky_material = SubResource("ProceduralSkyMaterial_xu4ug")
+
+[sub_resource type="Environment" id="Environment_q5b3h"]
+background_mode = 2
+sky = SubResource("Sky_6irbx")
+tonemap_mode = 2
+
+[sub_resource type="BoxMesh" id="BoxMesh_c1pk1"]
+size = Vector3(50, 1, 50)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_isohn"]
+size = Vector3(50, 1, 50)
+
+[sub_resource type="BoxMesh" id="BoxMesh_101iw"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_qv3bj"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_30ko3"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ymuol"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_ptiwu"]
+size = Vector3(50, 20, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_46ujq"]
+size = Vector3(50, 20, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_j2564"]
+size = Vector3(1, 20, 50)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mxhe3"]
+size = Vector3(1, 20, 50)
+
+[node name="trainer" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_q5b3h")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
+shadow_enabled = true
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D"]
+mesh = SubResource("BoxMesh_c1pk1")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+shape = SubResource("BoxShape3D_isohn")
+
+[node name="Agent" type="Agent" parent="." node_paths=PackedStringArray("camera")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.00907, 0)
+script = ExtResource("1_t5v1p")
+camera = [NodePath("Camera3D"), NodePath("../CharacterBody3D/Camera3D")]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Agent"]
+mesh = SubResource("BoxMesh_101iw")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Agent"]
+shape = SubResource("BoxShape3D_qv3bj")
+
+[node name="Camera3D" type="Camera3D" parent="Agent"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.603299)
+
+[node name="RayCast3D" type="RayCast3D" parent="Agent/Camera3D"]
+transform = Transform3D(1, 0, 0, 0, -0.0160913, -0.999871, 0, 0.999871, -0.0160913, 0, 0, 0)
+
+[node name="CharacterBody3D" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0713396, 11.2443, -25.1638)
+script = ExtResource("2_7b288")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CharacterBody3D"]
+mesh = SubResource("BoxMesh_30ko3")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
+shape = SubResource("BoxShape3D_ymuol")
+
+[node name="Camera3D" type="Camera3D" parent="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.914094, 3.50016)
+
+[node name="Button" type="Button" parent="."]
+offset_right = 8.0
+offset_bottom = 8.0
+text = "cam"
+
+[node name="Node" type="Node" parent="."]
+
+[node name="wall" type="StaticBody3D" parent="Node"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 25.6033)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Node/wall"]
+mesh = SubResource("BoxMesh_ptiwu")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Node/wall"]
+shape = SubResource("BoxShape3D_46ujq")
+
+[node name="wall2" type="StaticBody3D" parent="Node"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -25.3368)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Node/wall2"]
+mesh = SubResource("BoxMesh_ptiwu")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Node/wall2"]
+shape = SubResource("BoxShape3D_46ujq")
+
+[node name="wally" type="StaticBody3D" parent="Node"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24.3503, 0, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Node/wally"]
+mesh = SubResource("BoxMesh_j2564")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Node/wally"]
+shape = SubResource("BoxShape3D_mxhe3")
+
+[node name="wally2" type="StaticBody3D" parent="Node"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24.5662, 0, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Node/wally2"]
+mesh = SubResource("BoxMesh_j2564")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Node/wally2"]
+shape = SubResource("BoxShape3D_mxhe3")
+
+[connection signal="pressed" from="Button" to="Agent" method="_on_button_pressed"]
