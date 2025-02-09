@@ -88,6 +88,10 @@ shape = SubResource("BoxShape3D_ymuol")
 [node name="Camera3D" type="Camera3D" parent="CharacterBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.914094, 3.50016)
 
+[node name="Area3D" type="Area3D" parent="CharacterBody3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D/Area3D"]
+
 [node name="Button" type="Button" parent="."]
 offset_right = 8.0
 offset_bottom = 8.0
