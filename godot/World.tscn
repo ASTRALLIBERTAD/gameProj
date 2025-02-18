@@ -154,7 +154,7 @@ animations = [{
 
 [node name="World" type="Node2dRust" parent="." node_paths=PackedStringArray("players", "coords")]
 players = NodePath("PLAYERS")
-coords = NodePath("PauseMenu/CanvasLayer/VBoxContainer/coords")
+coords = NodePath("PLAYERS/Control/CanvasLayer/coords")
 script = ExtResource("1_aftjc")
 
 [node name="Pet" type="Pet" parent="World" node_paths=PackedStringArray("player", "sprite")]
@@ -178,8 +178,25 @@ autoplay = "run"
 wait_time = 5.0
 autostart = true
 
-[node name="PLAYERS" parent="World" instance=ExtResource("4_dqyd3")]
+[node name="PLAYERS" parent="World" node_paths=PackedStringArray("coords") instance=ExtResource("4_dqyd3")]
+coords = NodePath("Control/CanvasLayer/coords")
 unique_name_in_owner = true
+
+[node name="Control" type="Control" parent="World/PLAYERS"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CanvasLayer" type="CanvasLayer" parent="World/PLAYERS/Control"]
+
+[node name="coords" type="Label" parent="World/PLAYERS/Control/CanvasLayer"]
+unique_name_in_owner = true
+offset_right = 1.0
+offset_bottom = 55.0
+theme_override_font_sizes/font_size = 40
 
 [node name="osl" type="Label" parent="World"]
 offset_right = 40.0
@@ -255,11 +272,6 @@ texture_filter = 1
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
 script = ExtResource("5_dged2")
-
-[node name="coords" type="Label" parent="World/PauseMenu/CanvasLayer/VBoxContainer"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_font_sizes/font_size = 40
 
 [node name="MENU" type="Button" parent="World/PauseMenu/CanvasLayer"]
 anchors_preset = 1

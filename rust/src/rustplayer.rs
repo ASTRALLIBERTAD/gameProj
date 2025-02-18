@@ -1,6 +1,8 @@
 use std::str::FromStr;
-use godot::classes::{  AnimatedSprite2D, CharacterBody2D, ICharacterBody2D, Input};
+use godot::classes::{  AnimatedSprite2D, CharacterBody2D, ICharacterBody2D, Input, Label};
 use godot::prelude::*;
+
+use crate::terrain::Terrain1;
 
 #[derive(GodotClass)]
 #[class(base=CharacterBody2D)]
@@ -10,6 +12,9 @@ pub struct Rustplayer{
 
     #[export]
     sprite: Gd<AnimatedSprite2D>,
+
+    #[export]
+    coords: Gd<Label>
 }
 
 #[godot_api]
@@ -18,6 +23,7 @@ impl ICharacterBody2D for Rustplayer {
         Self {
             base, 
             sprite: AnimatedSprite2D::new_alloc(),
+            coords: Label::new_alloc(),
         }
     }
 
@@ -47,7 +53,34 @@ impl ICharacterBody2D for Rustplayer {
         }
         self.base_mut().set_velocity(velocity);
         self.base_mut().move_and_slide();
+
+
+        let cord = self.player_cord();
+        
+        let y_value = if cord.y == 0.0 {
+            cord.y * 1.0
+        } else {
+            cord.y * -1.0
+        };
+
+        let k = format!("coordinates :{}, {:?}", cord.x, y_value as i32);
+        self.coords.set_text(&k);
         
     }
     
+}
+
+#[godot_api]
+impl Rustplayer {    
+    fn player_cord(&mut self) -> Vector2{
+        let scene = self.base_mut().get_tree().unwrap().get_root().unwrap().get_node_as::<Terrain1>("/root/main/Terrain/Terrain1");
+
+        let cord = scene.local_to_map(self.base_mut().get_global_position());
+
+        let ko = scene.to_local(Vector2::new(cord.x as f32, cord.y as f32));
+        return ko;
+    }
+    
+    
+
 }

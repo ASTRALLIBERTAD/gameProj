@@ -135,9 +135,10 @@ properties/1/path = NodePath(".:position")
 properties/1/spawn = true
 properties/1/replication_mode = 1
 
-[node name="Multiplayer" type="MultiPlayerRust" node_paths=PackedStringArray("sprite", "cam")]
+[node name="Multiplayer" type="MultiPlayerRust" node_paths=PackedStringArray("sprite", "cam", "coords")]
 sprite = NodePath("AnimatedSprite2D")
 cam = NodePath("Camera2D")
+coords = NodePath("Control/CanvasLayer/coords")
 script = ExtResource("1_x3kef")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
@@ -151,6 +152,7 @@ shape = SubResource("CapsuleShape2D_1k6xe")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 process_mode = 3
+zoom = Vector2(3, 3)
 position_smoothing_enabled = true
 position_smoothing_speed = 2.0
 
@@ -161,5 +163,21 @@ replication_config = SubResource("SceneReplicationConfig_378ug")
 process_callback = 0
 wait_time = 0.3
 autostart = true
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CanvasLayer" type="CanvasLayer" parent="Control"]
+
+[node name="coords" type="Label" parent="Control/CanvasLayer"]
+unique_name_in_owner = true
+offset_right = 1.0
+offset_bottom = 55.0
+theme_override_font_sizes/font_size = 40
 
 [connection signal="timeout" from="tile" to="." method="_on_tile_timeout"]
