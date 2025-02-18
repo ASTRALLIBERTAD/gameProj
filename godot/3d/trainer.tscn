@@ -73,9 +73,9 @@ shape = SubResource("BoxShape3D_qv3bj")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.603299)
 
 [node name="RayCast3D" type="RayCast3D" parent="Agent/Camera3D"]
-transform = Transform3D(1, 0, 0, 0, -0.0160913, -0.999871, 0, 0.999871, -0.0160913, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, -0.0310088, -0.984954, 0, 1.9268, -0.0158512, 0, 0, 0)
 
-[node name="CharacterBody3D" type="CharacterBody3D" parent="."]
+[node name="CharacterBody3D" type="CharacterBody3D" parent="." groups=["players"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0713396, 11.2443, -25.1638)
 script = ExtResource("2_7b288")
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://mnm8rs3ffkxt"]
+[gd_scene load_steps=6 format=3 uid="uid://mnm8rs3ffkxt"]
 
 [ext_resource type="Texture2D" uid="uid://clmqosmyhqmw5" path="res://Assets/brackeys_platformer_assets/brackeys_platformer_assets/sprites/platforms.png" id="1_ubm8c"]
 [ext_resource type="Texture2D" uid="uid://eao47njq38uu" path="res://Assets/brackeys_platformer_assets/brackeys_platformer_assets/sprites/world_tileset.png" id="2_7dd47"]
@@ -160,17 +160,9 @@ texture = ExtResource("2_7dd47")
 sources/0 = SubResource("TileSetAtlasSource_a480t")
 sources/1 = SubResource("TileSetAtlasSource_ccpnp")
 
-[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_l8j4p"]
-properties/0/path = NodePath("Terrain1:seedser")
-properties/0/spawn = true
-properties/0/replication_mode = 1
-
 [node name="Terrain" type="Node"]
 
 [node name="Terrain1" type="Terrain1" parent="."]
 z_index = -3
 y_sort_enabled = true
 tile_set = SubResource("TileSet_o07my")
-
-[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
-replication_config = SubResource("SceneReplicationConfig_l8j4p")

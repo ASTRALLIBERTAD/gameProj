@@ -5,11 +5,11 @@ const SPEED = 5.0
 const JUMP_VELOCITY = 4.5
 var current_index = 0
 func _ready() -> void:
-	init()
+	ready()
 	update_cam()
 
 func _physics_process(delta: float) -> void:
-	update_movement($Camera3D/RayCast3D, $"../CharacterBody3D", delta)
+	update_agent( delta)
 	move_and_slide()
 
 func update_cam():

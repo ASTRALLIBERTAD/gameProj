@@ -1,14 +1,23 @@
 use godot::prelude::*;
-use godot::classes::{CharacterBody3D, RayCast3D};
+use godot::classes::{CharacterBody3D, RayCast3D, Node3D};
 use rand::Rng;
-use ndarray::{Array1, Array2};
+use ndarray::{Array1, Array2, arr2};
 
 const INPUT_SIZE: usize = 11;
-const HIDDEN_LAYER: usize = 16;
-const OUTPUT_SIZE: usize = 3;
-const MINIMUM_MOVEMENT_THRESHOLD: f32 = 0.001;
-const AGENT_SPEED: f32 = 2.0;
-const VERTICAL_LIMIT: f32 = 0.5;
+const HIDDEN_LAYER: usize = 32;
+const OUTPUT_SIZE: usize = 2;
+const AGENT_SPEED: f32 = 3.5;
+const RAYCAST_NUM: usize = 7;
+const MAX_DETECTION_RANGE: f32 = 30.0;
+const FOV: f32 = 120.0* std::f32::consts::PI / 180.0;
+
+// Reward system
+const REWARD_FOUND_PLAYER: f32 = 5.0;
+const REWARD_CLOSER: f32 = 1.5;
+const PUNISH_LOST_PLAYER: f32 = -3.0;
+const PUNISH_TIMEOUT: f32 = -5.0;
+const REWARD_MAINTAIN_LOS: f32 = 0.2;
+const PUNISH_STUCK: f32 = -2.0;
 
 #[derive(GodotClass)]
 #[class(init, base=CharacterBody3D)]
@@ -16,136 +25,238 @@ pub struct Agent {
     #[base]
     base: Base<CharacterBody3D>,
     
+    // Neural Network
     weights_input_hidden: Array2<f32>,
     weights_hidden_output: Array2<f32>,
-    timer: f32,
-    max_time: f32,
-    reward: f32,
+    
+    // Agent state
+    raycasts: Vec<Gd<RayCast3D>>,
+    last_player_pos: Vector3,
+    player_visible: bool,
+    last_distance: f32,
+    episode_reward: f32,
+    positions_history: Vec<Vector3>,
+    rotation_angle: f32,
+    velocity_history: Vec<Vector3>,
 }
 
 #[godot_api]
 impl Agent {
+
+    fn velocity_history_x(&self) -> f32 {
+        self.velocity_history.iter()
+            .map(|v| v.x)
+            .sum::<f32>() / self.velocity_history.len() as f32
+    }
+
+    fn velocity_history_z(&self) -> f32 {
+        self.velocity_history.iter()
+            .map(|v| v.z)
+            .sum::<f32>() / self.velocity_history.len() as f32
+    }
+
     #[func]
-    fn init(&mut self) {
-        let mut rng = rand::rng(); // Fixed: Use thread_rng() instead of rng()
-        
-        self.weights_input_hidden = Array2::from_shape_fn((INPUT_SIZE, HIDDEN_LAYER), 
-            |_| rng.random_range(-1.0..1.0)); // Fixed: Use gen_range instead of random_range
-        self.weights_hidden_output = Array2::from_shape_fn((HIDDEN_LAYER, OUTPUT_SIZE), 
-            |_| rng.random_range(-1.0..1.0));
+    fn ready(&mut self) {
+        self.init_raycasts();
+        self.reset_state();
+    }
+
+    fn init_raycasts(&mut self) {
+        let angle_step = FOV / (RAYCAST_NUM - 1) as f32;
+        for i in 0..RAYCAST_NUM {
+            let mut ray = RayCast3D::new_alloc();
+            let angle = -FOV/2.0 + angle_step * i as f32;
             
-        self.max_time = 10.0;
-        self.timer = 0.0;
-        self.reward = 0.0;
+            ray.set_rotation(Vector3::new(0.0, angle, 0.0));
+            ray.set_target_position(Vector3::FORWARD * MAX_DETECTION_RANGE);
+            ray.set_collision_mask(0b1);
+            ray.set_enabled(true);
+            
+            self.base_mut().add_child(&ray.clone().upcast::<RayCast3D>());
+            self.raycasts.push(ray);
+        }
     }
 
     #[func]
-    fn update_movement(&mut self, raycast: Gd<RayCast3D>, player: Gd<CharacterBody3D>, delta: f64) {
-        self.timer += delta as f32;
+    fn update_agent(&mut self, delta: f64) {
+        let delta = delta as f32;
+        let player_info = self.detect_player();
+        let mut reward = 0.0;
 
-        if self.timer > self.max_time {
-            godot_print!("Failed to reach player! Resetting...");
-            self.reward -= 5.0;
-            self.reset_agent();
-            return;
-        }
-
-        // Handle gravity
-        if !self.base_mut().is_on_floor() {
-            let gravity = self.base_mut().get_gravity();
-            let gravity_vector = Vector3::new(0.0, gravity.y, 0.0) * delta as f32;
-            self.base_mut().set_velocity(gravity_vector);
-            return; // Don't process movement while falling
-        }
-
-        let npc_position = self.base_mut().get_global_position();
-        let player_position = player.get_global_position();
-        let hit_position = raycast.get_collision_point();
-        
-        // Calculate distance to player before movement
-        let distance_before = (npc_position - player_position).length();
-
-        // Prepare neural network input
-        let input = Array1::from(vec![
-            player_position.x, player_position.y, player_position.z,
-            hit_position.x, hit_position.y, hit_position.z,
-            (player_position - hit_position).length(),
-            npc_position.x, npc_position.y, npc_position.z,
-            1.0 // Bias term
-        ]);
-
-        // Get movement from neural network
-        let movement = self.forward(input);
-        
-        // Create movement vector with proper safety checks
-        let movement_vector = Vector3::new(
-            movement[0],
-            movement[1].clamp(-VERTICAL_LIMIT, VERTICAL_LIMIT),
-            movement[2]
-        );
-
-        // Safety check for zero vector
-        let movement_vector = if movement_vector.length_squared() > MINIMUM_MOVEMENT_THRESHOLD * MINIMUM_MOVEMENT_THRESHOLD {
-            movement_vector.normalized() * AGENT_SPEED
-        } else {
-            // If movement is too small, move directly towards player
-            let direction = player_position - npc_position;
-            if direction.length_squared() > MINIMUM_MOVEMENT_THRESHOLD * MINIMUM_MOVEMENT_THRESHOLD {
-                direction.normalized() * AGENT_SPEED
-            } else {
-                Vector3::ZERO // Stay still if too close
+        // Handle player detection
+        if player_info.found {
+            if !self.player_visible {
+                reward += REWARD_FOUND_PLAYER;
             }
-        };
+            self.last_player_pos = player_info.position;
+            self.player_visible = true;
+            reward += REWARD_MAINTAIN_LOS;
+        } else if self.player_visible {
+            reward += PUNISH_LOST_PLAYER;
+            self.player_visible = false;
+        }
 
-        // Apply movement
-        self.base_mut().set_velocity(movement_vector);
-        self.base_mut().move_and_slide();
-
-        // Calculate reward based on new position
-        let distance_after = (self.base_mut().get_global_position() - player_position).length();
+        // Create input vector
+        let input = self.create_input_vector(player_info);
+        let output = self.forward(&input);
         
-        if distance_after < distance_before {
-            self.reward += 1.0;
-        } else {
-            self.reward -= 0.5;
+        // Convert output to movement
+        let move_dir = Vector3::new(output[0], 0.0, output[1]).normalized();
+        let velocity = move_dir * AGENT_SPEED;
+        
+        // Apply movement
+        self.base_mut().set_velocity(velocity);
+        self.base_mut().move_and_slide();
+        
+        // Distance-based rewards
+        if self.player_visible {
+            let new_dist = self.base().get_global_position().distance_to(self.last_player_pos);
+            if new_dist < self.last_distance {
+                reward += REWARD_CLOSER * (self.last_distance - new_dist);
+            }
+            self.last_distance = new_dist;
         }
 
-        // Check if reached player
-        if distance_after < 1.0 {
-            godot_print!("Agent reached player! Rewarding...");
-            self.reward += 10.0;
-            self.reset_agent();
+        // Check for stuck
+        if self.is_stuck() {
+            reward += PUNISH_STUCK;
+            self.apply_escape_move();
+        }
+        self.velocity_history.push(velocity);
+        if self.velocity_history.len() > 10 {
+            self.velocity_history.remove(0);
         }
 
-        godot_print!("Reward: {}, Timer: {}", self.reward, self.timer);
+        // Update network
+        self.update_network(&input, reward);
     }
 
-    fn forward(&mut self, input: Array1<f32>) -> Array1<f32> {
-        let hidden = input.dot(&self.weights_input_hidden).mapv(Self::relu);
-        let output = hidden.dot(&self.weights_hidden_output);
-    
-        let learning_rate = 0.1;
-        let reward_signal = self.reward / 10.0;
-    
-        // Use broadcasting for weight updates
-        let delta_input_hidden = input.view().insert_axis(ndarray::Axis(1))
-            .dot(&hidden.view().insert_axis(ndarray::Axis(0)));
-        let delta_hidden_output = hidden.view().insert_axis(ndarray::Axis(1))
-            .dot(&output.view().insert_axis(ndarray::Axis(0)));
-    
-        self.weights_input_hidden += &(delta_input_hidden * (learning_rate * reward_signal));
-        self.weights_hidden_output += &(delta_hidden_output * (learning_rate * reward_signal));
-    
+    fn detect_player(&mut self) -> PlayerDetection {
+        for ray in &self.raycasts {
+            if ray.is_colliding() {
+                let collider = ray.get_collider().unwrap();
+                let node = collider.clone().cast::<CharacterBody3D>();
+                
+                if node.is_in_group("players") {
+                    let position = ray.get_collision_point();
+                    return PlayerDetection {
+                        found: true,
+                        position,
+                        distance: position.distance_to(self.base().get_global_position()),
+                    };
+                }
+            }
+        }
+        PlayerDetection::none()
+    }
+
+    fn create_input_vector(&self, detection: PlayerDetection) -> Array1<f32> {
+        let pos = self.base().get_global_position();
+        let mut input = Array1::zeros(INPUT_SIZE);
+        
+        // Player relative position
+        input[0] = if detection.found { (detection.position.x - pos.x) / MAX_DETECTION_RANGE } else { 0.0 };
+        input[1] = if detection.found { (detection.position.z - pos.z) / MAX_DETECTION_RANGE } else { 0.0 };
+        input[2] = detection.distance / MAX_DETECTION_RANGE;
+        
+        // Agent's own rotation
+        input[3] = self.rotation_angle.sin();
+        input[4] = self.rotation_angle.cos();
+        
+        // Historical movement
+        input[5] = self.velocity_history_x();
+        input[6] = self.velocity_history_z();
+        
+        // Environment awareness
+        input[7] = pos.x / 50.0;  // Normalized map position
+        input[8] = pos.z / 50.0;
+        input[9] = (pos.y - 1.0) / 5.0;  // Height awareness
+        
+        // Player visibility
+        input[10] = if detection.found { 1.0 } else { -1.0 };
+        
+        input
+    }
+
+    fn forward(&self, input: &Array1<f32>) -> Array1<f32> {
+        let hidden = input.dot(&self.weights_input_hidden).mapv(|x| x.max(0.0));
+        let output = hidden.dot(&self.weights_hidden_output).mapv(|x| x.tanh());
         output
     }
 
-    fn relu(x: f32) -> f32 {
-        x.max(0.0)
+    fn update_network(&mut self, input: &Array1<f32>, reward: f32) {
+        let hidden = input.dot(&self.weights_input_hidden).mapv(|x| x.max(0.0));
+        
+        let learning_rate = 0.01;
+        let discount_factor = 0.9;
+        
+        // Clone hidden before first use
+        let hidden_clone = hidden.clone();
+        let mut q_values = hidden_clone.dot(&self.weights_hidden_output);
+        
+        let max_future_q = q_values.iter().fold(f32::NEG_INFINITY, |a, &b| a.max(b));
+        let update = (reward + discount_factor * max_future_q - q_values.sum()) * learning_rate;
+        
+        // Apply update to all elements
+        q_values.mapv_inplace(|x| x + update);
+        
+        // Create views with cloning for axis operations
+        let hidden_t = hidden.clone().insert_axis(ndarray::Axis(1));
+        let input_t = input.clone().insert_axis(ndarray::Axis(1));
+        
+        // Update weights using cloned arrays
+        let delta_output = hidden_t.dot(&q_values.clone().insert_axis(ndarray::Axis(0)));
+        self.weights_hidden_output += &(delta_output * learning_rate);
+        
+        let delta_hidden = input_t.dot(&hidden.insert_axis(ndarray::Axis(0)));
+        self.weights_input_hidden += &(delta_hidden * learning_rate);
     }
 
-    fn reset_agent(&mut self) {
-        self.base_mut().set_global_position(Vector3::new(0.0, 1.0, 0.0));
-        self.timer = 0.0;
-        self.reward = 0.0;
+    fn is_stuck(&self) -> bool {
+        if self.positions_history.len() < 10 { return false; }
+        let avg = self.positions_history.iter()
+            .fold(Vector3::ZERO, |acc, pos| acc + *pos) 
+            / self.positions_history.len() as f32;
+        avg.distance_to(*self.positions_history.last().unwrap()) < 0.5
+    }
+
+    fn apply_escape_move(&mut self) {
+        let escape_dir = Vector3::new(
+            rand::rng().random_range(-1.0..1.0),
+            0.0,
+            rand::rng().random_range(-1.0..1.0)
+        ).normalized();
+        self.base_mut().set_velocity(escape_dir * AGENT_SPEED * 2.0);
+    }
+
+    fn reset_state(&mut self) {
+        self.last_player_pos = Vector3::ZERO;
+        self.player_visible = false;
+        self.last_distance = f32::MAX;
+        self.episode_reward = 0.0;
+        self.positions_history.clear();
+        self.base_mut().set_position(Vector3::new(
+            rand::rng().random_range(-20.0..20.0),
+            1.0,
+            rand::rng().random_range(-20.0..20.0)
+        ));
+    }
+}
+
+// Helper structs
+#[derive(Debug, Clone, Copy)]
+struct PlayerDetection {
+    found: bool,
+    position: Vector3,
+    distance: f32,
+}
+
+impl PlayerDetection {
+    fn none() -> Self {
+        Self {
+            found: false,
+            position: Vector3::ZERO,
+            distance: f32::MAX,
+        }
     }
 }

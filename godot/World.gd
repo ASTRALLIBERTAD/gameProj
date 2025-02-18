@@ -52,7 +52,7 @@ func _on_back_pressed() -> void:
 
 
 func _on_add_player_pressed() -> void:
-	peer.create_client("192.168.100.15", 55555)
+	peer.create_client("localhost", 55555)
 	multiplayer.multiplayer_peer = peer
 	pass # Replace with function body.
 
