@@ -16,7 +16,9 @@ pub struct Terrain1 {
     pub altitude: Gd<FastNoiseLite>,
     pub height: i32,
     pub width: i32,
+    // Track both chunks and current positions
     pub player_chunks: HashMap<i32, HashSet<Vector2i>>,
+    pub player_positions: HashMap<i32, Vector2i>,
     #[export]
     pub seedser: i32, 
 }
@@ -32,6 +34,7 @@ impl ITileMapLayer for Terrain1 {
             height: 25,
             width: 25,
             player_chunks: HashMap::new(),
+            player_positions: HashMap::new(),
             seedser: i32::default(),
         }
     }
@@ -46,10 +49,13 @@ impl ITileMapLayer for Terrain1 {
     fn process(&mut self, _delta: f64) {
         self.altitude.set_seed(self.seedser);
         
+        // Update main player
         let label = self.base_mut().get_tree().unwrap().get_root().unwrap().get_node_as::<Rustplayer>("/root/main/World/PLAYERS");
         let ypo = label.get_position();
         let sls = self.base_mut().local_to_map(ypo);
         
+        // Update main player position (using ID 0)
+        self.player_positions.insert(0, sls);
         self.generate_chunk_for_player(0, sls);
         self.unload_distant_chunks_for_player(0, sls);
 
@@ -65,10 +71,15 @@ impl ITileMapLayer for Terrain1 {
                 if y.is_instance_valid() {
                     let r = y.get_global_position();
                     let f = self.base_mut().local_to_map(r);
+                    // Update multiplayer position
+                    self.player_positions.insert(i, f);
                     self.generate_chunk_for_player(i, f);
                     self.unload_distant_chunks_for_player(i, f);
                     godot_print!("Player {} is valid", i);
                 } else {
+                    // Remove disconnected player data
+                    self.player_positions.remove(&i);
+                    self.player_chunks.remove(&i);
                     godot_print!("Player {} is not valid", i);
                 }
             }
@@ -85,12 +96,10 @@ impl Terrain1 {
     }
 
     fn generate_chunk_for_player(&mut self, player_id: i32, pos: Vector2i) {
-        // Check if chunk is already generated
         if self.player_chunks.get(&player_id).map_or(false, |chunks| chunks.contains(&pos)) {
             return;
         }
 
-        // Generate tile data first
         let mut tiles_to_set = Vec::new();
         for x in 0..self.width {
             for y in 0..self.height {
@@ -114,7 +123,6 @@ impl Terrain1 {
             }
         }
 
-        // Set all tiles
         for (position, coords) in tiles_to_set {
             self.base_mut().set_cell_ex(position)
                 .source_id(1)
@@ -122,51 +130,49 @@ impl Terrain1 {
                 .done();
         }
 
-        // Update player chunks after setting tiles
         self.player_chunks.entry(player_id)
             .or_insert_with(HashSet::new)
             .insert(pos);
     }
 
+    fn is_chunk_needed_by_any_player(&self, chunk: Vector2i, excluded_player_id: i32) -> bool {
+        let unload_distance_threshold = (self.width as f32 * 2.0) + 1.0;
+        
+        // Check all player positions against this chunk
+        for (&player_id, &player_pos) in &self.player_positions {
+            if player_id != excluded_player_id {
+                let dist = self.get_dist(chunk, player_pos);
+                if dist <= unload_distance_threshold as f64 {
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
     fn unload_distant_chunks_for_player(&mut self, player_id: i32, pos: Vector2i) {
         let unload_distance_threshold = (self.width as f32 * 2.0) + 1.0;
         
-        // Collect chunks to unload first
-        let chunks_to_unload: Vec<Vector2i> = {
-            if let Some(chunks) = self.player_chunks.get(&player_id) {
-                chunks.iter()
-                    .filter(|&&chunk| {
-                        let dist = self.get_dist(chunk, pos);
-                        dist > unload_distance_threshold as f64
-                    })
-                    .cloned()
-                    .collect()
-            } else {
-                Vec::new()
-            }
+        let chunks_to_unload = if let Some(chunks) = self.player_chunks.get(&player_id) {
+            chunks.iter()
+                .filter(|&&chunk| {
+                    let dist = self.get_dist(chunk, pos);
+                    dist > unload_distance_threshold as f64
+                })
+                .cloned()
+                .collect::<Vec<_>>()
+        } else {
+            Vec::new()
         };
 
-        // Check which chunks are needed by other players
         let mut chunks_to_clear = Vec::new();
         for chunk in &chunks_to_unload {
-            let other_players_need_chunk = self.player_chunks.iter()
-                .any(|(&pid, player_chunks)| {
-                    if pid != player_id && player_chunks.contains(chunk) {
-                        // Check if any position in other player's chunks is within range
-                        player_chunks.iter().any(|&c| {
-                            self.get_dist(c, *chunk) <= unload_distance_threshold as f64
-                        })
-                    } else {
-                        false
-                    }
-                });
-
-            if !other_players_need_chunk {
+            if !self.is_chunk_needed_by_any_player(*chunk, player_id) {
                 chunks_to_clear.push(*chunk);
             }
         }
 
-        // Clear chunks that are no longer needed
+        // Clear chunks that are no longer needed by any player
         for chunk in chunks_to_clear {
             self.clear_chunk(chunk);
         }
@@ -209,10 +215,13 @@ impl Terrain1 {
         if y.is_instance_valid() {
             let r = y.get_global_position();
             let f = self.base_mut().local_to_map(r);
+            self.player_positions.insert(pid, f);
             self.generate_chunk_for_player(pid, f);
             self.unload_distant_chunks_for_player(pid, f);
             godot_print!("Player klkl {} is valid", pid);
         } else {
+            self.player_positions.remove(&pid);
+            self.player_chunks.remove(&pid);
             godot_print!("Player klkl {} is not valid", pid);
         }
     }
