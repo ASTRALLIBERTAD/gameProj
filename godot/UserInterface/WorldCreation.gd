@@ -1,6 +1,9 @@
 extends Control
 
 var WorldName: String
+@onready var t = get_tree()
+@onready var y = preload("uid://d2oibegpqmv2b").instantiate()
+@onready var i = get_node("/root/main/Terrain/Terrain1") as Terrain1
 
 func _on_playbuton_pressed() -> void:
 	var WorldName = %WorldNameInput.text
@@ -27,14 +30,12 @@ func _on_playbuton_pressed() -> void:
 			var t = hash(lp)
 			SaveManager.WorldSeed = clamp(t, -2147483648, 2147483647)
 			var y = load("res://World.tscn").instantiate()
-			get_tree().root.add_child(y)
-			var i = get_node("/root/main/Terrain/Terrain1") as Terrain1
+			t.root.add_child(y)
 			i.seed_seed(SaveManager.WorldSeed)
 			queue_free()
 		else:
 			var t = hash(GameSeed)
 			SaveManager.WorldSeed = clamp(t, -2147483648, 2147483647)
-			SaveManager.terra(SaveManager.WorldSeed)
 			var y = load("res://World.tscn").instantiate()
 			get_tree().root.add_child(y)
 			var i = get_node("/root/main/Terrain/Terrain1") as Terrain1

@@ -14,6 +14,7 @@ func _process(delta: float) -> void:
 func _on_join_pressed() -> void:
 	peer.create_client("localhost", 55555)
 	multiplayer.multiplayer_peer = peer
-	var l =preload("res://World.tscn").instantiate()
-	add_child(l)
+	var p =get_node("/root/main/World")
+	var t = preload("uid://cb7g0u1n88g4v").instantiate()
+	add_child(t)
 	pass # Replace with function body.

@@ -335,10 +335,6 @@ text = "host"
 _spawnable_scenes = PackedStringArray("res://Player/multiplayers.tscn")
 spawn_path = NodePath("..")
 
-[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("res://world/terrain_1.tscn")
-spawn_path = NodePath("..")
-
 [connection signal="timeout" from="World/AutoSave" to="World" method="_on_auto_save_timeout"]
 [connection signal="timeout" from="World/PauseMenu/SavingTime" to="World" method="_on_saving_time_timeout"]
 [connection signal="pressed" from="World/PauseMenu/CanvasLayer/MENU" to="World" method="_on_menu_pressed"]

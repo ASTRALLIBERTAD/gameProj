@@ -42,7 +42,7 @@ func LoadImageTexture(path : String):
 
 
 func _on_load_scene_button_down() -> void:
-	var world_scene = load("res://World.tscn").instantiate()
+	var world_scene = load("uid://d2oibegpqmv2b").instantiate()
 	get_tree().root.add_child(world_scene)
 	queue_free()
 	SaveManager.load_game(SaveToLoad)

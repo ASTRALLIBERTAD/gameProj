@@ -1,9 +1,9 @@
 [gd_scene load_steps=2 format=3 uid="uid://bdintepuaugnj"]
 
-[ext_resource type="Script" path="res://world/multiplayer.gd" id="1_l33yn"]
+[ext_resource type="Script" path="res://world/multiplayer.gd" id="1_7tqqm"]
 
 [node name="MULTIPLAYER" type="Node"]
-script = ExtResource("1_l33yn")
+script = ExtResource("1_7tqqm")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
