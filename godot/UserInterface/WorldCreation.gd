@@ -1,9 +1,9 @@
 extends Control
 
 var WorldName: String
-@onready var t = get_tree()
-@onready var y = preload("uid://d2oibegpqmv2b").instantiate()
-@onready var i = get_node("/root/main/Terrain/Terrain1") as Terrain1
+@onready var t: = get_tree()
+@onready var y: = preload("uid://d2oibegpqmv2b").instantiate() #res://World.tscn
+@onready var i: = get_node("/root/main/Terrain/Terrain1") as Terrain1
 
 func _on_playbuton_pressed() -> void:
 	var WorldName = %WorldNameInput.text
@@ -20,35 +20,35 @@ func _on_playbuton_pressed() -> void:
 	if !get_tree() == null:
 		if GameSeed.is_valid_int():
 			SaveManager.WorldSeed = GameSeed
-			var t = load("res://World.tscn").instantiate()
+			var t = load("uid://d2oibegpqmv2b").instantiate() #res://World.tscn
 			get_tree().root.add_child(t)
 			var i = get_node("/root/main/Terrain/Terrain1") as Terrain1
 			i.seed_seed(SaveManager.WorldSeed)
 			queue_free()
 		elif GameSeed == "":
-			var lp = RandomNumberGenerator.new()
+			var lp: = RandomNumberGenerator.new()
 			var t = hash(lp)
 			SaveManager.WorldSeed = clamp(t, -2147483648, 2147483647)
-			var y = load("res://World.tscn").instantiate()
+			var y = load("uid://d2oibegpqmv2b").instantiate() #res://World.tscn
 			t.root.add_child(y)
 			i.seed_seed(SaveManager.WorldSeed)
 			queue_free()
 		else:
-			var t = hash(GameSeed)
+			var t: = hash(GameSeed)
 			SaveManager.WorldSeed = clamp(t, -2147483648, 2147483647)
-			var y = load("res://World.tscn").instantiate()
+			var y = load("uid://d2oibegpqmv2b").instantiate() #res://World.tscn
 			get_tree().root.add_child(y)
-			var i = get_node("/root/main/Terrain/Terrain1") as Terrain1
+			var i: = get_node("/root/main/Terrain/Terrain1") as Terrain1
 			i.seed_seed(SaveManager.WorldSeed)
 			queue_free()
-		var game = SaveManagerRust.new()
+		var game: = SaveManagerRust.new()
 		game.save_game_rust(WorldName)
 		SaveManager.save_world(WorldName)
 	else:
 		print("failed to  save a new game")
 	
 	
-	var game = SaveManagerRust.new()
+	var game: = SaveManagerRust.new()
 	game.save_game_rust(WorldName)
 
 func _on_backbutton_pressed() -> void:

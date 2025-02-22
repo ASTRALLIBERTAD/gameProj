@@ -4,6 +4,18 @@ extends Node2dRust
 var peer = ENetMultiplayerPeer.new()
 var t = PacketPeerUDP.new()
 func _ready() -> void:
+	peer.create_server(55555, 3)
+	multiplayer.multiplayer_peer = peer
+	multiplayer.peer_connected.connect(
+	func(pid):
+		print("pid")
+		add_player(pid)
+		multiplayer.get_unique_id()
+		)
+	multiplayer.peer_disconnected.connect(
+		func(pid):
+			get_node(str(pid)).queue_free()
+	)
 	$AutoSave.start()
 
 func add_player(pid):

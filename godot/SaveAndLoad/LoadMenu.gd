@@ -10,10 +10,10 @@ func _ready() -> void:
 	for i in dir:
 		var button : Button = LoadButton.instantiate()
 		button.LoadButtonDown.connect(OnLoadButtonDown)
-		var file_path = SaveManager.get_os() + "/games/%s/%s_saveGame.json" % [i, i]
+		var file_path: = SaveManager.get_os() + "/games/%s/%s_saveGame.json" % [i, i]
 		
-		var file = FileAccess.open( file_path, FileAccess.READ)
-		var content = file.get_as_text()
+		var file: = FileAccess.open( file_path, FileAccess.READ)
+		var content: = file.get_as_text()
 		var obj = JSON.parse_string(content)
 		button.SetupButton(obj)
 		button.text = obj.name
@@ -32,8 +32,8 @@ func OnLoadButtonDown(date, saveName, imagePath, seedGame):
 	pass
 
 func LoadImageTexture(path : String):
-	var loadedImage = Image.new()
-	var error = loadedImage.load(path)
+	var loadedImage: = Image.new()
+	var error: = loadedImage.load(path)
 	
 	if error != OK:
 		print("image failed to load")
@@ -42,11 +42,11 @@ func LoadImageTexture(path : String):
 
 
 func _on_load_scene_button_down() -> void:
-	var world_scene = load("uid://d2oibegpqmv2b").instantiate()
+	var world_scene: = preload("uid://d2oibegpqmv2b").instantiate()
 	get_tree().root.add_child(world_scene)
 	queue_free()
 	SaveManager.load_game(SaveToLoad)
-	var u = get_node("/root/main/Terrain/Terrain1") as Terrain1
+	var u: Terrain1 = get_node("/root/main/Terrain/Terrain1") as Terrain1
 	u.seed_seed(GameTerrain)
 	
 

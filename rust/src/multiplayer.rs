@@ -78,10 +78,7 @@ impl ICharacterBody2D for MultiPlayerRust {
 
         let k = format!("coordinates :{}, {:?}", cord.x, y_value as i32);
         self.coords.set_text(&k);
-
-
     }
-    
 }
 
 
@@ -95,7 +92,4 @@ impl MultiPlayerRust {
         let ko = scene.to_local(Vector2::new(cord.x as f32, cord.y as f32));
         return ko;
     }
-    
-    
-
 }
