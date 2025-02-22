@@ -28,10 +28,12 @@ func _on_playbuton_pressed() -> void:
 		elif GameSeed == "":
 			var lp: = RandomNumberGenerator.new()
 			var t = hash(lp)
-			SaveManager.WorldSeed = clamp(t, -2147483648, 2147483647)
+			var m = clamp(t, -2147483648, 2147483647)
+			SaveManager.WorldSeed = m
 			var y = load("uid://d2oibegpqmv2b").instantiate() #res://World.tscn
-			t.root.add_child(y)
-			i.seed_seed(SaveManager.WorldSeed)
+			var ui = t
+			ui.root.add_child(y)
+			t.seed_seed(m)
 			queue_free()
 		else:
 			var t: = hash(GameSeed)
