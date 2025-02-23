@@ -1,29 +1,67 @@
 extends Node
 
-const BROADCAST_PORT = 55555
 var udp := PacketPeerUDP.new()
-var found_servers := []
+@export var serverInfo: PackedScene
+signal joinGame(ip)
+
+# Listener for incoming packets
+var listener: PacketPeerUDP
+@export var listenPort: int = 8912
 
 func _ready():
-	udp.bind(BROADCAST_PORT)
-	print("Client ready to scan for servers.")
+	setUp()
 
-func scan_for_servers():
-	found_servers.clear()
-	print("Scanning for servers...")
+func setUp():
+	listener = PacketPeerUDP.new()
+	var ok = listener.bind(listenPort)
+	if ok == OK:
+		print("Successfully bound to port:", listenPort)
+	else:
+		print("Failed to bind to port:", listenPort)
 
-func _process(delta):
-	if udp.get_available_packet_count() > 0:
-		var packet = udp.get_packet().get_string_from_utf8()
-		if packet.begins_with("GODOT_SERVER|"):
-			var server_ip = packet.replace("GODOT_SERVER|", "")
-			if server_ip not in found_servers:
-				found_servers.append(server_ip)
-				print("Found server at:", server_ip)
+func _process(_delta):
+	while listener.get_available_packet_count() > 0:
+		var serverip = listener.get_packet_ip()
+		var serverport = listener.get_packet_port()
+		var packet = listener.get_packet()
+		
+		# Convert bytes to string using get_string_from_utf8() instead of get_string_from_ascii()
+		var data = packet.get_string_from_ascii()
+		
+		# Add error handling for JSON parsing
+		var json = JSON.new()
+		var parse_result = json.parse(data)
+		
+		if parse_result == OK:
+			var roomInfo = json.get_data()
+			print("Server IP: " + serverip + " Server Port: " + str(serverport) + " Room info: " + str(roomInfo))
+			
+			# Check if room already exists
+			var room_exists = false
+			for child in $Panel/VBoxContainer.get_children():
+				if child.name == roomInfo.name:
+					room_exists = true
+					break
+			
+			# Only create new room if it doesn't exist
+			if !room_exists:
+				var currentInfo = serverInfo.instantiate()
+				currentInfo.name = roomInfo.name
+				currentInfo.get_node("Name").text = roomInfo.name
+				$Panel/VBoxContainer.add_child(currentInfo)
+				# Connect the signal using lambda to pass the IP
+				currentInfo.joinGame.connect(func(): joinbyIp(serverip))
+
+func joinbyIp(ip):
+	joinGame.emit(ip)
 
 func _on_join_pressed(ip):
 	var peer = ENetMultiplayerPeer.new()
-	peer.create_client(ip, 55555)
-	multiplayer.multiplayer_peer = peer
-	print("Connecting to:", ip)
-	get_tree().change_scene_to_file("res://World.tscn")
+	var error = peer.create_client(ip, 55555)
+	
+	if error == OK:
+		multiplayer.multiplayer_peer = peer
+		print("Connecting to:", ip)
+		get_tree().change_scene_to_file("res://World.tscn")
+	else:
+		print("Failed to create client. Error code:", error)

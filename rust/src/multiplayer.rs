@@ -41,8 +41,6 @@ impl ICharacterBody2D for MultiPlayerRust {
             self.cam.make_current();
         }
 
-        let mut r = self.base_mut().get_node_as::<Label>("/root/main/World/PLAYERS/Control/CanvasLayer/coords");
-        r.set_visible(false);
     }
     
     fn process(&mut self, _delta:f64){

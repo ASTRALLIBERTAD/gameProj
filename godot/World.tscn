@@ -152,9 +152,8 @@ animations = [{
 
 [node name="main" type="PlayerNode"]
 
-[node name="World" type="Node2dRust" parent="." node_paths=PackedStringArray("players", "coords")]
+[node name="World" type="Node2dRust" parent="." node_paths=PackedStringArray("players")]
 players = NodePath("PLAYERS")
-coords = NodePath("PLAYERS/Control/CanvasLayer/coords")
 script = ExtResource("1_aftjc")
 
 [node name="Pet" type="Pet" parent="World" node_paths=PackedStringArray("player", "sprite")]
@@ -178,25 +177,8 @@ autoplay = "run"
 wait_time = 5.0
 autostart = true
 
-[node name="PLAYERS" parent="World" node_paths=PackedStringArray("coords") instance=ExtResource("4_dqyd3")]
-coords = NodePath("Control/CanvasLayer/coords")
+[node name="PLAYERS" parent="World" instance=ExtResource("4_dqyd3")]
 unique_name_in_owner = true
-
-[node name="Control" type="Control" parent="World/PLAYERS"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="CanvasLayer" type="CanvasLayer" parent="World/PLAYERS/Control"]
-
-[node name="coords" type="Label" parent="World/PLAYERS/Control/CanvasLayer"]
-unique_name_in_owner = true
-offset_right = 1.0
-offset_bottom = 55.0
-theme_override_font_sizes/font_size = 40
 
 [node name="osl" type="Label" parent="World"]
 offset_right = 40.0
@@ -335,6 +317,8 @@ text = "connect"
 _spawnable_scenes = PackedStringArray("res://Player/multiplayers.tscn")
 spawn_path = NodePath("..")
 
+[node name="Broadcaster" type="Timer" parent="World"]
+
 [connection signal="timeout" from="World/AutoSave" to="World" method="_on_auto_save_timeout"]
 [connection signal="timeout" from="World/PauseMenu/SavingTime" to="World" method="_on_saving_time_timeout"]
 [connection signal="pressed" from="World/PauseMenu/CanvasLayer/MENU" to="World" method="_on_menu_pressed"]
@@ -342,3 +326,4 @@ spawn_path = NodePath("..")
 [connection signal="pressed" from="World/PauseMenu/CanvasLayer/Panel/VBoxContainer/Back" to="World" method="_on_back_pressed"]
 [connection signal="pressed" from="World/host" to="World" method="_on_host_pressed"]
 [connection signal="pressed" from="World/add player" to="World" method="_on_add_player_pressed"]
+[connection signal="timeout" from="World/Broadcaster" to="World" method="_on_broadcaster_timeout"]

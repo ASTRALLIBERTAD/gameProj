@@ -2,20 +2,8 @@ extends Node2dRust
 
 @onready var scene = get_tree()
 var peer = ENetMultiplayerPeer.new()
-var t = PacketPeerUDP.new()
+
 func _ready() -> void:
-	peer.create_server(55555, 3)
-	multiplayer.multiplayer_peer = peer
-	multiplayer.peer_connected.connect(
-	func(pid):
-		print("pid")
-		add_player(pid)
-		multiplayer.get_unique_id()
-		)
-	multiplayer.peer_disconnected.connect(
-		func(pid):
-			get_node(str(pid)).queue_free()
-	)
 	$AutoSave.start()
 
 func add_player(pid):
@@ -81,4 +69,24 @@ func _on_host_pressed() -> void:
 		func(pid):
 			get_node(str(pid)).queue_free()
 	)
+	broadcaster()
+	pass # Replace with function body.
+var udp : PacketPeerUDP
+var listner: PacketPeerUDP
+@export var broadcastPort: int = 8912
+
+var RoomInfo = {"name":"name", "playerCount": 0}
+func broadcaster():
+	RoomInfo.name = SaveManager.get_world_name()
+	udp = PacketPeerUDP.new()
+	udp.set_broadcast_enabled(true)
+	udp.bind(broadcastPort)
+	$Broadcaster.start()
+
+
+func _on_broadcaster_timeout() -> void:
+	var data = JSON.stringify(RoomInfo)
+	var packet = data.to_ascii_buffer()
+	udp.put_packet(packet)
+	udp.set_dest_address("255.255.255.255", broadcastPort)
 	pass # Replace with function body.
