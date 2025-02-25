@@ -71,3 +71,9 @@ func d(ip):
 
 func _on_back_pressed():
 	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")
+
+func _exit_tree():
+	cleanUp()
+
+func cleanUp():
+	listener.close()

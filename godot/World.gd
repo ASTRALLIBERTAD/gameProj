@@ -67,6 +67,7 @@ func _on_host_pressed() -> void:
 		)
 	multiplayer.peer_disconnected.connect(
 		func(pid):
+			print(pid)
 			get_node(str(pid)).queue_free()
 	)
 	broadcaster()
@@ -92,3 +93,11 @@ func _on_broadcaster_timeout() -> void:
 
 	udp.set_dest_address("255.255.255.255", broadcastPort)
 	pass # Replace with function body.
+
+func cleanUp():
+	$Broadcaster.stop()
+	if udp != null:
+		udp.close()
+
+func _exit_tree():
+	cleanUp()
