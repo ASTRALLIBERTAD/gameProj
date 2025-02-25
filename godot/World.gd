@@ -87,6 +87,8 @@ func broadcaster():
 func _on_broadcaster_timeout() -> void:
 	var data = JSON.stringify(RoomInfo)
 	var packet = data.to_ascii_buffer()
+
 	udp.put_packet(packet)
+
 	udp.set_dest_address("255.255.255.255", broadcastPort)
 	pass # Replace with function body.

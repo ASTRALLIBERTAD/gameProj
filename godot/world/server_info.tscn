@@ -13,7 +13,7 @@ text = "test label"
 [node name="Ip" type="Label" parent="."]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "192.168.1.111"
+text = "192.168.100.1"
 
 [node name="PlayerCount" type="Label" parent="."]
 layout_mode = 2
