@@ -42,7 +42,6 @@ func _process(_delta):
 				if i.name == roomInfo.name:
 					i.get_node("Ip").text = serverip
 					return
-
 			
 			# Only create new room if it doesn't exist
 			if !room_exists:
@@ -70,13 +69,5 @@ func d(ip):
 	else:
 		print("Failed to create client. Error code:", error)
 
-func _on_join_pressed(ip):
-	var peer = ENetMultiplayerPeer.new()
-	var error = peer.create_client(ip, 55555)
-	
-	if error == OK:
-		multiplayer.multiplayer_peer = peer
-		print("Connecting ", ip ) 
-		get_tree().change_scene_to_file("res://World.tscn")
-	else:
-		print("Failed to create client. Error code:", error)
+func _on_back_pressed():
+	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")

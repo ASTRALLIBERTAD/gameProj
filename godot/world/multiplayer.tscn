@@ -31,7 +31,7 @@ offset_bottom = 64.0
 grow_horizontal = 2
 theme_override_constants/separation = 18
 
-[node name="join" type="Button" parent="CanvasLayer"]
+[node name="back" type="Button" parent="CanvasLayer"]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -43,6 +43,7 @@ offset_right = 19.0
 offset_bottom = 15.5
 grow_horizontal = 2
 grow_vertical = 2
-text = "Join"
+text = "Back"
 
-[connection signal="pressed" from="CanvasLayer/join" to="." method="_on_join_pressed"]
+[connection signal="pressed" from="CanvasLayer/back" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="CanvasLayer/back" to="." method="_on_join_pressed"]
