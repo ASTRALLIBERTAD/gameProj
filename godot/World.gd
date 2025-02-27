@@ -50,7 +50,6 @@ func _on_back_pressed() -> void:
 	get_tree().paused = false
 	pass # Replace with function body.
 
-
 func _on_add_player_pressed() -> void:
 	peer.create_client("localhost", 55555)
 	multiplayer.multiplayer_peer = peer
@@ -61,7 +60,7 @@ func _on_host_pressed() -> void:
 	multiplayer.multiplayer_peer = peer
 	multiplayer.peer_connected.connect(
 	func(pid):
-		print("pid")
+		print(pid)
 		add_player(pid)
 		multiplayer.get_unique_id()
 		)
@@ -70,28 +69,19 @@ func _on_host_pressed() -> void:
 			print(pid)
 			get_node(str(pid)).queue_free()
 	)
-	broadcaster()
+	%World.broadcast()
+	$Broadcaster.start()
+	RoomInfo.name = SaveManager.get_world_name()
 	pass # Replace with function body.
 var udp : PacketPeerUDP
 var listner: PacketPeerUDP
 @export var broadcastPort: int = 8912
 
 var RoomInfo = {"name":"name", "playerCount": 0}
-func broadcaster():
-	RoomInfo.name = SaveManager.get_world_name()
-	udp = PacketPeerUDP.new()
-	udp.set_broadcast_enabled(true)
-	udp.bind(broadcastPort)
-	$Broadcaster.start()
-
-
 func _on_broadcaster_timeout() -> void:
 	var data = JSON.stringify(RoomInfo)
 	var packet = data.to_ascii_buffer()
-
-	udp.put_packet(packet)
-
-	udp.set_dest_address("255.255.255.255", broadcastPort)
+	%World.broadcaster_timeout(packet)
 	pass # Replace with function body.
 
 func cleanUp():

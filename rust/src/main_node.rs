@@ -3,13 +3,13 @@ use godot::prelude::*;
 
 #[derive(GodotClass)]
 #[class(base=Node)]
-pub struct PlayerNode {
+pub struct MainNode {
     base: Base<Node>,
     
 }
 
 #[godot_api]
-impl INode for PlayerNode {
+impl INode for MainNode {
     fn init(base: Base<Node>) -> Self {
         Self {
             base,

@@ -3,10 +3,11 @@ mod example;
 mod rustplayer;
 mod save_manager_rusts;
 mod terrain;
-mod node2d;
+mod world;
 mod control;
-mod node;
+mod main_node;
 mod multiplayer;
+mod multiplayer_scene;
 
 use godot::prelude::*;
 

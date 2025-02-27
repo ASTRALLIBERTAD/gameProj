@@ -150,10 +150,10 @@ animations = [{
 "speed": 5.0
 }]
 
-[node name="main" type="PlayerNode"]
+[node name="main" type="MainNode"]
 
-[node name="World" type="Node2dRust" parent="." node_paths=PackedStringArray("players")]
-players = NodePath("PLAYERS")
+[node name="World" type="Node2dRust" parent="."]
+unique_name_in_owner = true
 script = ExtResource("1_aftjc")
 
 [node name="Pet" type="Pet" parent="World" node_paths=PackedStringArray("player", "sprite")]
