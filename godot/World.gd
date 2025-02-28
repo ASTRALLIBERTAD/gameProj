@@ -72,6 +72,7 @@ func _on_host_pressed() -> void:
 	%World.broadcast()
 	$Broadcaster.start()
 	RoomInfo.name = SaveManager.get_world_name()
+	stun()
 	pass # Replace with function body.
 var udp : PacketPeerUDP
 var listner: PacketPeerUDP
@@ -91,3 +92,19 @@ func cleanUp():
 
 func _exit_tree():
 	cleanUp()
+	
+var webrtc_peer = PacketPeerUDP.new()
+
+func stun():
+	webrtc_peer.set_dest_address("stun.1.google.com",19302)
+	webrtc_peer.put_packet("request".to_utf8_buffer())
+	await get_tree().create_timer(1.0).timeout
+	
+	
+var gh = Vector2i(0, 4)
+func _input(event: InputEvent) -> void:
+	if Input.is_action_just_pressed("click"):
+		var mouse = get_global_mouse_position()
+		var t = get_node("/root/main/Terrain/Terrain1") as Terrain1
+		var tile  = t.local_to_map(mouse)
+		t.set_cell(tile, 0, gh)
