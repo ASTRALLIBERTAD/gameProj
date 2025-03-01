@@ -1,5 +1,5 @@
 use std::collections::{HashMap, HashSet};
-use godot::classes::{FastNoiseLite, ITileMapLayer, TileMapLayer};
+use godot::classes::{FastNoiseLite, ITileMapLayer, InputEvent, TileMapLayer};
 use godot::global::{randi, sqrt};
 use godot::obj::WithBaseField;
 use godot::prelude::*;
@@ -83,6 +83,18 @@ impl ITileMapLayer for Terrain1 {
                     godot_print!("Player {} is not valid", i);
                 }
             }
+        }
+    }
+
+    fn input(&mut self, event: Gd<InputEvent>) {
+        
+        if event.is_action_pressed("click"){
+            let k = self.base_mut().get_global_mouse_position();
+            let l = self.base_mut().local_to_map(k);
+            self.base_mut().set_cell_ex(l)
+            .source_id(1)
+            .atlas_coords(Vector2i::new(1, 0))
+            .done();
         }
     }
 }

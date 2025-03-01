@@ -101,10 +101,3 @@ func stun():
 	await get_tree().create_timer(1.0).timeout
 	
 	
-var gh = Vector2i(0, 4)
-func _input(event: InputEvent) -> void:
-	if Input.is_action_just_pressed("click"):
-		var mouse = get_global_mouse_position()
-		var t = get_node("/root/main/Terrain/Terrain1") as Terrain1
-		var tile  = t.local_to_map(mouse)
-		t.set_cell(tile, 0, gh)
