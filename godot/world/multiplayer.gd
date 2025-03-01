@@ -25,10 +25,6 @@ func setUp():
 var stun = PacketPeerUDP.new()
 
 func _process(_delta):
-	stun.connect_to_host("stun.1.google.com",19302)
-	while stun.get_available_packet_count() > 0:
-		var response = stun.get_packet().get_string_from_utf8()
-		print(response)
 	while listener.get_available_packet_count() > 0:
 		var serverip = listener.get_packet_ip()
 		var serverport = listener.get_packet_port()
