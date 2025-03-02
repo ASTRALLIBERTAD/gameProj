@@ -8,10 +8,15 @@ signal joinGame(ip)
 var listener: PacketPeerUDP
 @export var listenPort: int = 8912
 
+
+
 func _ready():
 	
-	
+
 	setUp()
+
+
+
 
 func setUp():
 	listener = PacketPeerUDP.new()

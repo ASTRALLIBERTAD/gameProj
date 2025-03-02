@@ -20,6 +20,7 @@ config/icon="res://Assets/PixelUIButtons/PlayButton.png"
 [autoload]
 
 SaveManager="*res://SaveAndLoad/SaveManager.gd"
+Nakama="*res://addons/com.heroiclabs.nakama/Nakama.gd"
 
 [display]
 

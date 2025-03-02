@@ -319,6 +319,32 @@ spawn_path = NodePath("..")
 
 [node name="Broadcaster" type="Timer" parent="World"]
 
+[node name="player_id" type="Label" parent="World"]
+offset_left = 43.0
+offset_top = -71.0
+offset_right = 111.0
+offset_bottom = -48.0
+text = "player id"
+
+[node name="Tester" type="Button" parent="World"]
+offset_right = 8.0
+offset_bottom = 8.0
+text = "nakama"
+
+[node name="player name" type="Button" parent="."]
+offset_left = 85.0
+offset_top = -30.0
+offset_right = 155.0
+offset_bottom = 1.0
+text = "player 2"
+
+[node name="send" type="Button" parent="."]
+offset_left = -38.0
+offset_top = -60.0
+offset_right = 8.0
+offset_bottom = -29.0
+text = "send"
+
 [connection signal="timeout" from="World/AutoSave" to="World" method="_on_auto_save_timeout"]
 [connection signal="timeout" from="World/PauseMenu/SavingTime" to="World" method="_on_saving_time_timeout"]
 [connection signal="pressed" from="World/PauseMenu/CanvasLayer/MENU" to="World" method="_on_menu_pressed"]
@@ -327,3 +353,6 @@ spawn_path = NodePath("..")
 [connection signal="pressed" from="World/host" to="World" method="_on_host_pressed"]
 [connection signal="pressed" from="World/add player" to="World" method="_on_add_player_pressed"]
 [connection signal="timeout" from="World/Broadcaster" to="World" method="_on_broadcaster_timeout"]
+[connection signal="pressed" from="World/Tester" to="World" method="_on_tester_pressed"]
+[connection signal="pressed" from="player name" to="World" method="_on_player_name_pressed"]
+[connection signal="pressed" from="send" to="World" method="_on_send_pressed"]

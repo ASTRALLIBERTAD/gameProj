@@ -2,9 +2,30 @@ extends Node2dRust
 
 @onready var scene = get_tree()
 var peer = ENetMultiplayerPeer.new()
-
+var session: NakamaSession
+var client: NakamaClient
+var socket: NakamaSocket
 func _ready() -> void:
+	client = Nakama.create_client("defaultkey", "127.0.0.1", 7350, "http")
+	
+	
+	
 	$AutoSave.start()
+
+func onMatchState(state : NakamaRTAPI.MatchData):
+	print("data is : " + str(state.data))
+
+func onMatchPresence(presence : NakamaRTAPI.MatchPresenceEvent):
+	print(presence)
+
+func onSocketClosed():
+	print("Socket Closed")
+
+func onSocketReceivedError(err):
+	print("Socket Error:" + str(err))
+
+func conectedsocket():
+	print("connected socket")
 
 func add_player(pid):
 	var plyr = preload("res://Player/multiplayers.tscn").instantiate()
@@ -51,8 +72,7 @@ func _on_back_pressed() -> void:
 	pass # Replace with function body.
 
 func _on_add_player_pressed() -> void:
-	peer.create_client("localhost", 55555)
-	multiplayer.multiplayer_peer = peer
+	multiplayerBridge.join_named_match(SaveManager.get_world_name())
 	pass # Replace with function body.
 
 func _on_host_pressed() -> void:
@@ -72,7 +92,6 @@ func _on_host_pressed() -> void:
 	%World.broadcast()
 	$Broadcaster.start()
 	RoomInfo.name = SaveManager.get_world_name()
-	stun()
 	pass # Replace with function body.
 var udp : PacketPeerUDP
 var listner: PacketPeerUDP
@@ -95,9 +114,69 @@ func _exit_tree():
 	
 var webrtc_peer = PacketPeerUDP.new()
 
-func stun():
-	webrtc_peer.set_dest_address("stun.1.google.com",19302)
-	webrtc_peer.put_packet("request".to_utf8_buffer())
-	await get_tree().create_timer(1.0).timeout
+var multiplayerBridge : NakamaMultiplayerBridge
+
+func setupMultiplayerBridge():
+	multiplayerBridge = NakamaMultiplayerBridge.new(socket)
+	multiplayerBridge.match_join_error.connect(onMatchJoinError)
+	var multiplayer = get_tree().get_multiplayer()
+	multiplayer.set_multiplayer_peer(multiplayerBridge.multiplayer_peer)
+	multiplayer.peer_connected.connect(onPeerConnected)
+	multiplayer.peer_disconnected.connect(onPeerDisconnected)
 	
 	
+func onMatchJoinError(error):
+	print("Unable to join match: " + error.message)
+func onPeerConnected(id):
+	print("Peer connected id is : " + str(id))
+func onPeerDisconnected(id):
+	print("Peer disconnected id is : " + str(id))
+
+
+func _on_tester_pressed() -> void:
+	session = await client.authenticate_email_async("test2@gmail.com", "password", "l")
+	socket = Nakama.create_socket_from(client)
+	await socket.connect_async(session)
+	var account = await client.get_account_async(session)
+	$player_id.text = account.user.id
+	print(account)
+	
+	socket.connected.connect(conectedsocket)
+	socket.closed.connect(onSocketClosed)
+	socket.received_error.connect(onSocketReceivedError)
+	
+	socket.received_match_presence.connect(onMatchPresence)
+	socket.received_match_state.connect(onMatchState)
+	setupMultiplayerBridge()
+	
+	pass # Replace with function body.
+
+
+func _on_player_name_pressed() -> void:
+	session = await client.authenticate_email_async("test@gmail.com", "password", "k")
+	socket = Nakama.create_socket_from(client)
+	await socket.connect_async(session)
+	var account = await client.get_account_async(session)
+	$player_id.text = account.user.id
+	print(account)
+	
+	socket.connected.connect(conectedsocket)
+	socket.closed.connect(onSocketClosed)
+	socket.received_error.connect(onSocketReceivedError)
+	
+	socket.received_match_presence.connect(onMatchPresence)
+	socket.received_match_state.connect(onMatchState)
+	setupMultiplayerBridge()
+	
+
+	pass # Replace with function body.
+
+
+@rpc("any_peer")
+func sendData(message):
+	print(message)
+
+
+func _on_send_pressed() -> void:
+	sendData.rpc("hello")
+	pass # Replace with function body.
