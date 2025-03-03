@@ -306,13 +306,6 @@ offset_right = -59.0
 offset_bottom = -15.0
 text = "host"
 
-[node name="add player" type="Button" parent="World"]
-offset_left = -130.0
-offset_top = -8.0
-offset_right = -73.0
-offset_bottom = 23.0
-text = "connect"
-
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="World"]
 _spawnable_scenes = PackedStringArray("res://Player/multiplayers.tscn")
 spawn_path = NodePath("..")
@@ -325,11 +318,6 @@ offset_top = -71.0
 offset_right = 111.0
 offset_bottom = -48.0
 text = "player id"
-
-[node name="Tester" type="Button" parent="World"]
-offset_right = 8.0
-offset_bottom = 8.0
-text = "nakama"
 
 [node name="player name" type="Button" parent="."]
 offset_left = 85.0
@@ -345,14 +333,26 @@ offset_right = 8.0
 offset_bottom = -29.0
 text = "send"
 
+[node name="Tester" type="Button" parent="."]
+offset_right = 71.0
+offset_bottom = 31.0
+text = "nakama"
+
+[node name="add player" type="Button" parent="."]
+offset_left = -153.0
+offset_top = -7.0
+offset_right = -83.0
+offset_bottom = 24.0
+text = "connect"
+
 [connection signal="timeout" from="World/AutoSave" to="World" method="_on_auto_save_timeout"]
 [connection signal="timeout" from="World/PauseMenu/SavingTime" to="World" method="_on_saving_time_timeout"]
 [connection signal="pressed" from="World/PauseMenu/CanvasLayer/MENU" to="World" method="_on_menu_pressed"]
 [connection signal="pressed" from="World/PauseMenu/CanvasLayer/Panel/VBoxContainer/save" to="World" method="_on_save_pressed"]
 [connection signal="pressed" from="World/PauseMenu/CanvasLayer/Panel/VBoxContainer/Back" to="World" method="_on_back_pressed"]
 [connection signal="pressed" from="World/host" to="World" method="_on_host_pressed"]
-[connection signal="pressed" from="World/add player" to="World" method="_on_add_player_pressed"]
 [connection signal="timeout" from="World/Broadcaster" to="World" method="_on_broadcaster_timeout"]
-[connection signal="pressed" from="World/Tester" to="World" method="_on_tester_pressed"]
 [connection signal="pressed" from="player name" to="World" method="_on_player_name_pressed"]
 [connection signal="pressed" from="send" to="World" method="_on_send_pressed"]
+[connection signal="pressed" from="Tester" to="World" method="_on_tester_pressed"]
+[connection signal="pressed" from="add player" to="World" method="_on_add_player_pressed"]

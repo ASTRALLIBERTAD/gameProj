@@ -51,6 +51,7 @@ func _process(_delta):
 			for i in $CanvasLayer/Panel/VBoxContainer.get_children():
 				if i.name == roomInfo.name:
 					i.get_node("Ip").text = serverip
+					i.get_node("PlayerCount").text = roomInfo.port
 					return
 			
 			# Only create new room if it doesn't exist
@@ -59,15 +60,16 @@ func _process(_delta):
 				currentInfo.name = roomInfo.name
 				
 				currentInfo.get_node("Ip").text = str(serverip)
+				currentInfo.get_node("PlayerCount").text = roomInfo.port
 				currentInfo.get_node("Name").text = roomInfo.name
 				$CanvasLayer/Panel/VBoxContainer.add_child(currentInfo)
 				# Connect the signal using lambda to pass the IP
 				currentInfo.joinGame.connect(joinbyIp)
 
-
-
 func joinbyIp(ip):
 	joinGame.emit(ip)
+
+
 
 
 func d(ip):

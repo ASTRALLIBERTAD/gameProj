@@ -48,7 +48,6 @@ func _on_load_scene_button_down() -> void:
 	SaveManager.load_game(SaveToLoad)
 	var u: Terrain1 = get_node("/root/main/Terrain/Terrain1") as Terrain1
 	u.seed_seed(GameTerrain)
-	
 
 func _on_delete_pressed() -> void:
 	SaveManager.delete_save(SaveToLoad)
