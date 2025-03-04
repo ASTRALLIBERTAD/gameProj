@@ -307,7 +307,7 @@ offset_bottom = -15.0
 text = "host"
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="World"]
-_spawnable_scenes = PackedStringArray("res://Player/multiplayers.tscn")
+_spawnable_scenes = PackedStringArray("uid://cb7g0u1n88g4v")
 spawn_path = NodePath("..")
 
 [node name="Broadcaster" type="Timer" parent="World"]
