@@ -47,10 +47,13 @@ func _on_playbuton_pressed() -> void:
 	else:
 		print("failed to  save a new game")
 	
-	
-
 	newgame.save_game_rust(WorldName)
 
 func _on_backbutton_pressed() -> void:
+	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")
+	pass # Replace with function body.
+
+
+func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")
 	pass # Replace with function body.
