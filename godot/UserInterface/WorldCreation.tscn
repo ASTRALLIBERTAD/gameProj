@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://cae6flombrjgk"]
 
-[ext_resource type="Script" path="res://UserInterface/WorldCreation.gd" id="1_0t4g1"]
+[ext_resource type="Script" uid="uid://dm7r0c2ousbu6" path="res://UserInterface/WorldCreation.gd" id="1_0t4g1"]
 [ext_resource type="Texture2D" uid="uid://l1g06b80dhe8" path="res://Assets/PixelUIButtons/CancelButton.png" id="2_mjge2"]
 
 [node name="WorldCreation" type="Control"]

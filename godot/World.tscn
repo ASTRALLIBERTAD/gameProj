@@ -1,11 +1,11 @@
 [gd_scene load_steps=28 format=3 uid="uid://d2oibegpqmv2b"]
 
-[ext_resource type="Script" path="res://World.gd" id="1_aftjc"]
+[ext_resource type="Script" uid="uid://bslfkk847kwap" path="res://World.gd" id="1_aftjc"]
 [ext_resource type="Texture2D" uid="uid://cbwt50e1g17xq" path="res://Assets/Pet Cats Pack/Cat-5/Cat-5-Idle.png" id="3_ew8vj"]
 [ext_resource type="Texture2D" uid="uid://dvb08glmmt3t2" path="res://Assets/Pet Cats Pack/Cat-5/Cat-5-Run.png" id="3_wmsuc"]
 [ext_resource type="PackedScene" uid="uid://cf1y4gylaktvs" path="res://UserInterface/TouchControls.tscn" id="4_dd45r"]
 [ext_resource type="PackedScene" uid="uid://bpi3sbit45l5" path="res://Player/players.tscn" id="4_dqyd3"]
-[ext_resource type="Script" path="res://FpsCounter.gd" id="5_dged2"]
+[ext_resource type="Script" uid="uid://dtfghg4godxt4" path="res://FpsCounter.gd" id="5_dged2"]
 [ext_resource type="Texture2D" uid="uid://djo53ep2hv88p" path="res://icon.svg" id="7_6ip7a"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6js52"]

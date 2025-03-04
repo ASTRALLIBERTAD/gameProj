@@ -20,9 +20,9 @@ func _on_playbuton_pressed() -> void:
 	if !get_tree() == null:
 		if GameSeed.is_valid_int():
 			SaveManager.WorldSeed = GameSeed
-			var t = load("uid://d2oibegpqmv2b").instantiate() #res://World.tscn
-			get_tree().root.add_child(t)
-			var i = get_node("/root/main/Terrain/Terrain1") as Terrain1
+			var world = load("uid://d2oibegpqmv2b").instantiate() #res://World.tscn
+			get_tree().root.add_child(world)
+			var Terrain = get_node("/root/main/Terrain/Terrain1") as Terrain1
 			i.seed_seed(SaveManager.WorldSeed)
 			queue_free()
 		elif GameSeed == "":
@@ -30,15 +30,15 @@ func _on_playbuton_pressed() -> void:
 			var ti = hash(lp)
 			var m = clamp(ti, -2147483648, 2147483647)
 			SaveManager.WorldSeed = m
-			var y = preload("uid://d2oibegpqmv2b").instantiate() #res://World.tscn
+			var world = preload("uid://d2oibegpqmv2b").instantiate() #res://World.tscn
 			var ui = t
-			ui.root.add_child(y)
+			ui.root.add_child(world)
 			i.seed_seed(m)
 			queue_free()
 		else:
 			var t: = hash(GameSeed)
 			SaveManager.WorldSeed = clamp(t, -2147483648, 2147483647)
-			var y = load("uid://d2oibegpqmv2b").instantiate() #res://World.tscn
+			var y = preload("uid://d2oibegpqmv2b").instantiate() #res://World.tscn
 			get_tree().root.add_child(y)
 			var i: = get_node("/root/main/Terrain/Terrain1") as Terrain1
 			i.seed_seed(SaveManager.WorldSeed)
@@ -50,8 +50,8 @@ func _on_playbuton_pressed() -> void:
 		print("failed to  save a new game")
 	
 	
-	var game: = SaveManagerRust.new()
-	game.save_game_rust(WorldName)
+	var newgame: = SaveManagerRust.new()
+	newgame.save_game_rust(WorldName)
 
 func _on_backbutton_pressed() -> void:
 	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")

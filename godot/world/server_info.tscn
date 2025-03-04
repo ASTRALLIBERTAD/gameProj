@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dpqlhqyadbpvs"]
 
-[ext_resource type="Script" path="res://world/Server_info.gd" id="1_04nes"]
+[ext_resource type="Script" uid="uid://cs3k7jcghnchy" path="res://world/Server_info.gd" id="1_04nes"]
 
 [node name="ServerInfo" type="HBoxContainer"]
 script = ExtResource("1_04nes")

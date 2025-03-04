@@ -13,8 +13,9 @@ func _process(delta):
 func _on_button_button_down():
 	joinGame.emit($Ip.text)
 	var ip = $Ip.text
+	var port = $PlayerCount.text
 	var peer = ENetMultiplayerPeer.new()
-	var error = peer.create_client(ip, 55555)
+	var error = peer.create_client(ip, port)
 	
 	if error == OK:
 		multiplayer.multiplayer_peer = peer

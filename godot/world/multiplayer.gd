@@ -12,11 +12,7 @@ var listener: PacketPeerUDP
 
 func _ready():
 	
-
 	setUp()
-
-
-
 
 func setUp():
 	listener = PacketPeerUDP.new()
@@ -51,7 +47,6 @@ func _process(_delta):
 			for i in $CanvasLayer/Panel/VBoxContainer.get_children():
 				if i.name == roomInfo.name:
 					i.get_node("Ip").text = serverip
-					i.get_node("PlayerCount").text = roomInfo.port
 					return
 			
 			# Only create new room if it doesn't exist
@@ -60,7 +55,7 @@ func _process(_delta):
 				currentInfo.name = roomInfo.name
 				
 				currentInfo.get_node("Ip").text = str(serverip)
-				currentInfo.get_node("PlayerCount").text = roomInfo.port
+
 				currentInfo.get_node("Name").text = roomInfo.name
 				$CanvasLayer/Panel/VBoxContainer.add_child(currentInfo)
 				# Connect the signal using lambda to pass the IP
@@ -68,20 +63,6 @@ func _process(_delta):
 
 func joinbyIp(ip):
 	joinGame.emit(ip)
-
-
-
-
-func d(ip):
-	var peer = ENetMultiplayerPeer.new()
-	var error = peer.create_client(ip, 55555)
-	
-	if error == OK:
-		multiplayer.multiplayer_peer = peer
-		print("Connecting ", ip ) 
-		get_tree().change_scene_to_file("res://World.tscn")
-	else:
-		print("Failed to create client. Error code:", error)
 
 func _on_back_pressed():
 	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")

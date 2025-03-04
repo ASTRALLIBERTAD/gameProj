@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bdintepuaugnj"]
 
-[ext_resource type="Script" path="res://world/multiplayer.gd" id="1_7tqqm"]
+[ext_resource type="Script" uid="uid://dglgsvvhupxix" path="res://world/multiplayer.gd" id="1_7tqqm"]
 [ext_resource type="PackedScene" uid="uid://dpqlhqyadbpvs" path="res://world/server_info.tscn" id="2_3mwxt"]
 
 [node name="MULTIPLAYER" type="Node"]

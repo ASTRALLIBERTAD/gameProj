@@ -6,7 +6,7 @@ var session: NakamaSession
 var client: NakamaClient
 var socket: NakamaSocket
 func _ready() -> void:
-	client = Nakama.create_client("defaultkey", "127.0.0.1", 7350, "http")
+
 	$AutoSave.start()
 
 func onMatchState(state : NakamaRTAPI.MatchData):
@@ -75,8 +75,8 @@ func _on_add_player_pressed() -> void:
 func _on_host_pressed() -> void:
 	var k = randi_range(1, 65535)
 	print("port: " + str(k))
-	RoomInfo.port = k
-	peer.create_server(k, 3)
+	RoomInfo.port = 55555
+	peer.create_server(55555, 3)
 	multiplayer.multiplayer_peer = peer
 	multiplayer.peer_connected.connect(
 	func(pid):
@@ -97,7 +97,7 @@ var udp : PacketPeerUDP
 var listner: PacketPeerUDP
 @export var broadcastPort: int = 8912
 
-var RoomInfo = {"name":"name", "playerCount": 0, "port": 0}
+var RoomInfo = {"name":"name", "port": 0}
 func _on_broadcaster_timeout() -> void:
 	var data = JSON.stringify(RoomInfo)
 	var packet = data.to_ascii_buffer()
