@@ -2,7 +2,6 @@ extends Control
 
 var WorldName: String
 @onready var t: = get_tree()
-@onready var y: = preload("uid://d2oibegpqmv2b").instantiate() #res://World.tscn
 @onready var  newgame: = SaveManagerRust.new()
 
 func _on_playbuton_pressed() -> void:
@@ -17,31 +16,31 @@ func _on_playbuton_pressed() -> void:
 	if SaveManager.world_exist(WorldName):
 		print("world name already exist")
 		return
-	var Terrain = get_node("/root/main/Terrain/Terrain1") as Terrain1
+	
 	var world = preload("uid://d2oibegpqmv2b").instantiate() #res://World.tscn
 	if !get_tree() == null:
 		if GameSeed.is_valid_int():
 			SaveManager.WorldSeed = GameSeed
 			get_tree().root.add_child(world)
-			if Terrain.is_inside_tree():
-				Terrain.seed_seed(SaveManager.WorldSeed)
-				queue_free()
-		elif GameSeed == null:
+			var uop = world.get_node("/root/main/Terrain/Terrain1") as Terrain1
+			uop.seed_seed(SaveManager.WorldSeed)
+			queue_free()
+		elif GameSeed == "":
 			var lp: = RandomNumberGenerator.new()
 			var ti = hash(lp)
 			var m = randi_range(-2147483648, 2147483647)
 			SaveManager.WorldSeed = m
 			print(m)
 			get_tree().root.add_child(world)
-			if Terrain.is_inside_tree():
-				Terrain.seed_seed(m)
-				queue_free()
+			var up = world.get_node("/root/main/Terrain/Terrain1") as Terrain1
+			up.seed_seed(m)
+			queue_free()
 		else:
 			var t: = hash(GameSeed)
 			SaveManager.WorldSeed = clamp(t, -2147483648, 2147483647)
 			get_tree().root.add_child(world)
-			var i: = get_node("/root/main/Terrain/Terrain1") as Terrain1
-			i.seed_seed(SaveManager.WorldSeed)
+			var upl = world.get_node("/root/main/Terrain/Terrain1") as Terrain1
+			upl.seed_seed(SaveManager.WorldSeed)
 			queue_free()
 		var game: = SaveManagerRust.new()
 		game.save_game_rust(WorldName)
