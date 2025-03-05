@@ -1,17 +1,33 @@
-[gd_scene load_steps=4 format=3 uid="uid://dbf2t7va3l002"]
+[gd_scene load_steps=6 format=3 uid="uid://b1wcw424g151h"]
 
-[ext_resource type="Script" uid="uid://kqi3x2omvqat" path="res://SaveAndLoad/LoadMenu.gd" id="1_8cngq"]
-[ext_resource type="Texture2D" uid="uid://djo53ep2hv88p" path="res://icon.svg" id="3_6e13g"]
-[ext_resource type="FontFile" uid="uid://b6ne2ntjnur2e" path="res://Assets/fonts/MinecraftBold-nMK1.otf" id="3_iysqx"]
+[ext_resource type="Script" uid="uid://b0142mbmxfo8p" path="res://SaveAndLoad/Csharp.cs" id="1_if5rg"]
+[ext_resource type="PackedScene" uid="uid://b0ne2ctjlfdqj" path="res://SaveAndLoad/LoadButton.tscn" id="2_13mrq"]
+[ext_resource type="FontFile" uid="uid://b6ne2ntjnur2e" path="res://Assets/fonts/MinecraftBold-nMK1.otf" id="2_qmjte"]
+[ext_resource type="Texture2D" uid="uid://djo53ep2hv88p" path="res://icon.svg" id="3_13mrq"]
 
-[node name="LoadMenu" type="Control"]
+[sub_resource type="CSharpScript" id="CSharpScript_if5rg"]
+script/source = "using Godot;
+using System;
+
+public partial class Label : Godot.Label
+{
+    public override void _Ready()
+    {
+        base._Ready();
+        base.Text = \"hello\";
+    }
+}
+"
+
+[node name="csharp" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_8cngq")
+script = ExtResource("1_if5rg")
+LoadButton = ExtResource("2_13mrq")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -35,7 +51,7 @@ size_flags_horizontal = 3
 
 [node name="New" type="Button" parent="CanvasLayer/Panel/ScrollContainer/LoadButtons"]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("3_iysqx")
+theme_override_fonts/font = ExtResource("2_qmjte")
 text = "NEW"
 
 [node name="LoadScene" type="Button" parent="CanvasLayer"]
@@ -60,7 +76,7 @@ offset_top = 19.0
 offset_right = 636.0
 offset_bottom = 83.0
 scale = Vector2(8.41837, 4.99352)
-texture = ExtResource("3_6e13g")
+texture = ExtResource("3_13mrq")
 expand_mode = 1
 
 [node name="Date" type="RichTextLabel" parent="CanvasLayer"]
@@ -68,7 +84,7 @@ offset_left = 682.0
 offset_top = 398.0
 offset_right = 998.0
 offset_bottom = 438.0
-theme_override_fonts/normal_font = ExtResource("3_iysqx")
+theme_override_fonts/normal_font = ExtResource("2_qmjte")
 text = "Date"
 fit_content = true
 scroll_active = false
@@ -78,7 +94,7 @@ offset_left = 680.0
 offset_top = 356.0
 offset_right = 1010.0
 offset_bottom = 396.0
-theme_override_fonts/normal_font = ExtResource("3_iysqx")
+theme_override_fonts/normal_font = ExtResource("2_qmjte")
 text = "Name"
 fit_content = true
 scroll_active = false
@@ -95,7 +111,7 @@ offset_right = -146.0
 offset_bottom = -176.0
 grow_horizontal = 0
 grow_vertical = 0
-theme_override_fonts/normal_font = ExtResource("3_iysqx")
+theme_override_fonts/normal_font = ExtResource("2_qmjte")
 text = "Seed
 "
 fit_content = true
@@ -115,6 +131,11 @@ offset_top = 552.0
 offset_right = 420.0
 offset_bottom = 595.0
 text = "MULTIPLAYER"
+
+[node name="Label" type="Label" parent="CanvasLayer"]
+offset_right = 40.0
+offset_bottom = 23.0
+script = SubResource("CSharpScript_if5rg")
 
 [connection signal="pressed" from="CanvasLayer/Panel/ScrollContainer/LoadButtons/New" to="." method="_on_new_pressed"]
 [connection signal="button_down" from="CanvasLayer/LoadScene" to="." method="_on_load_scene_button_down"]

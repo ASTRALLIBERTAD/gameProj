@@ -41,6 +41,7 @@ impl Node2dRust {
     fn broadcaster_timeout(&mut self, packet: PackedByteArray) {
         self.udp.put_packet(&packet);
         self.udp.set_dest_address("255.255.255.255", BROADCAST_PORT);
+        godot_print!("{}", packet)
     }
 }
 

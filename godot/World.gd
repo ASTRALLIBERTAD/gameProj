@@ -6,7 +6,6 @@ var session: NakamaSession
 var client: NakamaClient
 var socket: NakamaSocket
 func _ready() -> void:
-
 	$AutoSave.start()
 
 func onMatchState(state : NakamaRTAPI.MatchData):
@@ -75,7 +74,7 @@ func _on_host_pressed() -> void:
 	var k = randi_range(1, 65535)
 	print("port: " + str(k))
 	RoomInfo.port = 55555
-	peer.create_server(55555, 3)
+	peer.create_server(5555)
 	multiplayer.multiplayer_peer = peer
 	multiplayer.peer_connected.connect(
 	func(pid):
@@ -169,11 +168,9 @@ func _on_player_name_pressed() -> void:
 	
 	pass # Replace with function body.
 
-
 @rpc("any_peer")
 func sendData(message):
 	print(message)
-
 
 func _on_send_pressed() -> void:
 	sendData.rpc("hello")

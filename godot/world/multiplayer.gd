@@ -8,10 +8,7 @@ signal joinGame(ip)
 var listener: PacketPeerUDP
 @export var listenPort: int = 8912
 
-
-
 func _ready():
-	
 	setUp()
 
 func setUp():
@@ -21,9 +18,6 @@ func setUp():
 		print("Successfully bound to port:", listenPort)
 	else:
 		print("Failed to bind to port:", listenPort)
-
-
-var stun = PacketPeerUDP.new()
 
 func _process(_delta):
 	while listener.get_available_packet_count() > 0:
@@ -55,14 +49,26 @@ func _process(_delta):
 				currentInfo.name = roomInfo.name
 				
 				currentInfo.get_node("Ip").text = str(serverip)
-
 				currentInfo.get_node("Name").text = roomInfo.name
 				$CanvasLayer/Panel/VBoxContainer.add_child(currentInfo)
 				# Connect the signal using lambda to pass the IP
 				currentInfo.joinGame.connect(joinbyIp)
 
+
 func joinbyIp(ip):
 	joinGame.emit(ip)
+
+
+func d(ip):
+	var peer = ENetMultiplayerPeer.new()
+	var error = peer.create_client(ip, 55555)
+	
+	if error == OK:
+		multiplayer.multiplayer_peer = peer
+		print("Connecting ", ip ) 
+		get_tree().change_scene_to_file("res://World.tscn")
+	else:
+		print("Failed to create client. Error code:", error)
 
 func _on_back_pressed():
 	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")

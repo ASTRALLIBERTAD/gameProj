@@ -43,7 +43,7 @@ impl SaveManagerRust {
     
 
     #[func]
-    fn save_game_rust(&self, name: String) {
+    pub fn save_game_rust(&self, name: String) {
         let base_path = self.get_os();
         let folder = "games";
         let file_saver = format!("{}/{}", base_path, folder);
