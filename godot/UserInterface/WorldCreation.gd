@@ -23,8 +23,9 @@ func _on_playbuton_pressed() -> void:
 		if GameSeed.is_valid_int():
 			SaveManager.WorldSeed = GameSeed
 			get_tree().root.add_child(world)
-			Terrain.seed_seed(SaveManager.WorldSeed)
-			queue_free()
+			if Terrain.is_inside_tree():
+				Terrain.seed_seed(SaveManager.WorldSeed)
+				queue_free()
 		elif GameSeed == null:
 			var lp: = RandomNumberGenerator.new()
 			var ti = hash(lp)
@@ -32,8 +33,9 @@ func _on_playbuton_pressed() -> void:
 			SaveManager.WorldSeed = m
 			print(m)
 			get_tree().root.add_child(world)
-			Terrain.seed_seed(m)
-			queue_free()
+			if Terrain.is_inside_tree():
+				Terrain.seed_seed(m)
+				queue_free()
 		else:
 			var t: = hash(GameSeed)
 			SaveManager.WorldSeed = clamp(t, -2147483648, 2147483647)

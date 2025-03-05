@@ -6,7 +6,7 @@ var GameTerrain: int
 func _ready() -> void:
 	if get_tree().root.has_node("/root/main"):
 		get_tree().root.get_node("/root/main").queue_free()
-	var dir = DirAccess.get_directories_at( SaveManager.get_os() + "games")
+	var dir = DirAccess.get_directories_at( SaveManager.get_os() + "/games")
 	for i in dir:
 		var button : Button = LoadButton.instantiate()
 		button.LoadButtonDown.connect(OnLoadButtonDown)
