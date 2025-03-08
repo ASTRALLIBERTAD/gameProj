@@ -25,7 +25,6 @@ func _on_loading_pressed() -> void:
 
 func _on_saving_time_timeout() -> void:
 	get_tree().paused = false
-	get_tree().reload_current_scene()
 	SaveManager.save_game()
 	scene.change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")
 	queue_redraw()

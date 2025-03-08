@@ -28,16 +28,16 @@ func _on_playbuton_pressed() -> void:
 		elif GameSeed == "":
 			var lp: = RandomNumberGenerator.new()
 			var ti = hash(lp)
-			var m = randi_range(-2147483648, 2147483647)
-			SaveManager.WorldSeed = m
-			print(m)
+			var yoj = clampi(ti, -2147483648, 2147483647)
+			SaveManager.WorldSeed = yoj
+			print(yoj)
 			get_tree().root.add_child(world)
 			var up = world.get_node("/root/main/Terrain/Terrain1") as Terrain1
-			up.seed_seed(m)
+			up.seed_seed(yoj)
 			queue_free()
 		else:
 			var t: = hash(GameSeed)
-			SaveManager.WorldSeed = clamp(t, -2147483648, 2147483647)
+			SaveManager.WorldSeed = clampi(t, -2147483648, 2147483647)
 			get_tree().root.add_child(world)
 			var upl = world.get_node("/root/main/Terrain/Terrain1") as Terrain1
 			upl.seed_seed(SaveManager.WorldSeed)
