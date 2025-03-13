@@ -2,8 +2,20 @@ extends Node2dRust
 
 @onready var scene = get_tree()
 var peer = ENetMultiplayerPeer.new()
-
+const ITEM_SLOT = preload("res://UserInterface/item_slot.tscn")
+var row_size = 10
+var col_size = 3
+var  items = []
 func _ready() -> void:
+	for x in range(row_size):
+		items.append([])
+		
+		for y in range(col_size):
+			items[x].append([])
+			var instance = ITEM_SLOT.instantiate()
+			instance.global_position = Vector2(x*50, y*50)
+			%TouchControls.add_child(instance)
+		
 	$AutoSave.start()
 
 func add_player(pid):
@@ -89,14 +101,10 @@ func cleanUp():
 	if udp != null:
 		udp.close()
 
-func _exit_tree():
-	cleanUp()
-	
 var webrtc_peer = PacketPeerUDP.new()
 
 func stun():
 	webrtc_peer.set_dest_address("stun.1.google.com",19302)
 	webrtc_peer.put_packet("request".to_utf8_buffer())
 	await get_tree().create_timer(1.0).timeout
-	
 	

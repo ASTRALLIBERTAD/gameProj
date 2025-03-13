@@ -1,6 +1,6 @@
 [gd_scene load_steps=22 format=3 uid="uid://bpi3sbit45l5"]
 
-[ext_resource type="Script" uid="uid://cjybunquawmdm" path="res://Player/Players.gd" id="1_ly0sm"]
+[ext_resource type="Script" uid="uid://cjybunquawmdm" path="res://Player/players.gd" id="1_kb8n6"]
 [ext_resource type="Texture2D" uid="uid://c8yd5bsc84tk3" path="res://Assets/brackeys_platformer_assets/brackeys_platformer_assets/sprites/knight.png" id="1_vwsu5"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_r6qui"]
@@ -138,7 +138,7 @@ properties/1/replication_mode = 1
 [node name="PLAYERS" type="Rustplayer" node_paths=PackedStringArray("sprite", "coords")]
 sprite = NodePath("AnimatedSprite2D")
 coords = NodePath("Control/CanvasLayer/coords")
-script = ExtResource("1_ly0sm")
+script = ExtResource("1_kb8n6")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_64p8a")

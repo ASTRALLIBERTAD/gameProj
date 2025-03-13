@@ -1,7 +1,6 @@
 extends Control
 
 var WorldName: String
-@onready var t: = get_tree()
 @onready var  newgame: = SaveManagerRust.new()
 
 func _on_playbuton_pressed() -> void:
