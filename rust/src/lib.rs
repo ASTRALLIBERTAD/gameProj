@@ -4,10 +4,11 @@ mod rustplayer;
 mod save_manager_rusts;
 mod terrain;
 mod world;
-mod control;
 mod main_node;
 mod multiplayer;
 mod multiplayer_scene;
+mod item_collectibles;
+mod inventory;
 
 use godot::prelude::*;
 
