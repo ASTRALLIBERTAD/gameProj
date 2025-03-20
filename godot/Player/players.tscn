@@ -1,7 +1,9 @@
-[gd_scene load_steps=22 format=3 uid="uid://bpi3sbit45l5"]
+[gd_scene load_steps=24 format=3 uid="uid://bpi3sbit45l5"]
 
-[ext_resource type="Script" uid="uid://cjybunquawmdm" path="res://Player/players.gd" id="1_kb8n6"]
+[ext_resource type="Script" uid="uid://cjybunquawmdm" path="res://Player/Players.gd" id="1_kb8n6"]
 [ext_resource type="Texture2D" uid="uid://c8yd5bsc84tk3" path="res://Assets/brackeys_platformer_assets/brackeys_platformer_assets/sprites/knight.png" id="1_vwsu5"]
+[ext_resource type="Inventory" uid="uid://bl846msjstbf" path="res://Collectibles/items/inventory.res" id="1_xk5w0"]
+[ext_resource type="PackedScene" uid="uid://kwwyxdgylhl0" path="res://UserInterface/item_slot.tscn" id="4_fqw5d"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_r6qui"]
 atlas = ExtResource("1_vwsu5")
@@ -135,9 +137,11 @@ properties/1/path = NodePath("AnimatedSprite2D:flip_h")
 properties/1/spawn = true
 properties/1/replication_mode = 1
 
-[node name="PLAYERS" type="Rustplayer" node_paths=PackedStringArray("sprite", "coords")]
+[node name="PLAYERS" type="Rustplayer" node_paths=PackedStringArray("sprite", "coords", "item_slot")]
 sprite = NodePath("AnimatedSprite2D")
 coords = NodePath("Control/CanvasLayer/coords")
+invent = ExtResource("1_xk5w0")
+item_slot = NodePath("Control/CanvasLayer/ItemSlot")
 script = ExtResource("1_kb8n6")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
@@ -178,6 +182,15 @@ offset_right = 1.0
 offset_bottom = 55.0
 theme_override_font_sizes/font_size = 40
 
+[node name="ItemSlot" parent="Control/CanvasLayer" instance=ExtResource("4_fqw5d")]
+unique_name_in_owner = true
+
+[node name="inventory" type="Button" parent="Control"]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "inventory"
+
 [node name="name" type="Label" parent="."]
 anchors_preset = 8
 anchor_left = 0.5
@@ -194,3 +207,4 @@ theme_override_font_sizes/font_size = 13
 text = "name"
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
+[connection signal="pressed" from="Control/inventory" to="." method="_on_inventory_pressed"]

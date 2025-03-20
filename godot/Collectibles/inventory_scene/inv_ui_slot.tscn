@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://cyf7r2qdsjyp2"]
+
+[ext_resource type="Script" uid="uid://ba30vaotrflwl" path="res://Collectibles/inventory_scene/inv_ui_slot.gd" id="1_3i061"]
+[ext_resource type="Texture2D" uid="uid://djo53ep2hv88p" path="res://icon.svg" id="1_ngbk5"]
+
+[node name="inv_UI_slot" type="Panel"]
+self_modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(135, 135)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -2.0
+offset_right = -1019.0
+offset_bottom = -515.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_3i061")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(1.047, 1)
+texture = ExtResource("1_ngbk5")
+centered = false
+
+[node name="item" type="Sprite2D" parent="."]

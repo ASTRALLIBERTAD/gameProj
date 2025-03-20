@@ -1,4 +1,4 @@
-extends Node2D
+extends Control
 
 var slot_num : Vector2i
 var item : Dictionary

@@ -17,6 +17,8 @@ func _ready() -> void:
 		var obj = JSON.parse_string(content)
 		button.SetupButton(obj)
 		button.text = obj.name
+		
+
 		$CanvasLayer/Panel/ScrollContainer/LoadButtons.add_child(button)
 	queue_redraw()
 	pass # Replace with function body.

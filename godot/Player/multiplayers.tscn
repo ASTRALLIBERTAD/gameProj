@@ -1,7 +1,9 @@
-[gd_scene load_steps=22 format=3 uid="uid://cb7g0u1n88g4v"]
+[gd_scene load_steps=24 format=3 uid="uid://cb7g0u1n88g4v"]
 
+[ext_resource type="Inventory" uid="uid://bl846msjstbf" path="res://Collectibles/items/inventory.res" id="1_c21g0"]
 [ext_resource type="Script" uid="uid://dtduv3hn3hait" path="res://Player/multiplayers.gd" id="1_x3kef"]
 [ext_resource type="Texture2D" uid="uid://c8yd5bsc84tk3" path="res://Assets/brackeys_platformer_assets/brackeys_platformer_assets/sprites/knight.png" id="2_focnv"]
+[ext_resource type="PackedScene" uid="uid://kwwyxdgylhl0" path="res://UserInterface/item_slot.tscn" id="4_s3il6"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_r6qui"]
 atlas = ExtResource("2_focnv")
@@ -135,10 +137,12 @@ properties/1/path = NodePath(".:position")
 properties/1/spawn = true
 properties/1/replication_mode = 1
 
-[node name="Multiplayer" type="MultiPlayerRust" node_paths=PackedStringArray("sprite", "cam", "coords")]
+[node name="Multiplayer" type="MultiPlayerRust" node_paths=PackedStringArray("sprite", "cam", "coords", "item_slot")]
 sprite = NodePath("AnimatedSprite2D")
 cam = NodePath("Camera2D")
 coords = NodePath("Control/CanvasLayer/coords")
+invent = ExtResource("1_c21g0")
+item_slot = NodePath("Control/CanvasLayer/ItemSlot")
 script = ExtResource("1_x3kef")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
@@ -179,6 +183,8 @@ unique_name_in_owner = true
 offset_right = 1.0
 offset_bottom = 55.0
 theme_override_font_sizes/font_size = 40
+
+[node name="ItemSlot" parent="Control/CanvasLayer" instance=ExtResource("4_s3il6")]
 
 [node name="name" type="Label" parent="."]
 anchors_preset = 8

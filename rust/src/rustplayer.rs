@@ -1,7 +1,9 @@
 use std::str::FromStr;
-use godot::classes::{  AnimatedSprite2D, CharacterBody2D, ICharacterBody2D, Input, Label};
+use godot::classes::{  AnimatedSprite2D, CharacterBody2D, Control, ICharacterBody2D, Input, Label};
+use godot::obj::NewAlloc;
 use godot::prelude::*;
 
+use crate::inventory::Inventory;
 use crate::terrain::Terrain1;
 
 #[derive(GodotClass)]
@@ -14,7 +16,15 @@ pub struct Rustplayer{
     sprite: Gd<AnimatedSprite2D>,
 
     #[export]
-    coords: Gd<Label>
+    coords: Gd<Label>,
+
+    #[export]
+    invent: Gd<Inventory>,
+
+    #[export]
+    item_slot: Gd<Control>,
+
+    is_open: bool
 }
 
 #[godot_api]
@@ -24,12 +34,17 @@ impl ICharacterBody2D for Rustplayer {
             base, 
             sprite: AnimatedSprite2D::new_alloc(),
             coords: Label::new_alloc(),
+            invent: Inventory::new_gd(),
+            item_slot: Control::new_alloc(),
+            is_open: false
         }
     }
 
     fn ready(&mut self) {
         let r = self.base_mut().get_name().to_int();
         self.base_mut().set_multiplayer_authority( r as i32);
+        self.close();
+
     }
     
     fn process(&mut self, _delta:f64){
@@ -65,13 +80,23 @@ impl ICharacterBody2D for Rustplayer {
 
         let k = format!("coordinates :{}, {:?}", cord.x, y_value as i32);
         self.coords.set_text(&k);
+
+        if input.is_action_just_pressed("inventory"){
+            if self.is_open{
+                self.close();
+            }
+            else {
+                self.open();
+            }
+        }
         
     }
     
 }
 
 #[godot_api]
-impl Rustplayer {    
+impl Rustplayer {   
+
     fn player_cord(&mut self) -> Vector2{
         let scene = self.base_mut().get_tree().unwrap().get_root().unwrap().get_node_as::<Terrain1>("/root/main/Terrain/Terrain1");
 
@@ -80,7 +105,16 @@ impl Rustplayer {
         let ko = scene.to_local(Vector2::new(cord.x as f32, cord.y as f32));
         return ko;
     }
-    
-    
+
+    fn open(&mut self){
+        self.is_open = true;
+        self.item_slot.set_visible(true);
+    }
+
+    fn close(&mut self){
+        self.is_open = false;
+        self.item_slot.set_visible(false);
+        
+    }
 
 }

@@ -1,6 +1,0 @@
-[gd_resource type="Inventory" load_steps=2 format=3 uid="uid://dpxqdqom7wmuf"]
-
-[ext_resource type="Collectibles" uid="uid://d0wt2wrkqir3m" path="res://Collectibles/items/collectibles.res" id="1_pqi58"]
-
-[resource]
-items = Array[Collectibles]([null, ExtResource("1_pqi58"), null, null, null, null, null, null, null, null, null, null])

@@ -25,5 +25,4 @@ impl INode for MainNode {
         self.base_mut().add_child(&instance);
     }
 
-
 }

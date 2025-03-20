@@ -1,7 +1,8 @@
 use std::str::FromStr;
-use godot::classes::{AnimatedSprite2D, CharacterBody2D, ICharacterBody2D, Input, Label};
+use godot::classes::{AnimatedSprite2D, CharacterBody2D, Control, ICharacterBody2D, Input, Label};
 use godot::prelude::*;
 
+use crate::inventory::Inventory;
 use crate::terrain::Terrain1;
 
 #[derive(GodotClass)]
@@ -18,6 +19,14 @@ pub struct MultiPlayerRust{
 
     #[export]
     coords: Gd<Label>,
+
+    #[export]
+    invent: Gd<Inventory>,
+
+    #[export]
+    item_slot: Gd<Control>,
+
+    is_open: bool
 }
 
 #[godot_api]
@@ -27,7 +36,10 @@ impl ICharacterBody2D for MultiPlayerRust {
             base, 
             sprite: AnimatedSprite2D::new_alloc(),
             cam: Camera2D::new_alloc(),
-            coords: Label::new_alloc()
+            coords: Label::new_alloc(),
+            invent: Inventory::new_gd(),
+            item_slot: Control::new_alloc(),
+            is_open: false
         }
     }
 
@@ -76,6 +88,15 @@ impl ICharacterBody2D for MultiPlayerRust {
 
         let k = format!("coordinates :{}, {:?}", cord.x, y_value as i32);
         self.coords.set_text(&k);
+
+        if input.is_action_just_pressed("inventory"){
+            if self.is_open{
+                self.close();
+            }
+            else {
+                self.open();
+            }
+        }
     }
 }
 
@@ -89,5 +110,16 @@ impl MultiPlayerRust {
 
         let ko = scene.to_local(Vector2::new(cord.x as f32, cord.y as f32));
         return ko;
+    }
+
+    fn open(&mut self){
+        self.is_open = true;
+        self.item_slot.set_visible(true);
+    }
+
+    fn close(&mut self){
+        self.is_open = false;
+        self.item_slot.set_visible(false);
+        
     }
 }
