@@ -2,6 +2,7 @@ extends Rustplayer
 
 var is_open = false
 
+
 func _ready() -> void:
 	SaveManager.player_node = self
 

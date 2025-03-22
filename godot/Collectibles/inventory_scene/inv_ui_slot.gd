@@ -1,5 +1,5 @@
 extends Panel
-@onready var item_visual: Sprite2D = $item
+@onready var item_visual: Sprite2D = $CenterContainer/Panel/item
 
 func update(item: Collectibles):
 	if !item:

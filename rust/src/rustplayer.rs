@@ -24,7 +24,7 @@ pub struct Rustplayer{
     #[export]
     item_slot: Gd<Control>,
 
-    is_open: bool
+    is_open: bool,
 }
 
 #[godot_api]
@@ -36,7 +36,7 @@ impl ICharacterBody2D for Rustplayer {
             coords: Label::new_alloc(),
             invent: Inventory::new_gd(),
             item_slot: Control::new_alloc(),
-            is_open: false
+            is_open: false,
         }
     }
 

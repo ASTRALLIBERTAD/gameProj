@@ -51,6 +51,7 @@ impl ICharacterBody2D for MultiPlayerRust {
     fn ready(&mut self) {
         if self.base_mut().is_multiplayer_authority(){
             self.cam.make_current();
+            self.close();
         }
 
     }

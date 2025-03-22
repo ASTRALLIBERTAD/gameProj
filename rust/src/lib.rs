@@ -9,6 +9,7 @@ mod multiplayer;
 mod multiplayer_scene;
 mod item_collectibles;
 mod inventory;
+mod item_slot;
 
 use godot::prelude::*;
 
