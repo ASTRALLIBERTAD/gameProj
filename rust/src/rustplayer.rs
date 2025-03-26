@@ -4,6 +4,7 @@ use godot::obj::NewAlloc;
 use godot::prelude::*;
 
 use crate::inventory::Inventory;
+use crate::item_collectibles::Collectibles;
 use crate::terrain::Terrain1;
 
 #[derive(GodotClass)]
@@ -19,7 +20,7 @@ pub struct Rustplayer{
     coords: Gd<Label>,
 
     #[export]
-    invent: Gd<Inventory>,
+    inv: Gd<Inventory>,
 
     #[export]
     item_slot: Gd<Control>,
@@ -34,7 +35,7 @@ impl ICharacterBody2D for Rustplayer {
             base, 
             sprite: AnimatedSprite2D::new_alloc(),
             coords: Label::new_alloc(),
-            invent: Inventory::new_gd(),
+            inv: Inventory::new_gd(),
             item_slot: Control::new_alloc(),
             is_open: false,
         }
@@ -44,7 +45,7 @@ impl ICharacterBody2D for Rustplayer {
         let r = self.base_mut().get_name().to_int();
         self.base_mut().set_multiplayer_authority( r as i32);
         self.close();
-
+        
     }
     
     fn process(&mut self, _delta:f64){
@@ -89,7 +90,7 @@ impl ICharacterBody2D for Rustplayer {
                 self.open();
             }
         }
-        
+
     }
     
 }
@@ -116,5 +117,24 @@ impl Rustplayer {
         self.item_slot.set_visible(false);
         
     }
+
+    #[func]
+    fn collect_items(&mut self, items: Gd<Collectibles>){
+        self.inv.bind_mut().insert(items);
+        // let y = self.base_mut().emit_signal("fo", &[]);
+        // godot_print!("signal: {:?}", y);
+        godot_print!("item collected");
+    }
+    #[func]
+    fn open_close(&mut self){
+        if self.is_open{
+            self.close();
+        }
+        else {
+            self.open();
+        }
+    }
+
+   
 
 }

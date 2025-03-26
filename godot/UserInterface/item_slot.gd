@@ -7,8 +7,10 @@ var item : Dictionary
 var item_count = 0
 
 func _ready() -> void:
+	inv.update.connect(update_slots)
 	update_slots()
 
 func update_slots():
-	for i in range(min(inv.items.size(), slots.size())):
-		slots[i].update(inv.items[i])
+	for i in range(min(inv.slots.size(), slots.size())):
+		slots[i].update(inv.slots[i])
+		print("happpe")

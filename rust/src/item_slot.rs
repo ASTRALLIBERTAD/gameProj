@@ -1,7 +1,6 @@
 use godot::classes::{IControl, Control};
 use godot::prelude::*;
 
-use crate::inventory::Inventory;
 
 #[derive(GodotClass)]
 #[class(base=Control)]

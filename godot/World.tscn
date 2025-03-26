@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://d2oibegpqmv2b"]
+[gd_scene load_steps=29 format=3 uid="uid://d2oibegpqmv2b"]
 
 [ext_resource type="Script" uid="uid://bslfkk847kwap" path="res://World.gd" id="1_aftjc"]
 [ext_resource type="Texture2D" uid="uid://cbwt50e1g17xq" path="res://Assets/Pet Cats Pack/Cat-5/Cat-5-Idle.png" id="3_ew8vj"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://bpi3sbit45l5" path="res://Player/players.tscn" id="4_dqyd3"]
 [ext_resource type="Script" uid="uid://dtfghg4godxt4" path="res://FpsCounter.gd" id="5_dged2"]
 [ext_resource type="Texture2D" uid="uid://djo53ep2hv88p" path="res://icon.svg" id="7_6ip7a"]
+[ext_resource type="PackedScene" uid="uid://ct6lfqqoyt1cg" path="res://Collectibles/items/sword.tscn" id="8_bah7m"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_6js52"]
 size = Vector2(14, 9)
@@ -344,6 +345,9 @@ offset_top = -7.0
 offset_right = -83.0
 offset_bottom = 24.0
 text = "connect"
+
+[node name="sword" parent="." instance=ExtResource("8_bah7m")]
+position = Vector2(139, 20)
 
 [connection signal="timeout" from="World/AutoSave" to="World" method="_on_auto_save_timeout"]
 [connection signal="timeout" from="World/PauseMenu/SavingTime" to="World" method="_on_saving_time_timeout"]

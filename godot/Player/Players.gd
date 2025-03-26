@@ -12,15 +12,14 @@ func _on_timer_timeout() -> void:
 	pass # Replace with function body.
 
 func _on_inventory_pressed() -> void:
-	if is_open:
-		close()
-	else:
-		open()
-	pass # Replace with function body.
+	open_close()
 
 func open():
 	%ItemSlot.visible = true
 	is_open = true
+
+func player():
+	pass
 
 func close():
 	%ItemSlot.visible = false
