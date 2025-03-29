@@ -66,12 +66,12 @@ func d(ip):
 	if error == OK:
 		multiplayer.multiplayer_peer = peer
 		print("Connecting ", ip ) 
-		get_tree().change_scene_to_file("res://World.tscn")
+		get_tree().change_scene_to_file("res://World.scn")
 	else:
 		print("Failed to create client. Error code:", error)
 
 func _on_back_pressed():
-	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")
+	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.scn")
 
 func _exit_tree():
 	cleanUp()

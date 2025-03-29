@@ -7,11 +7,11 @@ func _ready() -> void:
 	pass # Replace with function body.
 
 func _on_play_pressed() -> void:
-	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")
+	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.scn")
 
 
 func _on_settings_pressed() -> void:
-	get_tree().change_scene_to_file("res://UserInterface/SettingMenu.tscn")
+	get_tree().change_scene_to_file("res://UserInterface/SettingMenu.scn")
 
 
 func _on_exit_pressed() -> void:

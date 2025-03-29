@@ -1,8 +1,5 @@
 extends Rustplayer
 
-var is_open = false
-
-
 func _ready() -> void:
 	SaveManager.player_node = self
 
@@ -14,13 +11,5 @@ func _on_timer_timeout() -> void:
 func _on_inventory_pressed() -> void:
 	open_close()
 
-func open():
-	%ItemSlot.visible = true
-	is_open = true
-
 func player():
 	pass
-
-func close():
-	%ItemSlot.visible = false
-	is_open = false

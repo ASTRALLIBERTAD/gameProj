@@ -19,7 +19,7 @@ impl INode for MainNode {
 
     fn ready(&mut self) {
 
-        let scene = load::<PackedScene>("res://world/terrain_1.tscn");
+        let scene = load::<PackedScene>("res://world/terrain_1.scn");
 
         let instance = scene.instantiate_ex().done().unwrap();
         self.base_mut().add_child(&instance);

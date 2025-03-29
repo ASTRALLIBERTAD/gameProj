@@ -17,7 +17,7 @@ impl IResource for Collectibles {
     fn init(base: Base<Resource>) -> Self {
         Self { 
             base,
-            name: GString::new(),
+            name: GString::default(),
             icon: None
         }
     }

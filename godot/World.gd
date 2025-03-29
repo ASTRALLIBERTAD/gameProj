@@ -7,7 +7,7 @@ func _ready() -> void:
 	$AutoSave.start()
 
 func add_player(pid):
-	var plyr = preload("res://Player/multiplayers.tscn").instantiate()
+	var plyr = preload("res://Player/multiplayers.scn").instantiate()
 	plyr.name = str(pid)
 	add_child(plyr)
 
@@ -26,7 +26,7 @@ func _on_loading_pressed() -> void:
 func _on_saving_time_timeout() -> void:
 	get_tree().paused = false
 	SaveManager.save_game()
-	scene.change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")
+	scene.change_scene_to_file("res://SaveAndLoad/LoadMenu.scn")
 	queue_redraw()
 	queue_free()
 

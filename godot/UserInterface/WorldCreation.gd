@@ -16,7 +16,7 @@ func _on_playbuton_pressed() -> void:
 		print("world name already exist")
 		return
 	
-	var world = preload("uid://d2oibegpqmv2b").instantiate() #res://World.tscn
+	var world = preload("res://World.scn").instantiate() #res://World.tscn
 	if !get_tree() == null:
 		if GameSeed.is_valid_int():
 			SaveManager.WorldSeed = GameSeed
@@ -50,10 +50,10 @@ func _on_playbuton_pressed() -> void:
 	newgame.save_game_rust(WorldName)
 
 func _on_backbutton_pressed() -> void:
-	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")
+	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.scn")
 	pass # Replace with function body.
 
 
 func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.tscn")
+	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.scn")
 	pass # Replace with function body.

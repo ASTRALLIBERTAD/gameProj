@@ -1,5 +1,3 @@
-use std::ops::DerefMut;
-
 use godot::classes::{IResource, Resource};
 use godot::prelude::*;
 

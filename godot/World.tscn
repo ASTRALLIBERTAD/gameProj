@@ -1,10 +1,10 @@
-[gd_scene load_steps=29 format=3 uid="uid://d2oibegpqmv2b"]
+[gd_scene load_steps=29 format=3 uid="uid://kh0yvr6q2i43"]
 
 [ext_resource type="Script" uid="uid://bslfkk847kwap" path="res://World.gd" id="1_aftjc"]
 [ext_resource type="Texture2D" uid="uid://cbwt50e1g17xq" path="res://Assets/Pet Cats Pack/Cat-5/Cat-5-Idle.png" id="3_ew8vj"]
 [ext_resource type="Texture2D" uid="uid://dvb08glmmt3t2" path="res://Assets/Pet Cats Pack/Cat-5/Cat-5-Run.png" id="3_wmsuc"]
-[ext_resource type="PackedScene" uid="uid://cf1y4gylaktvs" path="res://UserInterface/TouchControls.tscn" id="4_dd45r"]
-[ext_resource type="PackedScene" uid="uid://bpi3sbit45l5" path="res://Player/players.tscn" id="4_dqyd3"]
+[ext_resource type="PackedScene" uid="uid://ba43mamevp1tg" path="res://Player/players.scn" id="4_bah7m"]
+[ext_resource type="PackedScene" uid="uid://dsot55ltmaaqv" path="res://UserInterface/TouchControls.scn" id="5_bah7m"]
 [ext_resource type="Script" uid="uid://dtfghg4godxt4" path="res://FpsCounter.gd" id="5_dged2"]
 [ext_resource type="Texture2D" uid="uid://djo53ep2hv88p" path="res://icon.svg" id="7_6ip7a"]
 [ext_resource type="PackedScene" uid="uid://ct6lfqqoyt1cg" path="res://Collectibles/items/sword.tscn" id="8_bah7m"]
@@ -157,8 +157,7 @@ animations = [{
 unique_name_in_owner = true
 script = ExtResource("1_aftjc")
 
-[node name="Pet" type="Pet" parent="World" node_paths=PackedStringArray("player", "sprite")]
-player = NodePath("../PLAYERS")
+[node name="Pet" type="Pet" parent="World" node_paths=PackedStringArray("sprite")]
 sprite = NodePath("AnimatedSprite2D")
 y_sort_enabled = true
 position = Vector2(-144, -39)
@@ -178,8 +177,7 @@ autoplay = "run"
 wait_time = 5.0
 autostart = true
 
-[node name="PLAYERS" parent="World" instance=ExtResource("4_dqyd3")]
-unique_name_in_owner = true
+[node name="PLAYERS" parent="World" instance=ExtResource("4_bah7m")]
 
 [node name="osl" type="Label" parent="World"]
 offset_right = 40.0
@@ -193,7 +191,7 @@ offset_right = 40.0
 offset_bottom = 40.0
 metadata/_edit_use_anchors_ = true
 
-[node name="TouchControls" parent="World/Control" instance=ExtResource("4_dd45r")]
+[node name="TouchControls" parent="World/Control" instance=ExtResource("5_bah7m")]
 unique_name_in_owner = true
 
 [node name="test" type="Player" parent="World"]
@@ -308,7 +306,6 @@ offset_bottom = -15.0
 text = "host"
 
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="World"]
-_spawnable_scenes = PackedStringArray("uid://cb7g0u1n88g4v")
 spawn_path = NodePath("..")
 
 [node name="Broadcaster" type="Timer" parent="World"]
