@@ -1,7 +1,7 @@
 extends Panel
 @onready var item_visual: Sprite2D = $CenterContainer/Panel/item
 @onready var amount_text: Label = $CenterContainer/Panel/Label
-
+"res://Collectibles/items/sword.res"
 func update(slot: InvSlot):
 	if !slot.item:
 		item_visual.visible= false
@@ -11,4 +11,5 @@ func update(slot: InvSlot):
 		item_visual.texture = slot.item.icon
 		if slot.amount > 1:
 			amount_text.visible = true
-		amount_text.text = str(slot.amount)
+			amount_text.text = str(slot.amount)
+		

@@ -29,38 +29,32 @@ impl Inventory {
     fn update();
 
     pub fn insert(&mut self, item: Gd<Collectibles>) {
-        let mut target_slot: Option<Gd<InvSlot>> = None;
 
         for mut slot in self.slots.iter_shared()  {
             if slot.bind_mut().get_item() == item {
-                target_slot = Some(slot);
-                godot_print!("kdkdk");
-                break;
+                
+                let r = slot.bind_mut().get_amount();
+                slot.bind_mut().set_amount(r + 1);
+                self.base_mut().emit_signal("update", &[]);
+                godot_print!("Item added to inventory!dldl");
+                return;
+            }
+        }
+
+        for mut slot in self.slots.iter_shared()  {
+
+            if  slot.bind_mut().get_item().bind_mut().get_name().is_empty() {
+
+                slot.bind_mut().set_item(item).to_godot();
+                slot.bind_mut().set_amount(1);
+                self.base_mut().emit_signal("update", &[]);
+                godot_print!("Item added to inventory!");
+                godot_print!("{:?}", slot.bind_mut().get_item());
+                return;
+                                    
             }
             
         }
-        if target_slot.is_some(){
-            target_slot.unwrap().bind_mut().set_amount(1);
-            godot_print!("kkkhhhh");
-        }
-
-        else {
-            for mut slot in self.slots.iter_shared() {
-                if Some(slot.bind_mut().get_item()) == None {
-                    target_slot = Some(slot);
-                    godot_print!("djh");
-                    break;
-                }
-            }
-
-            if let Some(mut tr_slot) = target_slot{
-                tr_slot.bind_mut().set_item(item);
-                tr_slot.bind_mut().set_amount(1);
-                godot_print!("didd");
-            }
-        }
-
-        self.base_mut().emit_signal("update", &[]);
 
     }
 }
