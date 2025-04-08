@@ -47,6 +47,8 @@ impl ITileMapLayer for Terrain1 {
     }
     
     fn process(&mut self, _delta: f64) {
+
+        
         self.altitude.set_seed(self.seedser);
         
         // Update main player

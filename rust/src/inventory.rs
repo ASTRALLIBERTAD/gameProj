@@ -27,6 +27,10 @@ impl IResource for Inventory {
 impl Inventory {
     #[signal]
     fn update();
+    #[func]
+    fn ok(&mut self) {
+        godot_print!("ok");
+    }
 
     pub fn insert(&mut self, item: Gd<Collectibles>) {
 
@@ -50,11 +54,20 @@ impl Inventory {
                 self.base_mut().emit_signal("update", &[]);
                 godot_print!("Item added to inventory!");
                 godot_print!("{:?}", slot.bind_mut().get_item());
-                return;
-                                    
+                let r = &self.slots.get(0).unwrap().bind_mut().get_item().bind_mut().get_name();
+                godot_print!("kkk {:?}", r);
+                
+                return;                    
             }
             
         }
+
+        let mut base = self.base_mut();
+        let callable = base.callable("ok");
+        base.connect_ex("out", &callable).done();
+        
+        
+
 
     }
 }
