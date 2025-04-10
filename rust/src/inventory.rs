@@ -32,39 +32,84 @@ impl Inventory {
         godot_print!("ok");
     }
 
-    pub fn insert(&mut self, item: Gd<Collectibles>) {
+    #[func]
+    pub fn insert(&mut self, item: Gd<Collectibles>, index: i32) {
 
-        for mut slot in self.slots.iter_shared()  {
-            if slot.bind_mut().get_item() == item {
-                
-                let r = slot.bind_mut().get_amount();
-                slot.bind_mut().set_amount(r + 1);
-                self.base_mut().emit_signal("update", &[]);
-                godot_print!("Item added to inventory!dldl");
-                return;
+        if index < 0{
+            for mut slot in self.slots.iter_shared()  {
+                if slot.bind_mut().get_item() == item {
+                    
+                    let r = slot.bind_mut().get_amount();
+                    slot.bind_mut().set_amount(r + 1);
+                    self.base_mut().emit_signal("update", &[]);
+                    godot_print!("Item added to inventory!dldl");
+                    return;
+                }
             }
+    
+            for mut slot in self.slots.iter_shared()  {
+    
+                if  slot.bind_mut().get_item().bind_mut().get_name().is_empty() {
+    
+                    slot.bind_mut().set_item(item).to_godot();
+                    slot.bind_mut().set_amount(1);
+                    self.base_mut().emit_signal("update", &[]);
+                    godot_print!("Item added to inventory!");
+                    godot_print!("{:?}", slot.bind_mut().get_item());
+                    let r = &self.slots.get(0).unwrap().bind_mut().get_item().bind_mut().get_name();
+                    godot_print!("kkk {:?}", r);
+                    
+                    return;                    
+                }
+                
+            }
+
         }
+        else {
 
-        for mut slot in self.slots.iter_shared()  {
+            let r = self.slots.get(0).unwrap().clone();
+            let b =self.slots.get(1).unwrap().clone();
+            self.slots.set(0, &b);
+            self.slots.set(1, &r);
+            self.base_mut().emit_signal("update", &[]);
 
-            if  slot.bind_mut().get_item().bind_mut().get_name().is_empty() {
 
-                slot.bind_mut().set_item(item).to_godot();
-                slot.bind_mut().set_amount(1);
-                self.base_mut().emit_signal("update", &[]);
-                godot_print!("Item added to inventory!");
-                godot_print!("{:?}", slot.bind_mut().get_item());
-                let r = &self.slots.get(0).unwrap().bind_mut().get_item().bind_mut().get_name();
-                godot_print!("kkk {:?}", r);
+            godot_print!("index is not less than 0");
+            // for mut slot in self.slots.iter_shared()  {
+            //     if slot.bind_mut().get_item() == item {
+                    
+            //         let r = slot.bind_mut().get_amount();
+            //         slot.bind_mut().set_amount(r + 1);
+            //         self.base_mut().emit_signal("update", &[]);
+            //         godot_print!("Item added to inventory!dldl");
+            //         return;
+            //     }
+            // }
+    
+            // for mut slot in self.slots.iter_shared()  {
+    
+            //     if  slot.bind_mut().get_item().bind_mut().get_name().is_empty() {
+    
+            //         slot.bind_mut().set_item(item).to_godot();
+            //         slot.bind_mut().set_amount(1);
+            //         self.base_mut().emit_signal("update", &[]);
+            //         godot_print!("Item added to inventory!");
+            //         godot_print!("{:?}", slot.bind_mut().get_item());
+            //         let r = &self.slots.get(0).unwrap().bind_mut().get_item().bind_mut().get_name();
+            //         godot_print!("kkk {:?}", r);
+                    
+            //         return;                    
+            //     }
                 
-                return;                    
-            }
+            // }
             
         }
 
-        let mut base = self.base_mut();
-        let callable = base.callable("ok");
-        base.connect_ex("out", &callable).done();
+        
+
+        // let mut base = self.base_mut();
+        // let callable = base.callable("ok");
+        // base.connect_ex("out", &callable).done();
         
         
 

@@ -12,4 +12,4 @@ func _on_area_2d_body_entered(body: Node2D) -> void:
 	pass # Replace with function body.
 
 func player_collect():
-	player.collect_items(item)
+	player.collect_items(item, -1)

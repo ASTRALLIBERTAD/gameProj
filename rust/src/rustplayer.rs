@@ -119,8 +119,9 @@ impl Rustplayer {
     }
 
     #[func]
-    fn collect_items(&mut self, items: Gd<Collectibles>){
-        self.inv.bind_mut().insert(items);
+    fn collect_items(&mut self, items: Gd<Collectibles>, index: i32) {
+        self.inv.bind_mut().insert(items, index);
+        godot_print!("item index is: {}", index);
         // let y = self.base_mut().emit_signal("fo", &[]);
         // godot_print!("signal: {:?}", y);
         godot_print!("item collected");
