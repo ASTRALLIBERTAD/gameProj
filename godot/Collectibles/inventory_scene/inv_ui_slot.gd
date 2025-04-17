@@ -20,7 +20,6 @@ func update(slot: InvSlot):
 			amount_text.visible = true
 			var t = slot.item.amount
 			amount_text.text = str(t)
-	
 
 func redraw(slot: InvSlot):
 	if slot.item.amount <= 1:

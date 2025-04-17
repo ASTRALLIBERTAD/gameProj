@@ -12,6 +12,8 @@ pub struct Collectibles {
     amount: i32,
     #[export]
     icon: Option<Gd<Texture2D>>,
+    #[export]
+    stackable: bool,
 }
 
 #[godot_api]
@@ -22,6 +24,7 @@ impl IResource for Collectibles {
             name: GString::default(),
             amount: i32::default(),
             icon: None,
+            stackable: bool::default(),
 
         }
     }
