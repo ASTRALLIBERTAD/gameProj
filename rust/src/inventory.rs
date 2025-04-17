@@ -39,8 +39,8 @@ impl Inventory {
             for mut slot in self.slots.iter_shared()  {
                 if slot.bind_mut().get_item() == item {
                     
-                    let r = slot.bind_mut().get_amount();
-                    slot.bind_mut().set_amount(r + 1);
+                    let r = slot.bind_mut().get_item().bind_mut().get_amount();
+                    slot.bind_mut().get_item().bind_mut().set_amount(r + 1);
                     self.base_mut().emit_signal("update", &[]);
                     godot_print!("Item added to inventory!dldl");
                     return;
@@ -52,7 +52,7 @@ impl Inventory {
                 if  slot.bind_mut().get_item().bind_mut().get_name().is_empty() {
     
                     slot.bind_mut().set_item(item).to_godot();
-                    slot.bind_mut().set_amount(1);
+                    slot.bind_mut().get_item().bind_mut().set_amount(1);
                     self.base_mut().emit_signal("update", &[]);
                     godot_print!("Item added to inventory!");
                     godot_print!("{:?}", slot.bind_mut().get_item());
@@ -72,7 +72,6 @@ impl Inventory {
             self.slots.set(index1 as usize, &b);
             self.slots.set(index2 as usize, &r);
             self.base_mut().emit_signal("update", &[]);
-
 
             godot_print!("index is not less than 0");
             // for mut slot in self.slots.iter_shared()  {

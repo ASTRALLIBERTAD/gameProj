@@ -11,9 +11,6 @@ pub struct InvSlot {
 
     #[export]
     item: Gd<Collectibles>,
-
-    #[export]
-    amount: i32
 }
 
 #[godot_api]
@@ -22,7 +19,6 @@ impl IResource for InvSlot {
         Self { 
             base,
             item: Collectibles::new_gd(),
-            amount: i32::default(),
         }
     }
 

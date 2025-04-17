@@ -9,7 +9,9 @@ pub struct Collectibles {
     #[export]
     name: GString,
     #[export]
-    icon: Option<Gd<Texture2D>>
+    amount: i32,
+    #[export]
+    icon: Option<Gd<Texture2D>>,
 }
 
 #[godot_api]
@@ -18,7 +20,9 @@ impl IResource for Collectibles {
         Self { 
             base,
             name: GString::default(),
-            icon: None
+            amount: i32::default(),
+            icon: None,
+
         }
     }
 

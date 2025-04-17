@@ -1,11 +1,9 @@
 extends Control
 @onready var inv: Inventory = preload("res://Collectibles/items/inventory.res")
 @onready var slots: Array = $NinePatchRect/GridContainer.get_children()
+
 var tapped_slot :Array= []
 var first_slot : int = -1
-var slot_num : Vector2i
-var item : Dictionary
-var item_count = 0
 
 func _ready() -> void:
 	inv.update.connect(update_slots)
@@ -22,10 +20,11 @@ func _on_slot_pressed(index: int):
 		first_slot = index
 		return
 	
+	if !inv.slots[first_slot].item.name:
+		first_slot = -1
+		tapped_slot.clear()
+	
 	if tapped_slot.size() == 2:
-		
-		var slot1 = inv.slots[first_slot] 
-		var slot2 = inv.slots[index]
 		po(first_slot, index)
 		
 		tapped_slot.clear()
@@ -35,12 +34,6 @@ func  po(index1:int, index2:int):
 	var t = inv.slots[0].item as Collectibles
 	
 	inv.insert(t, index1, index2)
-	#var l = inv.slots[from].item 
-	#inv.slots[from].item = inv.slots[into].item
-	#inv.slots[into].item = l
-	#var u = inv.slots[from].amount
-	#inv.slots[from].amount = inv.slots[into].amount
-	#inv.slots[into].amount = u
 
 func update_slots():
 	for i in range(min(inv.slots.size(), slots.size())):
