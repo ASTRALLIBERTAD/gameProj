@@ -33,9 +33,9 @@ impl Inventory {
     }
 
     #[func]
-    pub fn insert(&mut self, item: Gd<Collectibles>, index: i32) {
+    pub fn insert(&mut self, item: Gd<Collectibles>, index1: i32, index2: i32) {
 
-        if index < 0{
+        if index1 < 0{
             for mut slot in self.slots.iter_shared()  {
                 if slot.bind_mut().get_item() == item {
                     
@@ -67,10 +67,10 @@ impl Inventory {
         }
         else {
 
-            let r = self.slots.get(0).unwrap().clone();
-            let b =self.slots.get(1).unwrap().clone();
-            self.slots.set(0, &b);
-            self.slots.set(1, &r);
+            let r = self.slots.get(index1 as usize).unwrap().clone();
+            let b =self.slots.get(index2 as usize).unwrap().clone();
+            self.slots.set(index1 as usize, &b);
+            self.slots.set(index2 as usize, &r);
             self.base_mut().emit_signal("update", &[]);
 
 

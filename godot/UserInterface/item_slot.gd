@@ -1,7 +1,8 @@
 extends Control
 @onready var inv: Inventory = preload("res://Collectibles/items/inventory.res")
 @onready var slots: Array = $NinePatchRect/GridContainer.get_children()
-
+var tapped_slot :Array= []
+var first_slot : int = -1
 var slot_num : Vector2i
 var item : Dictionary
 var item_count = 0
@@ -15,14 +16,25 @@ func _ready() -> void:
 
 func _on_slot_pressed(index: int):
 	print("slot pressed :" , index)
-	var t = inv.slots[index].item.name
-	print("iii", t)
-	po(0,1)
+	if not tapped_slot.has(index):
+		tapped_slot.append(index)
+	if first_slot == -1:
+		first_slot = index
+		return
+	
+	if tapped_slot.size() == 2:
+		
+		var slot1 = inv.slots[first_slot] 
+		var slot2 = inv.slots[index]
+		po(first_slot, index)
+		
+		tapped_slot.clear()
+		first_slot = -1
 
-func  po(from:int,into:int):
+func  po(index1:int, index2:int):
 	var t = inv.slots[0].item as Collectibles
 	
-	inv.insert(t, 0)
+	inv.insert(t, index1, index2)
 	#var l = inv.slots[from].item 
 	#inv.slots[from].item = inv.slots[into].item
 	#inv.slots[into].item = l
