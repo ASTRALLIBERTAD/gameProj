@@ -24,19 +24,9 @@
             "args": ["--path", "C:\\Users\\Boss\\Documents\\proj\\proj_godot-rust\\godot\\godot"], 
             "cwd": "${workspaceFolder}",
             "windows": {
-                "program": "C:\\Users\\Boss\\Documents\\Godot_v4.4-stable_mono_win64\\Godot_v4.4-stable_mono_win64\\Godot_v4.4-stable_mono_win64.exe"
+                "program": "C:\\Users\\Boss\\Documents\\Godot_v4.4.1-stable_win64.exe\\Godot_v4.4.1-stable_win64.exe"
             }
         },
-        {
-            "name": "Play",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build",
-            "program": "C:\\Users\\Boss\\Documents\\Godot_v4.4-stable_mono_win64\\Godot_v4.4-stable_mono_win64\\Godot_v4.4-stable_mono_win64.exe",
-            "args": [],
-            "cwd": "${workspaceFolder}",
-            "stopAtEntry": false,
-        }
 
         
     ]
