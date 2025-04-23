@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://ct6lfqqoyt1cg"]
 
 [ext_resource type="Texture2D" uid="uid://cdqtf7qx7p1ws" path="res://Assets/16x16 RPG Item Pack/Item__01.png" id="1_hmlny"]
-[ext_resource type="Script" uid="uid://b5q86n4nelwik" path="res://Collectibles/items/sword.gd" id="1_jsoj3"]
+[ext_resource type="Script" uid="uid://b5q86n4nelwik" path="res://Collectibles/items/items_script.gd" id="1_jsoj3"]
 [ext_resource type="Collectibles" uid="uid://bl3ofqt0udho1" path="res://Collectibles/items/sword.res" id="2_ifrnd"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_85vga"]

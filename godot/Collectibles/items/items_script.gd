@@ -14,7 +14,6 @@ func _on_area_2d_body_entered(body: Node2D) -> void:
 				self.queue_free()
 			else:
 				print("inventory is full")
-	
 
 func player_collect():
 	player.collect_items(item, -1)
