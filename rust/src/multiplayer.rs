@@ -3,6 +3,7 @@ use godot::classes::{AnimatedSprite2D, CharacterBody2D, Control, ICharacterBody2
 use godot::prelude::*;
 
 use crate::inventory::Inventory;
+use crate::item_collectibles::Collectibles;
 use crate::terrain::Terrain1;
 
 #[derive(GodotClass)]
@@ -122,5 +123,21 @@ impl MultiPlayerRust {
         self.is_open = false;
         self.item_slot.set_visible(false);
         
+    }
+    #[func]
+    fn collect_items(&mut self, items: Gd<Collectibles>, index: i32) {
+        self.invent.bind_mut().insert(items, index, index);
+        godot_print!("item index is: {}", index);
+        // let y = self.base_mut().emit_signal("fo", &[]);
+        // godot_print!("signal: {:?}", y);
+        godot_print!("item collected");
+    }
+    #[func]
+    fn open_close(&mut self) {
+        if self.is_open {
+            self.close();
+        } else {
+            self.open();
+        }
     }
 }

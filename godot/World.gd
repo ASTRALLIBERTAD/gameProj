@@ -6,6 +6,7 @@ var peer = ENetMultiplayerPeer.new()
 func _ready() -> void:
 	$AutoSave.start()
 
+@rpc("any_peer","call_local")
 func add_player(pid):
 	var plyr = preload("res://Player/multiplayers.scn").instantiate()
 	plyr.name = str(pid)
@@ -55,12 +56,12 @@ func _on_add_player_pressed() -> void:
 	pass # Replace with function body.
 
 func _on_host_pressed() -> void:
-	peer.create_server(55555, 3)
+	peer.create_server(5555, 3)
 	multiplayer.multiplayer_peer = peer
 	multiplayer.peer_connected.connect(
 	func(pid):
 		print(pid)
-		add_player(pid)
+		rpc("add_player", pid)
 		multiplayer.get_unique_id()
 		)
 	multiplayer.peer_disconnected.connect(
@@ -71,7 +72,7 @@ func _on_host_pressed() -> void:
 	%World.broadcast()
 	$Broadcaster.start()
 	RoomInfo.name = SaveManager.get_world_name()
-	stun()
+	
 	pass # Replace with function body.
 var udp : PacketPeerUDP
 var listner: PacketPeerUDP
@@ -88,11 +89,3 @@ func cleanUp():
 	$Broadcaster.stop()
 	if udp != null:
 		udp.close()
-
-var webrtc_peer = PacketPeerUDP.new()
-
-func stun():
-	webrtc_peer.set_dest_address("stun.1.google.com",19302)
-	webrtc_peer.put_packet("request".to_utf8_buffer())
-	await get_tree().create_timer(1.0).timeout
-	

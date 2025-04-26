@@ -33,7 +33,6 @@ func _on_slot_pressed(index: int) -> void:
 		tex.visible = false
 		return
 	
-
 	if first_slot == -1:
 		if inv.slots[index].item.name:
 			first_slot = index
@@ -62,7 +61,6 @@ func _physics_process(delta: float) -> void:
 	if held_item:
 		tex.global_position = get_viewport().get_mouse_position()
 		tex.visible = true
-	print(first_slot)
 
 func  po(index1:int, index2:int):
 	var t = inv.slots[0].item as Collectibles

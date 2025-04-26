@@ -12,9 +12,14 @@ func _on_area_2d_body_entered(body: Node2D) -> void:
 				player_collect()
 				await get_tree().create_timer(0.1).timeout
 				self.queue_free()
+				if multiplayer.is_server():
+					rpc("self_destroy")
 			else:
 				print("inventory is full")
 
+@rpc("authority", "reliable")
+func self_destroy():
+	self.queue_free()
+
 func player_collect():
 	player.collect_items(item, -1)
-	

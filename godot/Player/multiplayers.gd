@@ -16,3 +16,21 @@ func _on_tile_timeout() -> void:
 		rpc_id(1, "trs", name)
 		print("kfk")
 	print("fp")
+
+
+
+func full_or_not() -> bool:
+	var is_full = true
+	for i in invent.slots:
+		if i.item.name == "":
+			is_full = false
+			return is_full
+	return is_full
+
+func player():
+	pass
+
+
+func _on_inventory_pressed() -> void:
+	open_close()
+	pass # Replace with function body.
