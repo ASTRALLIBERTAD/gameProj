@@ -1,7 +1,5 @@
 extends Rustplayer
 
-func _ready() -> void:
-	SaveManager.player_node = self
 
 func _on_timer_timeout() -> void:
 	$Camera2D.position_smoothing_enabled = true
@@ -21,3 +19,6 @@ func full_or_not() -> bool:
 
 func player():
 	pass
+
+#func _enter_tree() -> void:
+	#SaveManager.player_node = self

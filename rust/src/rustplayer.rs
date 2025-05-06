@@ -1,11 +1,15 @@
 use godot::classes::{AnimatedSprite2D, CharacterBody2D, Control, ICharacterBody2D, Input, Label};
-use godot::obj::NewAlloc;
+use godot::obj::{NewAlloc, WithBaseField};
 use godot::prelude::*;
 use std::str::FromStr;
 
+use crate::heart::Heart;
 use crate::inventory::Inventory;
 use crate::item_collectibles::Collectibles;
+
 use crate::terrain::Terrain1;
+
+const MAX_HEALTH: i32 = 20;
 
 #[derive(GodotClass)]
 #[class(base=CharacterBody2D)]
@@ -26,6 +30,9 @@ pub struct Rustplayer {
     item_slot: Gd<Control>,
 
     is_open: bool,
+
+    #[export]
+    heart_ui: Gd<Heart>
 }
 
 #[godot_api]
@@ -38,13 +45,24 @@ impl ICharacterBody2D for Rustplayer {
             inv: Inventory::new_gd(),
             item_slot: Control::new_alloc(),
             is_open: false,
+            heart_ui: Heart::new_alloc(),
         }
     }
 
+
     fn ready(&mut self) {
-        let r = self.base_mut().get_name().to_int();
-        self.base_mut().set_multiplayer_authority(r as i32);
+
+        // let r = self.base_mut().get_name().to_int();
+        // self.base_mut().set_multiplayer_authority(r as i32);
         self.close();
+
+        let health = MAX_HEALTH;
+        self.heart_ui.bind_mut().update_health(health);
+        
+        godot_print!("okkkk")
+        
+
+        
     }
 
     fn process(&mut self, _delta: f64) {
@@ -71,6 +89,7 @@ impl ICharacterBody2D for Rustplayer {
         }
         if input.is_action_just_pressed(&StringName::from_str("right").unwrap()) {
             self.sprite.set_flip_h(false);
+            self.heart_ui.bind_mut().update_health(1);
         }
         self.base_mut().set_velocity(velocity);
         self.base_mut().move_and_slide();

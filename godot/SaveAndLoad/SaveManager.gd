@@ -21,7 +21,7 @@ func world_exist(world_name: String) -> bool:
 func save_game():
 	var world_name = get_world_name()
 	var p: = SaveManagerRust.new()
-	p.save_player_pos(world_name, player_node)
+	p.save_player_pos(world_name, get_player())
 	
 	print(world_name)
 	var screenshot: = get_viewport().get_texture().get_image()
@@ -50,7 +50,7 @@ func save_world(name):
 
 func optimize_autosave(name):
 	var k := SaveManagerRust.new()
-	k.save_player_pos(name, player_node)
+	k.save_player_pos(name, get_player())
 	print("Game saved successfully.")
 	pass
 
@@ -62,7 +62,7 @@ func save(name: String):
 func load_game(name):
 	LoadGame = name
 	var i := SaveManagerRust.new()
-	i.load_player_pos(name, player_node)
+	i.load_player_pos(name, get_player())
 
 
 func delete_save(name):
@@ -87,3 +87,7 @@ func auto_save():
 		optimize_autosave(world_name)
 	else :
 		print("no world") 
+
+
+func get_player() -> Rustplayer:
+	return get_tree().get_root().get_node("/root/main/World/PLAYERS") as Rustplayer

@@ -41,6 +41,8 @@ func LoadImageTexture(path : String):
 		print("image failed to load")
 		return
 	return ImageTexture.create_from_image(loadedImage)
+	
+	
 
 
 func _on_load_scene_button_down() -> void:

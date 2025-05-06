@@ -11,6 +11,7 @@ mod item_collectibles;
 mod inventory;
 mod item_slot;
 mod inv_slot;
+mod heart;
 
 use godot::prelude::*;
 

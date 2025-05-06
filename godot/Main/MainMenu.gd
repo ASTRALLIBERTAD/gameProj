@@ -8,6 +8,7 @@ func _ready() -> void:
 
 func _on_play_pressed() -> void:
 	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.scn")
+	#get_tree().change_scene_to_file("res://joke/joke.scn")
 
 
 func _on_settings_pressed() -> void:
