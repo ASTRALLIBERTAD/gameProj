@@ -89,7 +89,7 @@ impl ICharacterBody2D for Rustplayer {
         }
         if input.is_action_just_pressed(&StringName::from_str("right").unwrap()) {
             self.sprite.set_flip_h(false);
-            self.heart_ui.bind_mut().update_health(1);
+            self.heart_ui.bind_mut().damage(1);
         }
         self.base_mut().set_velocity(velocity);
         self.base_mut().move_and_slide();

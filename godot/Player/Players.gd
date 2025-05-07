@@ -1,6 +1,5 @@
 extends Rustplayer
 
-
 func _on_timer_timeout() -> void:
 	$Camera2D.position_smoothing_enabled = true
 	$Camera2D.set_position_smoothing_enabled(2)
