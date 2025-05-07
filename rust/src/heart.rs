@@ -1,7 +1,7 @@
 use godot::classes::{HBoxContainer, IHBoxContainer, Texture2D};
 use godot::prelude::*;
 
-use crate::heart_display::{self, HeartDisplay};
+use crate::heart_display::HeartDisplay;
 
 #[derive(GodotClass)]
 #[class(base=HBoxContainer)]
@@ -74,37 +74,7 @@ impl Heart {
                     
                 }
 
-                // for heart_display in &mut self.heart_list {
-                //     let texture = if current_health >= 2 {
-                //         &self.full_heart
-                //     } else if current_health == 1 {
-                //         &self.half_heart
-                //     } else {
-                //         &self.empty_heart
-                //     };
-        
-                //     heart_display.set_texture(texture);
-        
-                //     // Subtract 2 health points per heart
-                //     current_health -= 2;
-                // }
-
-
-
-                // if health_left >= 2 {
-                //     // self.heart_list[0].set_texture(texture);
-                //     texture_rect.set_texture(&self.full_heart);
-                //     godot_print!("full heart");
-                // }
-                // else if health_left == 1 {
-                //     texture_rect.set_texture(&self.half_heart);
-                // }
-                // else {
-                //     texture_rect.set_texture(&self.empty_heart);
-                // }
-
                 self.heart_list.push(texture_rect);
-                // Handle the TextureRect here
             }
 
             
@@ -119,7 +89,7 @@ impl Heart {
 
         let mut remaining_damage = damage;
         let heart_parents = self.base_mut().get_children();
-        for (i, heart_display) in heart_parents.iter_shared().enumerate() {
+        for (_i, heart_display) in heart_parents.iter_shared().enumerate() {
             if let Ok(mut texture_rect) = heart_display.try_cast::<HeartDisplay>() {
 
                 let mut current_heart_health = texture_rect.bind_mut().get_health();
