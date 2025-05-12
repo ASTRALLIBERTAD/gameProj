@@ -9,7 +9,7 @@ use crate::item_collectibles::Collectibles;
 
 use crate::terrain::Terrain1;
 
-const MAX_HEALTH: i32 = 20;
+pub const MAX_HEALTH: i32 = 5;
 
 #[derive(GodotClass)]
 #[class(base=CharacterBody2D)]
@@ -57,10 +57,10 @@ impl ICharacterBody2D for Rustplayer {
         self.close();
 
         let health = MAX_HEALTH;
-        self.heart_ui.bind_mut().update_health(health);
+        self.heart_ui.bind_mut().heal(health);
+        
         
         godot_print!("okkkk")
-        
 
         
     }
