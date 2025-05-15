@@ -162,5 +162,17 @@ impl SaveManagerRust {
         self.load_player_pos(name.to_string());
 
     }
+
+
+    #[func]
+    fn rust_screenshot(&mut self){
+        let world_name = self.load_game.clone();
+        self.save_player_pos(world_name.to_string());
+        godot_print!("world name is: {}", world_name);
+        let path = format!("{}/games/{}/{}.png", self.get_os(), world_name, world_name);
+        let screen_capture = self.base_mut().get_viewport().unwrap().get_texture().unwrap().get_image().unwrap();
+        screen_capture.save_png(&path);
+    }
+	 
 }
                     

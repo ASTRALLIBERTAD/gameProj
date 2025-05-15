@@ -1,7 +1,7 @@
 extends Control
 
 var WorldName: String
-@onready var  newgame: = SaveManagerRust.new()
+@onready var  newgame: = RustSaveManager1
 
 func _on_playbuton_pressed() -> void:
 	var WorldName = %WorldNameInput.text
@@ -41,8 +41,7 @@ func _on_playbuton_pressed() -> void:
 			var upl = world.get_node("/root/main/Terrain/Terrain1") as Terrain1
 			upl.seed_seed(SaveManager.WorldSeed)
 			queue_free()
-		var game: = SaveManagerRust.new()
-		game.save_game_rust(WorldName)
+		RustSaveManager1.save_game_rust(WorldName)
 		SaveManager.save_world()
 	else:
 		print("failed to  save a new game")

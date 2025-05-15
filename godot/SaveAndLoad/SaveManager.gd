@@ -11,13 +11,13 @@ func world_exist(world_name: String) -> bool:
 	return FileAccess.file_exists(world_file)
 	
 
-func save_game():
-	var world_name = get_world_name()
-	RustSaveManager1.save_player_pos(world_name)
+# func save_game():
+# 	var world_name = get_world_name()
+# 	RustSaveManager1.save_player_pos(world_name)
 	
-	print(world_name)
-	var screenshot: = get_viewport().get_texture().get_image()
-	screenshot.save_png(RustSaveManager1.get_os() + "games/" + world_name + "/" + world_name + ".png")
+# 	print(world_name)
+# 	var screenshot: = get_viewport().get_texture().get_image()
+# 	screenshot.save_png(RustSaveManager1.get_os() + "games/" + world_name + "/" + world_name + ".png")
 	
 
 
@@ -41,15 +41,13 @@ func save_world():
 	
 
 func optimize_autosave(name):
-	var k := SaveManagerRust.new()
-	k.save_player_pos(name)
+	RustSaveManager1.save_player_pos(name)
 	print("Game saved successfully.")
 	pass
 
-func save(name: String):
-	var t := SaveManagerRust.new()
-	t.save_game_rust(name)
-	pass
+# func save(name: String):
+# 	RustSaveManager1.save_game_rust(name)
+# 	pass
 
 func delete_save(name):
 	var dir_path: String = RustSaveManager1.get_os() + "games/" + name
@@ -73,7 +71,3 @@ func auto_save():
 		optimize_autosave(world_name)
 	else :
 		print("no world") 
-
-
-func get_player() -> Rustplayer:
-	return get_tree().get_root().get_node("/root/main/World/PLAYERS") as Rustplayer

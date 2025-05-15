@@ -26,7 +26,7 @@ func _on_loading_pressed() -> void:
 
 func _on_saving_time_timeout() -> void:
 	get_tree().paused = false
-	SaveManager.save_game()
+	RustSaveManager1.rust_screenshot()
 	scene.change_scene_to_file("res://SaveAndLoad/LoadMenu.scn")
 	queue_redraw()
 	queue_free()
