@@ -1,56 +1,48 @@
 extends Node
 
 var base_path: String
-var LoadGame : String
+var LoadGame : String 
 var player_node: Rustplayer
 var WorldSeed: int
 
 
-func get_os() -> String:
-	if OS.get_name() == "Windows":
-		base_path = "user://"
-	if OS.get_name() == "Android":
-		base_path = "/storage/emulated/0/Android/data/com.example.proj/files/"  
-	return base_path
-
 func world_exist(world_name: String) -> bool:
-	var world_file: = get_os() + world_name + "/" + world_name +".dat"
+	var world_file: String = RustSaveManager1.get_os() + world_name + "/" + world_name +".dat"
 	return FileAccess.file_exists(world_file)
 	
 
 func save_game():
 	var world_name = get_world_name()
-	var p: = SaveManagerRust.new()
-	p.save_player_pos(world_name, get_player())
+	RustSaveManager1.save_player_pos(world_name)
 	
 	print(world_name)
 	var screenshot: = get_viewport().get_texture().get_image()
-	screenshot.save_png(get_os() + "games/" + world_name + "/" + world_name + ".png")
+	screenshot.save_png(RustSaveManager1.get_os() + "games/" + world_name + "/" + world_name + ".png")
 	
 
 
-func save_world(name):
+func save_world():
 	var world_name = get_world_name()
 	print(world_name)
 	
 	var SaveGameInfo := {
 		"name" : world_name,
-		"imgPath" : get_os() + "games/" + world_name + "/" + world_name + ".png",
+		"imgPath" : RustSaveManager1.get_os() + "games/" + world_name + "/" + world_name + ".png",
 		"dateTime" : Time.get_unix_time_from_system(),
 		"seed": WorldSeed
 	}
 	var SaveGameJson := JSON.stringify(SaveGameInfo)
 	
-	var SaveGameFile := FileAccess.open( get_os() + "games/" + world_name + "/" + world_name + "_saveGame.json", FileAccess.WRITE)
+	var SaveGameFile := FileAccess.open( RustSaveManager1.get_os() + "games/" + world_name + "/" + world_name + "_saveGame.json", FileAccess.WRITE)
 	SaveGameFile.store_string(SaveGameJson)
 	
 	var screenshot := get_viewport().get_texture().get_image()
-	screenshot.save_png(get_os() + "games/" + world_name + "/" + world_name + ".png")
+	screenshot.save_png(RustSaveManager1.get_os() + "games/" + world_name + "/" + world_name + ".png")
 	
 
 func optimize_autosave(name):
 	var k := SaveManagerRust.new()
-	k.save_player_pos(name, get_player())
+	k.save_player_pos(name)
 	print("Game saved successfully.")
 	pass
 
@@ -59,14 +51,8 @@ func save(name: String):
 	t.save_game_rust(name)
 	pass
 
-func load_game(name):
-	LoadGame = name
-	var i := SaveManagerRust.new()
-	i.load_player_pos(name, get_player())
-
-
 func delete_save(name):
-	var dir_path = get_os() + "games/" + name
+	var dir_path: String = RustSaveManager1.get_os() + "games/" + name
 	var dir := DirAccess.open(dir_path)
 	if dir.dir_exists(dir_path):
 		var files := dir.get_files()

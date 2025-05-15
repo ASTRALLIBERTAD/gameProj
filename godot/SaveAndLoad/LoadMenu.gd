@@ -6,11 +6,11 @@ var GameTerrain: int
 func _ready() -> void:
 	if get_tree().root.has_node("/root/main"):
 		get_tree().root.get_node("/root/main").queue_free()
-	var dir = DirAccess.get_directories_at( SaveManager.get_os() + "/games")
+	var dir = DirAccess.get_directories_at( RustSaveManager1.get_os() + "/games")
 	for i in dir:
 		var button : Button = LoadButton.instantiate()
 		button.LoadButtonDown.connect(OnLoadButtonDown)
-		var file_path: = SaveManager.get_os() + "/games/%s/%s_saveGame.json" % [i, i]
+		var file_path: String = RustSaveManager1.get_os() + "/games/%s/%s_saveGame.json" % [i, i]
 		
 		var file: = FileAccess.open( file_path, FileAccess.READ)
 		var content: = file.get_as_text()
@@ -49,7 +49,7 @@ func _on_load_scene_button_down() -> void:
 	var world_scene: = preload("res://World.scn").instantiate()
 	get_tree().root.add_child(world_scene)
 	queue_free()
-	SaveManager.load_game(SaveToLoad)
+	RustSaveManager1.load_game(SaveToLoad)
 	var u: Terrain1 = get_node("/root/main/Terrain/Terrain1") as Terrain1
 	u.seed_seed(GameTerrain)
 

@@ -21,13 +21,17 @@ pub struct SaveManagerRust {
     #[base]
     base: Base<Node>,
     current_world_name: StringName,
+
+    #[export]
+    load_game: GString,
     
 }
 
 #[godot_api]
 impl SaveManagerRust {
 
-    fn get_os(&self) -> &str {
+    #[func]
+    fn get_os(&self) -> String {
         let mut baser: &str = "";
         if OS == "windows" {
             baser = "user://";
@@ -38,13 +42,13 @@ impl SaveManagerRust {
             godot_print!("android");  
         }
         godot_print!("{}", baser);
-        return &baser;
+        return (&baser).to_string();
     }
     
 
     #[func]
     pub fn save_game_rust(&self, name: String) {
-        let base_path = self.get_os();
+        let base_path = &self.get_os();
         let folder = "games";
         let file_saver = format!("{}/{}", base_path, folder);
         let name = name;
@@ -66,7 +70,7 @@ impl SaveManagerRust {
     }
 
     #[func]
-    fn save_player_pos(&mut self, name: String, players: Option<Gd<Rustplayer>>){
+    fn save_player_pos(&mut self, name: String){
 
         self.current_world_name = format!("{:?}", name.type_id()).into();
         godot_print!("Current world name: {}", self.current_world_name);
@@ -79,32 +83,30 @@ impl SaveManagerRust {
         // Open the file for writing
         match FileAccess::open(&save_path, ModeFlags::WRITE) {
             Some(mut file) => {
-                if let Some(player) = players {
-                    // Retrieve player position
-                    let position = player.get_global_position();
-                    let player_position = PlayerPosition {
-                        x: position.x,
-                        y: position.y,
-                    };
+                
+                // Retrieve player position
+                let position = self.get_player().get_global_position();
+                let player_position = PlayerPosition {
+                    x: position.x,
+                    y: position.y,
+                };
 
-                    // Serialize the position with a size limit
-                    match bincode::serialize(&player_position) {
-                        Ok(serialized_data) => {
-                            if serialized_data.len() <= 4096 { // Example size limit (4KB)
-                                let byte_array = PackedByteArray::from(serialized_data);
-                                file.store_buffer(&byte_array);
-                                godot_print!("Game saved successfully at {}", save_path);
-                            } else {
-                                godot_error!("Serialized data exceeds the size limit!");
-                            }
-                        }
-                        Err(e) => {
-                            godot_error!("Failed to serialize player position: {}", e);
+                // Serialize the position with a size limit
+                match bincode::serialize(&player_position) {
+                    Ok(serialized_data) => {
+                        if serialized_data.len() <= 4096 { // Example size limit (4KB)
+                            let byte_array = PackedByteArray::from(serialized_data);
+                            file.store_buffer(&byte_array);
+                            godot_print!("Game saved successfully at {}", save_path);
+                        } else {
+                            godot_error!("Serialized data exceeds the size limit!");
                         }
                     }
-                } else {
-                    godot_error!("Player instance is missing!");
+                    Err(e) => {
+                        godot_error!("Failed to serialize player position: {}", e);
+                    }
                 }
+                
             }
             None => {
                 godot_error!("Failed to open save file at {}", save_path);
@@ -114,7 +116,7 @@ impl SaveManagerRust {
     }
 
     #[func]
-    fn load_player_pos(&mut self, name: String, players: Option<Gd<Rustplayer>>) {
+    fn load_player_pos(&mut self, name: String) {
 
         let base_path = self.get_os();
         let folder = "games";
@@ -135,10 +137,10 @@ impl SaveManagerRust {
             match bincode::deserialize::<PlayerPosition>(data_slice) {
                 Ok(player_position) => {
 
-                    if let Some(mut player) = players {
-                        player.set_global_position(Vector2::new(player_position.x, player_position.y));
-                        godot_print!("Player position loaded successfully from {}", save_path);
-                    }
+                    
+                    self.get_player().set_global_position(Vector2::new(player_position.x, player_position.y));
+                    godot_print!("Player position loaded successfully from {}", save_path);
+                
                 }
                 Err(_) => {
                     godot_error!("Failed to deserialize player position from file");
@@ -147,6 +149,18 @@ impl SaveManagerRust {
         } else {
             godot_error!("Failed to open file for loading at {}", save_path);
         }
+    }
+
+
+    fn get_player(&mut self) -> Gd<Rustplayer> {
+        return self.base_mut().get_tree().unwrap().get_root().unwrap().get_node_as::<Rustplayer>("/root/main/World/PLAYERS");
+    }
+
+    #[func]
+    fn load_game(&mut self, name: GString) {
+        self.load_game = name.clone();
+        self.load_player_pos(name.to_string());
+
     }
 }
                     

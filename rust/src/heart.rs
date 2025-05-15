@@ -73,8 +73,10 @@ impl Heart {
 
         godot_print!("heart current {:?}", self.current_health);
 
-        if self.current_health <=0 {
+        if self.current_health <= 0 {
             self.base_mut().hide();
+            self.base_mut().get_tree().unwrap().get_root().unwrap().get_tree().unwrap().set_pause(true);
+            self.current_health = 0;
         }
 
         for i in heart_parents.iter_shared() {

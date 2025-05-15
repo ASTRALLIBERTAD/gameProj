@@ -43,7 +43,7 @@ func _on_playbuton_pressed() -> void:
 			queue_free()
 		var game: = SaveManagerRust.new()
 		game.save_game_rust(WorldName)
-		SaveManager.save_world(WorldName)
+		SaveManager.save_world()
 	else:
 		print("failed to  save a new game")
 	
