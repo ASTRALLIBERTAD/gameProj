@@ -173,6 +173,19 @@ impl SaveManagerRust {
         let screen_capture = self.base_mut().get_viewport().unwrap().get_texture().unwrap().get_image().unwrap();
         screen_capture.save_png(&path);
     }
-	 
+
+    #[func]
+    fn auto_save(&mut self){
+        let world_name = self.load_game.clone();
+        godot_print!("world name is: {}", world_name);
+        if world_name != "".into() {
+            self.save_player_pos(world_name.to_string());
+        } else {
+            godot_print!("no world");
+        }
+        
+
+    }
+ 
 }
                     

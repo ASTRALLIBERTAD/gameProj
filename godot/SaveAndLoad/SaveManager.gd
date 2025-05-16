@@ -40,10 +40,6 @@ func save_world():
 	screenshot.save_png(RustSaveManager1.get_os() + "games/" + world_name + "/" + world_name + ".png")
 	
 
-func optimize_autosave(name):
-	RustSaveManager1.save_player_pos(name)
-	print("Game saved successfully.")
-	pass
 
 # func save(name: String):
 # 	RustSaveManager1.save_game_rust(name)
@@ -63,11 +59,3 @@ func delete_save(name):
 
 func get_world_name():
 	return LoadGame
-
-func auto_save():
-	var world_name = get_world_name()
-	print(world_name)
-	if world_name != "":
-		optimize_autosave(world_name)
-	else :
-		print("no world") 

@@ -13,7 +13,7 @@ func add_player(pid):
 	add_child(plyr)
 
 func _on_auto_save_timeout() -> void:
-	SaveManager.auto_save()
+	RustSaveManager1.auto_save()
 	pass 
 
 func _on_loading_pressed() -> void:
