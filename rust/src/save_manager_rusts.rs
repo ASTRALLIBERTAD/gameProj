@@ -1,8 +1,12 @@
 use std::any::Any;
 use std::env::consts::OS;
+use std::ops::DerefMut;
+use std::{fs, path};
+use std::path::Path;
+use std::io::Write;
 
 use godot::classes::file_access::ModeFlags;
-use godot::classes::{ DirAccess, FileAccess, Node};
+use godot::classes::{ DirAccess, FileAccess, Json, Node, Time};
 use godot::prelude::*;
 use serde::{Deserialize, Serialize};
 use crate::rustplayer::Rustplayer;
@@ -12,6 +16,14 @@ use crate::rustplayer::Rustplayer;
 struct PlayerPosition {
     x: f32,
     y: f32,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct SaveGameInfo {
+    pub name: String,
+    pub img_path: String,
+    pub date_time: f64,
+    pub seed: i64,
 }
 
 #[derive(GodotClass)]
@@ -47,7 +59,9 @@ impl SaveManagerRust {
     
 
     #[func]
-    pub fn save_game_rust(&self, name: String) {
+    pub fn save_game_rust(&mut self, name: String) {
+
+        self.current_world_name = name.to_godot().into();
         let base_path = &self.get_os();
         let folder = "games";
         let file_saver = format!("{}/{}", base_path, folder);
@@ -186,6 +200,63 @@ impl SaveManagerRust {
         
 
     }
+
+    #[func]
+    fn delete_save(&mut self, name: String) {
+        let base_path = self.get_os();
+        let folder = "games";
+        let save_path = format!("{}/{}/{}", base_path, folder, name);
+
+        // Open the directory for deletion
+        let mut dir = DirAccess::open(&save_path).expect("ok");
+        let files = dir.get_files();
+
+        if dir.dir_exists(&save_path) {
+
+            for file in files.to_vec().into_iter() {
+                dir.remove(&format!("{}/{}", save_path, file));
+            }
+            dir.remove(&save_path);
+            godot_print!("Save game '{}' deleted successfully.", name);
+        } else {
+            godot_print!("Save game '{}' not found.", name);
+        }
+
+    }
+
+    #[func]
+    fn save_world(&mut self) {
+        let world_name = self.load_game.clone();
+        let time = Time::singleton();
+        let info = SaveGameInfo {
+            name: "MyWorld".to_string(),
+            img_path: format!("{}/games/{}/{}.png", self.get_os(), world_name, world_name),
+            date_time: time.get_unix_time_from_system(),
+            seed: 123456789,
+        };
+
+        let path = format!("{}/games/{}/{}_saveGame.json", self.get_os(), world_name, world_name);
+
+        // let save_game_json = Json::stringify_ex().done();
+    }
+
+    // func save_world():
+	// var world_name = get_world_name()
+	// print(world_name)
+	
+	// var SaveGameInfo := {
+	// 	"name" : world_name,
+	// 	"imgPath" : RustSaveManager1.get_os() + "games/" + world_name + "/" + world_name + ".png",
+	// 	"dateTime" : Time.get_unix_time_from_system(),
+	// 	"seed": WorldSeed
+	// }
+	// var SaveGameJson := JSON.stringify(SaveGameInfo)
+	
+	// var SaveGameFile := FileAccess.open( RustSaveManager1.get_os() + "games/" + world_name + "/" + world_name + "_saveGame.json", FileAccess.WRITE)
+	// SaveGameFile.store_string(SaveGameJson)
+	
+	// var screenshot := get_viewport().get_texture().get_image()
+	// screenshot.save_png(RustSaveManager1.get_os() + "games/" + world_name + "/" + world_name + ".png")
  
 }
                     

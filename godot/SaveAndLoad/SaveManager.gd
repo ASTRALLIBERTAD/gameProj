@@ -45,17 +45,17 @@ func save_world():
 # 	RustSaveManager1.save_game_rust(name)
 # 	pass
 
-func delete_save(name):
-	var dir_path: String = RustSaveManager1.get_os() + "games/" + name
-	var dir := DirAccess.open(dir_path)
-	if dir.dir_exists(dir_path):
-		var files := dir.get_files()
-		for file in files:
-			dir.remove(dir_path + "/" + file)
-		dir.remove(dir_path)
-		print("Save game '" + name + "' deleted successfully.")
-	else:
-		print("Save game '" + name + "' not found.")
+# func delete_save(name):
+# 	var dir_path: String = RustSaveManager1.get_os() + "games/" + name
+# 	var dir := DirAccess.open(dir_path)
+# 	if dir.dir_exists(dir_path):
+# 		var files := dir.get_files()
+# 		for file in files:
+# 			dir.remove(dir_path + "/" + file)
+# 		dir.remove(dir_path)
+# 		print("Save game '" + name + "' deleted successfully.")
+# 	else:
+# 		print("Save game '" + name + "' not found.")
 
 func get_world_name():
 	return LoadGame

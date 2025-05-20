@@ -54,7 +54,7 @@ func _on_load_scene_button_down() -> void:
 	u.seed_seed(GameTerrain)
 
 func _on_delete_pressed() -> void:
-	SaveManager.delete_save(SaveToLoad)
+	RustSaveManager1.delete_save(SaveToLoad)
 	get_tree().reload_current_scene()
 	queue_redraw()
 	pass # Replace with function body.

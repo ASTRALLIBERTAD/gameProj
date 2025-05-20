@@ -42,7 +42,7 @@ func _on_playbuton_pressed() -> void:
 			upl.seed_seed(SaveManager.WorldSeed)
 			queue_free()
 		RustSaveManager1.save_game_rust(WorldName)
-		SaveManager.save_world()
+		RustSaveManager1.save_world()
 	else:
 		print("failed to  save a new game")
 	
