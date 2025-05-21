@@ -18,7 +18,7 @@ func _on_auto_save_timeout() -> void:
 
 func _on_loading_pressed() -> void:
 	print(OS.get_user_data_dir())
-	var yt = SaveManager.get_os()
+	var yt = RustSaveManager1.get_os()
 	$po.text = yt
 	$osl.text = OS.get_name()
 	get_tree().paused = false
@@ -71,7 +71,7 @@ func _on_host_pressed() -> void:
 	)
 	%World.broadcast()
 	$Broadcaster.start()
-	RoomInfo.name = SaveManager.get_world_name()
+	RoomInfo.name = RustSaveManager1.load_game
 	
 	pass # Replace with function body.
 var udp : PacketPeerUDP

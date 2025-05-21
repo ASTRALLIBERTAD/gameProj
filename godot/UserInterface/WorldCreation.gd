@@ -36,7 +36,7 @@ func _on_playbuton_pressed() -> void:
 			queue_free()
 		else:
 			var t: = hash(GameSeed)
-			SaveManager.WorldSeed = clampi(t, -2147483648, 2147483647)
+			RustSaveManager1 = clampi(t, -2147483648, 2147483647)
 			get_tree().root.add_child(world)
 			var upl = world.get_node("/root/main/Terrain/Terrain1") as Terrain1
 			upl.seed_seed(SaveManager.WorldSeed)

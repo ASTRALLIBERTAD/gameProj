@@ -1,10 +1,7 @@
 use std::any::Any;
 use std::env::consts::OS;
-use std::ops::DerefMut;
-use std::{fs, path};
-use std::path::Path;
-use std::io::Write;
 
+use godot::classes::class_macros::private::callbacks::to_string;
 use godot::classes::file_access::ModeFlags;
 use godot::classes::{ DirAccess, FileAccess, Json, Node, Time};
 use godot::prelude::*;
@@ -21,9 +18,9 @@ struct PlayerPosition {
 #[derive(Serialize, Deserialize)]
 pub struct SaveGameInfo {
     pub name: String,
-    pub img_path: String,
     pub date_time: f64,
-    pub seed: i64,
+    pub img_path: String,
+    pub seed: i32,
 }
 
 #[derive(GodotClass)]
@@ -36,6 +33,9 @@ pub struct SaveManagerRust {
 
     #[export]
     load_game: GString,
+
+    #[export]
+    world_seed: i32
     
 }
 
@@ -60,6 +60,8 @@ impl SaveManagerRust {
 
     #[func]
     pub fn save_game_rust(&mut self, name: String) {
+
+        self.load_game = name.clone().into();
 
         self.current_world_name = name.to_godot().into();
         let base_path = &self.get_os();
@@ -226,16 +228,41 @@ impl SaveManagerRust {
 
     #[func]
     fn save_world(&mut self) {
-        let world_name = self.load_game.clone();
+        
         let time = Time::singleton();
-        let info = SaveGameInfo {
-            name: "MyWorld".to_string(),
-            img_path: format!("{}/games/{}/{}.png", self.get_os(), world_name, world_name),
-            date_time: time.get_unix_time_from_system(),
-            seed: 123456789,
-        };
 
-        let path = format!("{}/games/{}/{}_saveGame.json", self.get_os(), world_name, world_name);
+        let folder = "games";
+        let save_path = format!("{}/{}/{}/{}_saveGame.json", self.get_os(), folder, self.load_game, self.load_game);
+
+        match FileAccess::open(&save_path, ModeFlags::WRITE){
+            Some(mut file) => {
+
+                let info = SaveGameInfo {
+                    name: self.load_game.to_string(),
+                    date_time: time.get_unix_time_from_system(),
+                    img_path: format!("{}/games/{}/{}.png", self.get_os(), self.load_game, self.load_game),
+                    seed: self.world_seed,
+                };
+
+                match serde_json::to_string(&info) {
+                    Ok(json_string) => {
+                        file.store_string(&json_string);
+                        self.rust_screenshot();
+                        godot_print!("Game info saved successfully at {}", save_path);
+
+                    },
+                    Err(e) => {
+                        godot_error!("Failed to serialize game info: {}", e);
+                    }
+                }
+
+            }
+            None => {
+                godot_error!("Failed to open save file at {}", save_path);
+            }
+                
+
+        }
 
         // let save_game_json = Json::stringify_ex().done();
     }
