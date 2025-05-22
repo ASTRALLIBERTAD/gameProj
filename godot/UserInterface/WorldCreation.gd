@@ -5,30 +5,30 @@ var WorldName: String
 
 func _on_playbuton_pressed() -> void:
 	var WorldName = %WorldNameInput.text
-	SaveManager.LoadGame = WorldName
+	RustSaveManager1.load_game = WorldName
 	var GameSeed = %Seed.text.strip_edges()
 	print(WorldName)
 	
 	if WorldName == "":
 		print("ERROR")
 		return
-	if SaveManager.world_exist(WorldName):
-		print("world name already exist")
-		return
+	#if SaveManager.world_exist(WorldName):
+		#print("world name already exist")
+		#return
 	
 	var world = preload("res://World.scn").instantiate() #res://World.tscn
 	if !get_tree() == null:
 		if GameSeed.is_valid_int():
-			SaveManager.WorldSeed = GameSeed
+			RustSaveManager1.world_seed = int(GameSeed)
 			get_tree().root.add_child(world)
 			var uop = world.get_node("/root/main/Terrain/Terrain1") as Terrain1
-			uop.seed_seed(SaveManager.WorldSeed)
+			uop.seed_seed(RustSaveManager1.world_seed)
 			queue_free()
 		elif GameSeed == "":
 			var lp: = RandomNumberGenerator.new()
 			var ti = hash(lp)
 			var yoj = clampi(ti, -2147483648, 2147483647)
-			SaveManager.WorldSeed = yoj
+			RustSaveManager1.world_seed = yoj
 			print(yoj)
 			get_tree().root.add_child(world)
 			var up = world.get_node("/root/main/Terrain/Terrain1") as Terrain1
@@ -36,10 +36,10 @@ func _on_playbuton_pressed() -> void:
 			queue_free()
 		else:
 			var t: = hash(GameSeed)
-			RustSaveManager1 = clampi(t, -2147483648, 2147483647)
+			RustSaveManager1.world_seed = clampi(t, -2147483648, 2147483647)
 			get_tree().root.add_child(world)
 			var upl = world.get_node("/root/main/Terrain/Terrain1") as Terrain1
-			upl.seed_seed(SaveManager.WorldSeed)
+			upl.seed_seed(RustSaveManager1.world_seed)
 			queue_free()
 		RustSaveManager1.save_game_rust(WorldName)
 		RustSaveManager1.save_world()

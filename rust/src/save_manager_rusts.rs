@@ -1,9 +1,8 @@
 use std::any::Any;
 use std::env::consts::OS;
 
-use godot::classes::class_macros::private::callbacks::to_string;
 use godot::classes::file_access::ModeFlags;
-use godot::classes::{ DirAccess, FileAccess, Json, Node, Time};
+use godot::classes::{ DirAccess, FileAccess, Node, Time};
 use godot::prelude::*;
 use serde::{Deserialize, Serialize};
 use crate::rustplayer::Rustplayer;
@@ -17,9 +16,11 @@ struct PlayerPosition {
 
 #[derive(Serialize, Deserialize)]
 pub struct SaveGameInfo {
-    pub name: String,
+    #[serde(rename = "dateTime")]
     pub date_time: f64,
+    #[serde(rename = "imgPath")]
     pub img_path: String,
+    pub name: String,
     pub seed: i32,
 }
 
@@ -238,9 +239,9 @@ impl SaveManagerRust {
             Some(mut file) => {
 
                 let info = SaveGameInfo {
-                    name: self.load_game.to_string(),
                     date_time: time.get_unix_time_from_system(),
                     img_path: format!("{}/games/{}/{}.png", self.get_os(), self.load_game, self.load_game),
+                    name: self.load_game.to_string(),
                     seed: self.world_seed,
                 };
 
