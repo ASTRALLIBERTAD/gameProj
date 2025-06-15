@@ -75,8 +75,11 @@ impl Heart {
 
         if self.current_health <= 0 {
             self.base_mut().hide();
-            self.base_mut().get_tree().unwrap().get_root().unwrap().get_tree().unwrap().set_pause(true);
+            // self.base_mut().get_tree().unwrap().get_root().unwrap().get_tree().unwrap().set_pause(true);
             self.current_health = 0;
+        }
+        else {
+            self.base_mut().show();
         }
 
         for i in heart_parents.iter_shared() {

@@ -7,9 +7,8 @@ use crate::heart::Heart;
 use crate::inventory::Inventory;
 use crate::item_collectibles::Collectibles;
 
+use crate::save_manager_rusts::SaveManagerRust;
 use crate::terrain::Terrain1;
-
-pub const MAX_HEALTH: i32 = 5;
 
 #[derive(GodotClass)]
 #[class(base=CharacterBody2D)]
@@ -32,7 +31,9 @@ pub struct Rustplayer {
     is_open: bool,
 
     #[export]
-    heart_ui: Gd<Heart>
+    heart_ui: Gd<Heart>,
+
+
 }
 
 #[godot_api]
@@ -54,14 +55,14 @@ impl ICharacterBody2D for Rustplayer {
 
         // let r = self.base_mut().get_name().to_int();
         // self.base_mut().set_multiplayer_authority(r as i32);
+        
         self.close();
+        let mut r = self.base_mut().get_node_as::<SaveManagerRust>("/root/RustSaveManager1");
+        let v = r.bind_mut().player_health;
 
-        let health = MAX_HEALTH;
-        self.heart_ui.bind_mut().heal(health);
+        self.heart_ui.bind_mut().heal(v);
         
-        
-        godot_print!("okkkk")
-
+        godot_print!("codessssss {}", v)
         
     }
 
@@ -151,6 +152,7 @@ impl Rustplayer {
         // godot_print!("signal: {:?}", y);
         godot_print!("item collected");
     }
+
     #[func]
     fn open_close(&mut self) {
         if self.is_open {

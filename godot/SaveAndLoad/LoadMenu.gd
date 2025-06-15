@@ -45,7 +45,7 @@ func LoadImageTexture(path : String):
 	
 
 
-func _on_load_scene_button_down() -> void:
+func _on_timer_timeout() -> void:
 	var world_scene: = preload("res://World.scn").instantiate()
 	get_tree().root.add_child(world_scene)
 	queue_free()
@@ -70,4 +70,9 @@ func _on_back_pressed() -> void:
 
 func _on_multiplayer_pressed() -> void:
 	get_tree().change_scene_to_file("res://world/multiplayer.scn")
+	pass # Replace with function body.
+
+
+func _on_load_scene_button_down() -> void:
+	$Timer.start()
 	pass # Replace with function body.

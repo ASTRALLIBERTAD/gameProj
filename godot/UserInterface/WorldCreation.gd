@@ -3,7 +3,7 @@ extends Control
 var WorldName: String
 @onready var  newgame: = RustSaveManager1
 
-func _on_playbuton_pressed() -> void:
+func _on_timer_timeout() -> void:
 	var WorldName = %WorldNameInput.text
 	RustSaveManager1.load_game = WorldName
 	var GameSeed = %Seed.text.strip_edges()
@@ -41,6 +41,7 @@ func _on_playbuton_pressed() -> void:
 			var upl = world.get_node("/root/main/Terrain/Terrain1") as Terrain1
 			upl.seed_seed(RustSaveManager1.world_seed)
 			queue_free()
+		
 		RustSaveManager1.save_game_rust(WorldName)
 		RustSaveManager1.save_world()
 	else:
@@ -55,4 +56,10 @@ func _on_backbutton_pressed() -> void:
 
 func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.scn")
+	pass # Replace with function body.
+
+
+func _on_playbuton_pressed() -> void:
+	$Timer.start()
+	RustSaveManager1.set_player_health(5)
 	pass # Replace with function body.

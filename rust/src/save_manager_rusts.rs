@@ -1,5 +1,6 @@
 use std::any::Any;
 use std::env::consts::OS;
+use std::ops::Add;
 
 use godot::classes::file_access::ModeFlags;
 use godot::classes::{ DirAccess, FileAccess, Node, Time};
@@ -9,9 +10,10 @@ use crate::rustplayer::Rustplayer;
 
 
 #[derive(Serialize, Deserialize)]
-struct PlayerPosition {
-    x: f32,
-    y: f32,
+struct PlayerData {
+    position_x: f32,
+    position_y: f32,
+    health: i32,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -30,13 +32,16 @@ pub struct SaveManagerRust {
   
     #[base]
     base: Base<Node>,
+
     current_world_name: StringName,
 
     #[export]
     load_game: GString,
 
     #[export]
-    world_seed: i32
+    world_seed: i32,
+
+    pub player_health: i32,
     
 }
 
@@ -103,15 +108,16 @@ impl SaveManagerRust {
                 
                 // Retrieve player position
                 let position = self.get_player().get_global_position();
-                let player_position = PlayerPosition {
-                    x: position.x,
-                    y: position.y,
+                let player_position = PlayerData {
+                    position_x: position.x,
+                    position_y: position.y,
+                    health: self.player_health
                 };
 
                 // Serialize the position with a size limit
                 match bincode::serialize(&player_position) {
                     Ok(serialized_data) => {
-                        if serialized_data.len() <= 4096 { // Example size limit (4KB)
+                        if serialized_data.len() <= 1048576 { // Example size limit (4KB)
                             let byte_array = PackedByteArray::from(serialized_data);
                             file.store_buffer(&byte_array);
                             godot_print!("Game saved successfully at {}", save_path);
@@ -151,11 +157,11 @@ impl SaveManagerRust {
             let data_slice: &[u8] = data.as_slice();
 
             // Deserialize the player position data
-            match bincode::deserialize::<PlayerPosition>(data_slice) {
-                Ok(player_position) => {
+            match bincode::deserialize::<PlayerData>(data_slice) {
+                Ok(player_data) => {
 
                     
-                    self.get_player().set_global_position(Vector2::new(player_position.x, player_position.y));
+                    self.get_player().set_global_position(Vector2::new(player_data.position_x, player_data.position_y));
                     godot_print!("Player position loaded successfully from {}", save_path);
                 
                 }
@@ -285,6 +291,13 @@ impl SaveManagerRust {
 	
 	// var screenshot := get_viewport().get_texture().get_image()
 	// screenshot.save_png(RustSaveManager1.get_os() + "games/" + world_name + "/" + world_name + ".png")
- 
+    
+
+    #[func]
+    pub fn set_player_health(&mut self, health: i32) -> i32 {
+        self.player_health = health;
+        godot_print!("Player health set to: {}", health);
+        self.player_health
+    }
 }
                     
