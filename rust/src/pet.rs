@@ -13,9 +13,9 @@ struct Pet {
     follow_distance: f32,  
 
     #[export]
-    player: Gd<Rustplayer>,
+    player: OnEditor<Gd<Rustplayer>> ,
     #[export]
-    sprite: Gd<AnimatedSprite2D>,
+    sprite: OnEditor<Gd<AnimatedSprite2D>>,
 
 }
 
@@ -28,8 +28,8 @@ impl ICharacterBody2D for Pet {
             speed: 100.0,
             stop_threshold: 10.0,
             follow_distance: 100.0,
-            player: Rustplayer::new_alloc(),
-            sprite: AnimatedSprite2D::new_alloc(),
+            player: OnEditor::default(),
+            sprite: OnEditor::default(),
         }
     }
 

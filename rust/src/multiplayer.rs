@@ -1,5 +1,5 @@
 use std::str::FromStr;
-use godot::classes::{AnimatedSprite2D, CharacterBody2D, Control, ICharacterBody2D, Input, Label};
+use godot::classes::{AnimatedSprite2D, Camera2D, CharacterBody2D, Control, ICharacterBody2D, Input, Label};
 use godot::prelude::*;
 
 use crate::inventory::Inventory;
@@ -13,19 +13,19 @@ pub struct MultiPlayerRust{
     base: Base<CharacterBody2D>,
 
     #[export]
-    sprite: Gd<AnimatedSprite2D>,
+    sprite: OnEditor<Gd<AnimatedSprite2D>>,
 
     #[export]
-    cam: Gd<Camera2D>,
+    cam: OnEditor<Gd<Camera2D>>,
 
     #[export]
-    coords: Gd<Label>,
+    coords: OnEditor<Gd<Label>>,
 
     #[export]
-    invent: Gd<Inventory>,
+    invent: OnEditor<Gd<Inventory>>,
 
     #[export]
-    item_slot: Gd<Control>,
+    item_slot: OnEditor<Gd<Control>>,
 
     is_open: bool
 }
@@ -35,11 +35,11 @@ impl ICharacterBody2D for MultiPlayerRust {
     fn init(base: Base<CharacterBody2D>) -> Self {
         Self {
             base, 
-            sprite: AnimatedSprite2D::new_alloc(),
-            cam: Camera2D::new_alloc(),
-            coords: Label::new_alloc(),
-            invent: Inventory::new_gd(),
-            item_slot: Control::new_alloc(),
+            sprite: OnEditor::default(),
+            cam: OnEditor::default(),
+            coords: OnEditor::default(),
+            invent: OnEditor::default(),
+            item_slot: OnEditor::default(),
             is_open: false
         }
     }

@@ -10,7 +10,7 @@ pub struct InvSlot {
     base: Base<Resource>,
 
     #[export]
-    item: Gd<Collectibles>,
+    item: OnEditor<Gd<Collectibles>>,
 }
 
 #[godot_api]
@@ -18,7 +18,7 @@ impl IResource for InvSlot {
     fn init(base: Base<Resource>) -> Self {
         Self { 
             base,
-            item: Collectibles::new_gd(),
+            item: OnEditor::default(),
         }
     }
 

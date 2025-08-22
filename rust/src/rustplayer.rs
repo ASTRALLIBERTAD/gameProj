@@ -1,5 +1,6 @@
+use bincode::Options;
 use godot::classes::{AnimatedSprite2D, CharacterBody2D, Control, ICharacterBody2D, Input, Label};
-use godot::obj::{NewAlloc, WithBaseField};
+use godot::obj::{WithBaseField};
 use godot::prelude::*;
 use std::str::FromStr;
 
@@ -17,22 +18,24 @@ pub struct Rustplayer {
     base: Base<CharacterBody2D>,
 
     #[export]
-    sprite: Gd<AnimatedSprite2D>,
+    sprite:  OnEditor<Gd<AnimatedSprite2D>>,
 
     #[export]
-    coords: Gd<Label>,
+    coords: OnEditor<Gd<Label>>,
 
     #[export]
-    inv: Gd<Inventory>,
+    inv: OnEditor<Gd<Inventory>>,
 
     #[export]
-    item_slot: Gd<Control>,
+    item_slot: OnEditor<Gd<Control>>,
 
     is_open: bool,
 
     #[export]
-    heart_ui: Gd<Heart>,
+    heart_ui: OnEditor<Gd<Heart>>,
 
+    #[export]
+    pub health: i32,
 
 }
 
@@ -41,31 +44,27 @@ impl ICharacterBody2D for Rustplayer {
     fn init(base: Base<CharacterBody2D>) -> Self {
         Self {
             base,
-            sprite: AnimatedSprite2D::new_alloc(),
-            coords: Label::new_alloc(),
-            inv: Inventory::new_gd(),
-            item_slot: Control::new_alloc(),
+            sprite: OnEditor::default(),
+            coords: OnEditor::default(),
+            inv: OnEditor::default(),
+            item_slot: OnEditor::default(),
             is_open: false,
-            heart_ui: Heart::new_alloc(),
+            heart_ui: OnEditor::default(),
+            health: i32::default()
         }
     }
 
-
     fn ready(&mut self) {
+
+        // self.heart_ui.bind_mut().heal(self.health);
+        // godot_print!(" ito {}", self.health);
 
         // let r = self.base_mut().get_name().to_int();
         // self.base_mut().set_multiplayer_authority(r as i32);
         
-        self.close();
-        let mut r = self.base_mut().get_node_as::<SaveManagerRust>("/root/RustSaveManager1");
-        let v = r.bind_mut().player_health;
-
-        self.heart_ui.bind_mut().heal(v);
-        
-        godot_print!("codessssss {}", v)
+        // self.close();
         
     }
-
     fn process(&mut self, _delta: f64) {
         if !self.base_mut().is_multiplayer_authority() {
             return;
@@ -119,6 +118,11 @@ impl ICharacterBody2D for Rustplayer {
 
 #[godot_api]
 impl Rustplayer {
+    #[func]
+    pub fn tester(&mut self, amount: i32) {
+        godot_print!("connected and the amount is : {}", amount);
+    }
+
     fn player_cord(&mut self) -> Vector2 {
         let scene = self
             .base_mut()
@@ -160,5 +164,15 @@ impl Rustplayer {
         } else {
             self.open();
         }
+    }
+
+    pub fn player_hp(&mut self, num: i32) {
+        self.heart_ui.bind_mut().heal(num);
+        self.health = num;
+    }
+
+    fn player_health_checker(&mut self) {
+        
+
     }
 }

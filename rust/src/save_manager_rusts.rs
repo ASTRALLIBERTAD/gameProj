@@ -1,6 +1,5 @@
 use std::any::Any;
 use std::env::consts::OS;
-use std::ops::Add;
 
 use godot::classes::file_access::ModeFlags;
 use godot::classes::{ DirAccess, FileAccess, Node, Time};
@@ -40,6 +39,7 @@ pub struct SaveManagerRust {
 
     #[export]
     world_seed: i32,
+
 
     pub player_health: i32,
     
@@ -89,6 +89,8 @@ impl SaveManagerRust {
         if dir != DirAccess::open(&games_path).expect("failed to open"){
             return;
         }
+
+        self.set_player_health(20);
     }
 
     #[func]
@@ -111,7 +113,7 @@ impl SaveManagerRust {
                 let player_position = PlayerData {
                     position_x: position.x,
                     position_y: position.y,
-                    health: self.player_health
+                    health: self.get_player().bind_mut().get_heart_ui().unwrap().bind_mut().current_health,
                 };
 
                 // Serialize the position with a size limit
@@ -121,6 +123,8 @@ impl SaveManagerRust {
                             let byte_array = PackedByteArray::from(serialized_data);
                             file.store_buffer(&byte_array);
                             godot_print!("Game saved successfully at {}", save_path);
+                            godot_print!("Game saved health {}", player_position.health);
+
                         } else {
                             godot_error!("Serialized data exceeds the size limit!");
                         }
@@ -160,10 +164,12 @@ impl SaveManagerRust {
             match bincode::deserialize::<PlayerData>(data_slice) {
                 Ok(player_data) => {
 
-                    
                     self.get_player().set_global_position(Vector2::new(player_data.position_x, player_data.position_y));
+                    self.get_player().bind_mut().
+                    // health = player_data.health;
+                    player_hp(player_data.health);
                     godot_print!("Player position loaded successfully from {}", save_path);
-                
+                    godot_print!("saved heart {}", player_data.health);
                 }
                 Err(_) => {
                     godot_error!("Failed to deserialize player position from file");
@@ -294,10 +300,10 @@ impl SaveManagerRust {
     
 
     #[func]
-    pub fn set_player_health(&mut self, health: i32) -> i32 {
+    pub fn set_player_health(&mut self, health: i32) {
+        self.get_player().bind_mut().player_hp(health);
         self.player_health = health;
         godot_print!("Player health set to: {}", health);
-        self.player_health
     }
 }
                     

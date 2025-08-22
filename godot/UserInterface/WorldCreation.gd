@@ -44,6 +44,7 @@ func _on_timer_timeout() -> void:
 		
 		RustSaveManager1.save_game_rust(WorldName)
 		RustSaveManager1.save_world()
+		RustSaveManager1.set_player_health(20)
 	else:
 		print("failed to  save a new game")
 	
@@ -61,5 +62,5 @@ func _on_back_pressed() -> void:
 
 func _on_playbuton_pressed() -> void:
 	$Timer.start()
-	RustSaveManager1.set_player_health(5)
+	
 	pass # Replace with function body.
