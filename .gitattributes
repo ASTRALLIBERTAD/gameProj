@@ -1,0 +1,55 @@
+*.gdextension text eol=lf
+
+# Batch and shell scripts
+*.bat text eol=crlf
+*.sh  text eol=lf
+
+# ========================
+# Godot Project Attributes
+# ========================
+
+# Default: all text files use LF
+* text=auto eol=lf
+
+# Godot scripts and resources
+*.gd       text eol=lf
+*.tscn     text eol=lf
+*.tres     text eol=lf
+*.import   text eol=lf
+*.cfg      text eol=lf
+*.gdshader text eol=lf
+*.cs       text eol=lf
+*.shader   text eol=lf
+
+# Config / docs
+*.json     text eol=lf
+*.yml      text eol=lf
+*.yaml     text eol=lf
+*.md       text eol=lf
+*.txt      text eol=lf
+
+# ------------------------
+# Binary files (no EOL fix)
+# ------------------------
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.gif      binary
+*.svg      binary
+*.import   -text
+
+*.wav      binary
+*.ogg      binary
+*.mp3      binary
+
+*.ttf      binary
+*.otf      binary
+*.woff     binary
+*.woff2    binary
+
+*.zip      binary
+*.pck      binary
+*.exe      binary
+*.dll      binary
+*.so       binary
+*.dylib    binary

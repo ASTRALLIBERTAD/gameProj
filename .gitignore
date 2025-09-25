@@ -1,0 +1,14 @@
+# Godot exports
+export.cfg
+export_presets.cfg
+
+# Ignore Android build outputs
+godot/android/build/
+godot/android/.gradle/
+godot/android/.idea/
+godot/android/*.apk
+godot/android/*.idsig
+godot/android/*.aar
+
+# Ignore native libs
+godot/lib/
