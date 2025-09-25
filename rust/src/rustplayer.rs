@@ -1,4 +1,4 @@
-use bincode::Options;
+
 use godot::classes::{AnimatedSprite2D, CharacterBody2D, Control, ICharacterBody2D, Input, Label};
 use godot::obj::{WithBaseField};
 use godot::prelude::*;
@@ -8,7 +8,6 @@ use crate::heart::Heart;
 use crate::inventory::Inventory;
 use crate::item_collectibles::Collectibles;
 
-use crate::save_manager_rusts::SaveManagerRust;
 use crate::terrain::Terrain1;
 
 #[derive(GodotClass)]
@@ -171,8 +170,4 @@ impl Rustplayer {
         self.health = num;
     }
 
-    fn player_health_checker(&mut self) {
-        
-
-    }
 }
