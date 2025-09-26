@@ -100,37 +100,38 @@ impl ITileMapLayer for Terrain1 {
         }
     }
 }
+const CHUNK_SIZE: i32 = 16;
 
 #[godot_api]
 impl Terrain1 {
-    #[func]
-    fn seed_seed(&mut self, seed: i32) -> i32 {
-        self.seedser = seed;
-        self.seedser
+    /// Converts tile map coordinates to chunk coordinates
+    fn get_chunk_coord(&self, pos: Vector2i) -> Vector2i {
+        Vector2i::new(
+            pos.x.div_euclid(CHUNK_SIZE),
+            pos.y.div_euclid(CHUNK_SIZE),
+        )
     }
 
-    fn generate_chunk_for_player(&mut self, player_id: i32, pos: Vector2i) {
-        if self.player_chunks.get(&player_id).map_or(false, |chunks| chunks.contains(&pos)) {
-            return;
-        }
-
+    /// Generate a full chunk
+    fn generate_chunk(&mut self, chunk_pos: Vector2i) {
         let mut tiles_to_set = Vec::new();
-        for x in 0..self.width {
-            for y in 0..self.height {
-                let position = Vector2i::new(
-                    pos.x - (self.width / 2) + x,
-                    pos.y - (self.height / 2) + y
-                );
-                
+
+        let start_x = chunk_pos.x * CHUNK_SIZE;
+        let start_y = chunk_pos.y * CHUNK_SIZE;
+
+        for x in 0..CHUNK_SIZE {
+            for y in 0..CHUNK_SIZE {
+                let position = Vector2i::new(start_x + x, start_y + y);
+
                 let alt = self.altitude.get_noise_2d(
                     position.x as f32,
-                    position.y as f32
+                    position.y as f32,
                 ) * 10.0;
 
                 let coords = if alt < 0.1 {
-                    Vector2i::new(0, 11)
+                    Vector2i::new(0, 11) // water
                 } else {
-                    Vector2i::new(1, 0)
+                    Vector2i::new(1, 0) // grass
                 };
 
                 tiles_to_set.push((position, coords));
@@ -138,105 +139,95 @@ impl Terrain1 {
         }
 
         for (position, coords) in tiles_to_set {
-            self.base_mut().set_cell_ex(position)
+            self.base_mut()
+                .set_cell_ex(position)
                 .source_id(1)
                 .atlas_coords(coords)
                 .done();
         }
-
-        self.player_chunks.entry(player_id)
-            .or_insert_with(HashSet::new)
-            .insert(pos);
     }
 
-    fn is_chunk_needed_by_any_player(&self, chunk: Vector2i, excluded_player_id: i32) -> bool {
-        let unload_distance_threshold = (self.width as f32 * 2.0) + 1.0;
-        
-        // Check all player positions against this chunk
-        for (&player_id, &player_pos) in &self.player_positions {
-            if player_id != excluded_player_id {
-                let dist = self.get_dist(chunk, player_pos);
-                if dist <= unload_distance_threshold as f64 {
-                    return true;
+        fn generate_chunk_for_player(&mut self, player_id: i32, pos: Vector2i) {
+    let center_chunk = self.get_chunk_coord(pos);
+    let load_radius = 1; // 3x3
+
+    // Step 1: collect new chunks to generate
+    let mut new_chunks = Vec::new();
+    if let Some(player_chunks) = self.player_chunks.get(&player_id) {
+        for dx in -load_radius..=load_radius {
+            for dy in -load_radius..=load_radius {
+                let chunk_pos = Vector2i::new(center_chunk.x + dx, center_chunk.y + dy);
+                if !player_chunks.contains(&chunk_pos) {
+                    new_chunks.push(chunk_pos);
                 }
             }
         }
-        false
+    } else {
+        // First time: player has no chunks yet, so generate the full 3x3
+        for dx in -load_radius..=load_radius {
+            for dy in -load_radius..=load_radius {
+                new_chunks.push(Vector2i::new(center_chunk.x + dx, center_chunk.y + dy));
+            }
+        }
     }
+
+    // Step 2: actually generate and then insert into HashSet
+    for chunk_pos in new_chunks {
+        self.generate_chunk(chunk_pos);
+
+        // now safe to borrow mutably just for inserting
+        self.player_chunks
+            .entry(player_id)
+            .or_insert_with(HashSet::new)
+            .insert(chunk_pos);
+    }
+}
 
     fn unload_distant_chunks_for_player(&mut self, player_id: i32, pos: Vector2i) {
-        let unload_distance_threshold = (self.width as f32 * 2.0) + 1.0;
-        
-        let chunks_to_unload = if let Some(chunks) = self.player_chunks.get(&player_id) {
-            chunks.iter()
-                .filter(|&&chunk| {
-                    let dist = self.get_dist(chunk, pos);
-                    dist > unload_distance_threshold as f64
-                })
-                .cloned()
-                .collect::<Vec<_>>()
-        } else {
-            Vec::new()
-        };
+        let player_chunk = self.get_chunk_coord(pos);
+        let unload_distance = 2; // chunks around the player
 
-        let mut chunks_to_clear = Vec::new();
+        let chunks_to_unload: Vec<Vector2i> = self.player_chunks
+            .get(&player_id)
+            .map(|chunks| {
+                chunks.iter()
+                    .filter(|&&chunk| {
+                        let dx = (chunk.x - player_chunk.x).abs();
+                        let dy = (chunk.y - player_chunk.y).abs();
+                        dx > unload_distance || dy > unload_distance
+                    })
+                    .cloned()
+                    .collect()
+            })
+            .unwrap_or_default();
+
+        // Actually clear and remove unloaded chunks
         for chunk in &chunks_to_unload {
-            if !self.is_chunk_needed_by_any_player(*chunk, player_id) {
-                chunks_to_clear.push(*chunk);
-            }
+            self.clear_chunk(*chunk);  // remove tiles from map
         }
-
-        // Clear chunks that are no longer needed by any player
-        for chunk in chunks_to_clear {
-            self.clear_chunk(chunk);
-        }
-
-        // Remove chunks from player's set
         if let Some(chunks) = self.player_chunks.get_mut(&player_id) {
-            for chunk in chunks_to_unload {
-                chunks.remove(&chunk);
+            for chunk in &chunks_to_unload {
+                chunks.remove(chunk);    // remove from player's chunk set
             }
         }
     }
 
-    fn clear_chunk(&mut self, pos: Vector2i) {
-        for x in 0..self.width {
-            for y in 0..self.height {
-                let position = Vector2i::new(
-                    pos.x - (self.width / 2) + x,
-                    pos.y - (self.height / 2) + y
-                );
-                self.base_mut().set_cell_ex(position)
+
+    fn clear_chunk(&mut self, chunk_pos: Vector2i) {
+        let start_x = chunk_pos.x * CHUNK_SIZE;
+        let start_y = chunk_pos.y * CHUNK_SIZE;
+
+        for x in 0..CHUNK_SIZE {
+            for y in 0..CHUNK_SIZE {
+                let position = Vector2i::new(start_x + x, start_y + y);
+
+                self.base_mut()
+                    .set_cell_ex(position)
                     .source_id(-1)
                     .atlas_coords(Vector2i::new(-1, -1))
                     .alternative_tile(-1)
                     .done();
             }
-        }
-    }
-
-    fn get_dist(&self, p1: Vector2i, p2: Vector2i) -> f64 {
-        let resultant = p1 - p2;
-        sqrt((resultant.x as f64).powi(2) + (resultant.y as f64).powi(2))
-    }
-
-    #[func]
-    fn tile(&mut self, pid: i32) {
-        let tree = self.base_mut().get_tree().unwrap();
-        let root = tree.get_root().unwrap();
-        let pyr = format!("/root/main/World/{}", pid);
-        let y = root.get_node_as::<MultiPlayerRust>(&pyr);
-        if y.is_instance_valid() {
-            let r = y.get_global_position();
-            let f = self.base_mut().local_to_map(r);
-            self.player_positions.insert(pid, f);
-            self.generate_chunk_for_player(pid, f);
-            self.unload_distant_chunks_for_player(pid, f);
-            godot_print!("Player klkl {} is valid", pid);
-        } else {
-            self.player_positions.remove(&pid);
-            self.player_chunks.remove(&pid);
-            godot_print!("Player klkl {} is not valid", pid);
         }
     }
 }

@@ -13,6 +13,7 @@ mod item_slot;
 mod inv_slot;
 mod heart;
 mod heart_display;
+mod example_terrrain;
 
 use godot::prelude::*;
 
