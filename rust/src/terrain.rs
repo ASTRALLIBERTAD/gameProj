@@ -1,10 +1,44 @@
 use std::collections::{HashMap, HashSet};
-use godot::classes::{FastNoiseLite, ITileMapLayer, InputEvent, TileMapLayer};
-use godot::global::{randi, sqrt};
+use godot::classes::{FastNoiseLite, ITileMapLayer, InputEvent, TileMapLayer, file_access::ModeFlags, FileAccess};
+use godot::global::{randi};
 use godot::obj::WithBaseField;
 use godot::prelude::*;
+use serde::{Serialize, Deserialize};
 use crate::multiplayer::MultiPlayerRust;
 use crate::rustplayer::Rustplayer;
+
+#[derive(Serialize, Deserialize, Clone, Copy, Debug)]
+pub struct SerializableVector2i {
+    pub x: i32,
+    pub y: i32,
+}
+
+impl From<Vector2i> for SerializableVector2i {
+    fn from(v: Vector2i) -> Self {
+        Self { x: v.x, y: v.y }
+    }
+}
+
+impl From<SerializableVector2i> for Vector2i {
+    fn from(s: SerializableVector2i) -> Self {
+        Vector2i::new(s.x, s.y)
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct ChunkData {
+    pub tiles: Vec<(SerializableVector2i, SerializableVector2i)>, 
+    pub changed: bool,
+}
+
+impl ChunkData {
+    fn new() -> Self {
+        Self {
+            tiles: Vec::new(),
+            changed: false,
+        }
+    }
+}
 
 #[derive(GodotClass)]
 #[class(base=TileMapLayer)]
@@ -14,14 +48,14 @@ pub struct Terrain1 {
     pub moisture: Gd<FastNoiseLite>,
     pub temperature: Gd<FastNoiseLite>,
     pub altitude: Gd<FastNoiseLite>,
-    pub height: i32,
-    pub width: i32,
-    // Track both chunks and current positions
     pub player_chunks: HashMap<i32, HashSet<Vector2i>>,
     pub player_positions: HashMap<i32, Vector2i>,
+    pub chunk_cache: HashMap<Vector2i, ChunkData>, // store changed chunks
     #[export]
     pub seedser: i32, 
 }
+
+const CHUNK_SIZE: i32 = 16;
 
 #[godot_api]
 impl ITileMapLayer for Terrain1 {
@@ -31,36 +65,33 @@ impl ITileMapLayer for Terrain1 {
             moisture: FastNoiseLite::new_gd(),
             temperature: FastNoiseLite::new_gd(),
             altitude: FastNoiseLite::new_gd(),
-            height: 25,
-            width: 25,
             player_chunks: HashMap::new(),
             player_positions: HashMap::new(),
+            chunk_cache: HashMap::new(),
             seedser: i32::default(),
         }
     }
 
     fn ready(&mut self) {
-        self.base_mut().get_tree().unwrap().get_root().unwrap().get_node_as::<Rustplayer>("/root/main/World/PLAYERS");
         self.moisture.set_seed(randi() as i32);
         self.temperature.set_seed(randi() as i32);
         self.altitude.set_frequency(0.01);
     }
     
     fn process(&mut self, _delta: f64) {
-
-        
         self.altitude.set_seed(self.seedser);
         
-        // Update main player
-        let label = self.base_mut().get_tree().unwrap().get_root().unwrap().get_node_as::<Rustplayer>("/root/main/World/PLAYERS");
+        // main player
+        let label = self.base_mut().get_tree().unwrap().get_root().unwrap()
+            .get_node_as::<Rustplayer>("/root/main/World/PLAYERS");
         let ypo = label.get_position();
         let sls = self.base_mut().local_to_map(ypo);
         
-        // Update main player position (using ID 0)
         self.player_positions.insert(0, sls);
         self.generate_chunk_for_player(0, sls);
         self.unload_distant_chunks_for_player(0, sls);
 
+        // multiplayer
         let tree = self.base_mut().get_tree().unwrap();
         let root = tree.get_root().unwrap();
         let mut multiplayer = tree.get_multiplayer().unwrap();
@@ -73,38 +104,38 @@ impl ITileMapLayer for Terrain1 {
                 if y.is_instance_valid() {
                     let r = y.get_global_position();
                     let f = self.base_mut().local_to_map(r);
-                    // Update multiplayer position
                     self.player_positions.insert(i, f);
                     self.generate_chunk_for_player(i, f);
                     self.unload_distant_chunks_for_player(i, f);
-                    godot_print!("Player {} is valid", i);
                 } else {
-                    // Remove disconnected player data
                     self.player_positions.remove(&i);
                     self.player_chunks.remove(&i);
-                    godot_print!("Player {} is not valid", i);
                 }
             }
         }
     }
 
     fn input(&mut self, event: Gd<InputEvent>) {
-        
-        if event.is_action_pressed("click"){
+        if event.is_action_pressed("click") {
             let k = self.base_mut().get_global_mouse_position();
             let l = self.base_mut().local_to_map(k);
+
             self.base_mut().set_cell_ex(l)
-            .source_id(1)
-            .atlas_coords(Vector2i::new(1, 0))
-            .done();
+                .source_id(1)
+                .atlas_coords(Vector2i::new(1, 0))
+                .done();
+
+            // Mark chunk as changed
+            let chunk_pos = self.get_chunk_coord(l);
+            if let Some(chunk) = self.chunk_cache.get_mut(&chunk_pos) {
+                chunk.changed = true;
+            }
         }
     }
 }
-const CHUNK_SIZE: i32 = 16;
 
 #[godot_api]
 impl Terrain1 {
-    /// Converts tile map coordinates to chunk coordinates
     fn get_chunk_coord(&self, pos: Vector2i) -> Vector2i {
         Vector2i::new(
             pos.x.div_euclid(CHUNK_SIZE),
@@ -112,10 +143,13 @@ impl Terrain1 {
         )
     }
 
-    /// Generate a full chunk
     fn generate_chunk(&mut self, chunk_pos: Vector2i) {
-        let mut tiles_to_set = Vec::new();
+        if self.load_chunk(chunk_pos) {
+            return; // loaded from disk, don’t regenerate
+        }
 
+        // else generate new terrain
+        let mut tiles_to_set = Vec::new();
         let start_x = chunk_pos.x * CHUNK_SIZE;
         let start_y = chunk_pos.y * CHUNK_SIZE;
 
@@ -145,47 +179,43 @@ impl Terrain1 {
                 .atlas_coords(coords)
                 .done();
         }
+
+        // mark chunk as dirty (so we know it must be saved if modified later)
+        self.save_chunk(chunk_pos);
     }
 
-        fn generate_chunk_for_player(&mut self, player_id: i32, pos: Vector2i) {
-    let center_chunk = self.get_chunk_coord(pos);
-    let load_radius = 1; // 3x3
 
-    // Step 1: collect new chunks to generate
-    let mut new_chunks = Vec::new();
-    if let Some(player_chunks) = self.player_chunks.get(&player_id) {
-        for dx in -load_radius..=load_radius {
-            for dy in -load_radius..=load_radius {
-                let chunk_pos = Vector2i::new(center_chunk.x + dx, center_chunk.y + dy);
-                if !player_chunks.contains(&chunk_pos) {
-                    new_chunks.push(chunk_pos);
+    fn generate_chunk_for_player(&mut self, player_id: i32, pos: Vector2i) {
+        let center_chunk = self.get_chunk_coord(pos);
+        let load_radius = 1;
+
+        let mut new_chunks = Vec::new();
+        if let Some(player_chunks) = self.player_chunks.get(&player_id) {
+            for dx in -load_radius..=load_radius {
+                for dy in -load_radius..=load_radius {
+                    let chunk_pos = Vector2i::new(center_chunk.x + dx, center_chunk.y + dy);
+                    if !player_chunks.contains(&chunk_pos) {
+                        new_chunks.push(chunk_pos);
+                    }
+                }
+            }
+        } else {
+            for dx in -load_radius..=load_radius {
+                for dy in -load_radius..=load_radius {
+                    new_chunks.push(Vector2i::new(center_chunk.x + dx, center_chunk.y + dy));
                 }
             }
         }
-    } else {
-        // First time: player has no chunks yet, so generate the full 3x3
-        for dx in -load_radius..=load_radius {
-            for dy in -load_radius..=load_radius {
-                new_chunks.push(Vector2i::new(center_chunk.x + dx, center_chunk.y + dy));
-            }
+
+        for chunk_pos in new_chunks {
+            self.generate_chunk(chunk_pos);
+            self.player_chunks.entry(player_id).or_insert_with(HashSet::new).insert(chunk_pos);
         }
     }
 
-    // Step 2: actually generate and then insert into HashSet
-    for chunk_pos in new_chunks {
-        self.generate_chunk(chunk_pos);
-
-        // now safe to borrow mutably just for inserting
-        self.player_chunks
-            .entry(player_id)
-            .or_insert_with(HashSet::new)
-            .insert(chunk_pos);
-    }
-}
-
     fn unload_distant_chunks_for_player(&mut self, player_id: i32, pos: Vector2i) {
         let player_chunk = self.get_chunk_coord(pos);
-        let unload_distance = 2; // chunks around the player
+        let unload_distance = 2;
 
         let chunks_to_unload: Vec<Vector2i> = self.player_chunks
             .get(&player_id)
@@ -201,13 +231,15 @@ impl Terrain1 {
             })
             .unwrap_or_default();
 
-        // Actually clear and remove unloaded chunks
         for chunk in &chunks_to_unload {
-            self.clear_chunk(*chunk);  // remove tiles from map
+            // save before clearing
+            self.save_chunk(*chunk);
+            self.clear_chunk(*chunk);
         }
+
         if let Some(chunks) = self.player_chunks.get_mut(&player_id) {
             for chunk in &chunks_to_unload {
-                chunks.remove(chunk);    // remove from player's chunk set
+                chunks.remove(chunk);
             }
         }
     }
@@ -221,13 +253,50 @@ impl Terrain1 {
             for y in 0..CHUNK_SIZE {
                 let position = Vector2i::new(start_x + x, start_y + y);
 
-                self.base_mut()
-                    .set_cell_ex(position)
+                self.base_mut().set_cell_ex(position)
                     .source_id(-1)
                     .atlas_coords(Vector2i::new(-1, -1))
                     .alternative_tile(-1)
                     .done();
             }
         }
+    }
+
+    fn save_chunk(&mut self, chunk_pos: Vector2i) {
+        if let Some(chunk) = self.chunk_cache.get(&chunk_pos) {
+            if !chunk.changed {
+                return;
+            }
+            let save_path = format!("user://chunk_{}_{}.dat", chunk_pos.x, chunk_pos.y);
+
+            if let Some(mut file) = FileAccess::open(&save_path, ModeFlags::WRITE) {
+                if let Ok(data) = bincode::serialize(&chunk) {
+                    let buffer = PackedByteArray::from(data);
+                    file.store_buffer(&buffer);
+                    godot_print!("Saved chunk {:?}", chunk_pos);
+                }
+            }
+        }
+    }
+
+    fn load_chunk(&mut self, chunk_pos: Vector2i) -> bool {
+        let save_path = format!("user://chunk_{}_{}.dat", chunk_pos.x, chunk_pos.y);
+        if let Some(file) = FileAccess::open(&save_path, ModeFlags::READ) {
+            let buffer = file.get_buffer(file.get_length() as i64);
+            if let Ok(chunk) = bincode::deserialize::<ChunkData>(buffer.as_slice()) {
+                for (pos, coords) in &chunk.tiles {
+                    self.base_mut()
+                        .set_cell_ex((*pos).into())        // target position
+                        .atlas_coords((*coords).into())   // atlas coords
+                        .done();
+                }
+
+
+                self.chunk_cache.insert(chunk_pos, chunk);
+                godot_print!("Loaded chunk {:?}", chunk_pos);
+                return true;
+            }
+        }
+        false
     }
 }

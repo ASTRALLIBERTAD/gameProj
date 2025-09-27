@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 use godot::classes::{FastNoiseLite, ITileMapLayer, InputEvent, TileMapLayer};
-use godot::global::{randi, sqrt};
+use godot::global::{randi};
 use godot::obj::WithBaseField;
 use godot::prelude::*;
 use crate::multiplayer::MultiPlayerRust;
@@ -14,8 +14,6 @@ pub struct ExampleTerrain1 {
     pub moisture: Gd<FastNoiseLite>,
     pub temperature: Gd<FastNoiseLite>,
     pub altitude: Gd<FastNoiseLite>,
-    pub height: i32,
-    pub width: i32,
     // Track both chunks and current positions
     pub player_chunks: HashMap<i32, HashSet<Vector2i>>,
     pub player_positions: HashMap<i32, Vector2i>,
@@ -31,8 +29,6 @@ impl ITileMapLayer for ExampleTerrain1 {
             moisture: FastNoiseLite::new_gd(),
             temperature: FastNoiseLite::new_gd(),
             altitude: FastNoiseLite::new_gd(),
-            height: 25,
-            width: 25,
             player_chunks: HashMap::new(),
             player_positions: HashMap::new(),
             seedser: i32::default(),

@@ -18,16 +18,18 @@ func _ready() -> void:
 		button.SetupButton(obj)
 		button.text = obj.name
 		
-
-		$CanvasLayer/Panel/ScrollContainer/LoadButtons.add_child(button)
+		$CanvasLayer/TextureRect/Panel/ScrollContainer/LoadButtons.add_child(button)
+		
 	queue_redraw()
 	pass # Replace with function body.
 
 
 func OnLoadButtonDown(date, saveName, imagePath, seedGame):
-	$CanvasLayer/Name.text = saveName
-	$CanvasLayer/Date.text = date
-	$CanvasLayer/Seed.text = str(seedGame)
+	%VBoxContainer.visible = true
+	$CanvasLayer/HBoxContainer/HBoxContainer.visible = true
+	%Name.text = saveName
+	%Date.text = date
+	%Seed.text = str(seedGame)
 	SaveToLoad = saveName
 	GameTerrain = seedGame
 	$CanvasLayer/ScreenShot.texture = LoadImageTexture(imagePath)
@@ -51,7 +53,7 @@ func _on_timer_timeout() -> void:
 	queue_free()
 	RustSaveManager1.load_game(SaveToLoad)
 	var u: Terrain1 = get_node("/root/main/Terrain/Terrain1") as Terrain1
-	u.seed_seed(GameTerrain)
+	u.seedser = GameTerrain
 
 func _on_delete_pressed() -> void:
 	RustSaveManager1.delete_save(SaveToLoad)
