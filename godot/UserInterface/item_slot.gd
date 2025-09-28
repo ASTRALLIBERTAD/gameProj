@@ -57,7 +57,7 @@ func _on_slot_pressed(index: int) -> void:
 		tex.visible = false
 
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	if held_item:
 		tex.global_position = get_viewport().get_mouse_position()
 		tex.visible = true

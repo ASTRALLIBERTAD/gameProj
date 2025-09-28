@@ -35,7 +35,7 @@ pub struct SaveManagerRust {
     current_world_name: StringName,
 
     #[export]
-    load_game: GString,
+    pub load_game: GString,
 
     #[export]
     world_seed: i32,
@@ -49,7 +49,7 @@ pub struct SaveManagerRust {
 impl SaveManagerRust {
 
     #[func]
-    fn get_os(&self) -> String {
+    pub fn get_os(&self) -> String {
         let mut baser: &str = "";
         if OS == "windows" {
             baser = "user://";
