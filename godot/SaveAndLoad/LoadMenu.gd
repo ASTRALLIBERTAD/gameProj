@@ -18,6 +18,7 @@ func _ready() -> void:
 		button.SetupButton(obj)
 		button.text = obj.name
 		
+		
 		$CanvasLayer/TextureRect/Panel/ScrollContainer/LoadButtons.add_child(button)
 		
 	queue_redraw()

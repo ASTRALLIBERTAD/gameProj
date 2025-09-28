@@ -53,6 +53,7 @@ pub struct Terrain1 {
     pub player_chunks: HashMap<i32, HashSet<Vector2i>>,
     pub player_positions: HashMap<i32, Vector2i>,
     pub chunk_cache: HashMap<Vector2i, ChunkData>, // store changed chunks
+    pub path: String,
     #[export]
     pub seedser: i32, 
 }
@@ -70,6 +71,7 @@ impl ITileMapLayer for Terrain1 {
             player_chunks: HashMap::new(),
             player_positions: HashMap::new(),
             chunk_cache: HashMap::new(),
+            path: String::default(),
             seedser: i32::default(),
         }
     }
@@ -118,37 +120,37 @@ impl ITileMapLayer for Terrain1 {
     }
 
     fn input(&mut self, event: Gd<InputEvent>) {
-    if event.is_action_pressed("click") {
-        let k = self.base_mut().get_global_mouse_position();
-        let l = self.base_mut().local_to_map(k);
+        if event.is_action_pressed("click") {
+            let k = self.base_mut().get_global_mouse_position();
+            let l = self.base_mut().local_to_map(k);
 
-        let coords = Vector2i::new(1, 0);
+            let coords = Vector2i::new(1, 0);
 
-        self.base_mut().set_cell_ex(l)
-            .source_id(1)
-            .atlas_coords(coords)
-            .done();
+            self.base_mut().set_cell_ex(l)
+                .source_id(1)
+                .atlas_coords(coords)
+                .done();
 
-        // Mark chunk as changed and update stored tiles
-        let chunk_pos = self.get_chunk_coord(l);
-        let entry = self.chunk_cache.entry(chunk_pos).or_insert_with(ChunkData::new);
+            // Mark chunk as changed and update stored tiles
+            let chunk_pos = self.get_chunk_coord(l);
+            let entry = self.chunk_cache.entry(chunk_pos).or_insert_with(ChunkData::new);
 
-        // update or insert tile record
-        let mut found = false;
-        for (pos, c) in &mut entry.tiles {
-            if Vector2i::from(*pos) == l {
-                *c = coords.into();
-                found = true;
-                break;
+            // update or insert tile record
+            let mut found = false;
+            for (pos, c) in &mut entry.tiles {
+                if Vector2i::from(*pos) == l {
+                    *c = coords.into();
+                    found = true;
+                    break;
+                }
             }
-        }
-        if !found {
-            entry.tiles.push((l.into(), coords.into()));
-        }
+            if !found {
+                entry.tiles.push((l.into(), coords.into()));
+            }
 
-        entry.changed = true;
+            entry.changed = true;
+        }
     }
-}
 
 }
 
@@ -162,46 +164,46 @@ impl Terrain1 {
     }
 
     fn generate_chunk(&mut self, chunk_pos: Vector2i) {
-    if self.load_chunk(chunk_pos) {
-        return; // already loaded from disk
-    }
-
-    let mut tiles = Vec::new();
-    let start_x = chunk_pos.x * CHUNK_SIZE;
-    let start_y = chunk_pos.y * CHUNK_SIZE;
-
-    for x in 0..CHUNK_SIZE {
-        for y in 0..CHUNK_SIZE {
-            let position = Vector2i::new(start_x + x, start_y + y);
-
-            let alt = self.altitude.get_noise_2d(
-                position.x as f32,
-                position.y as f32,
-            ) * 10.0;
-
-            let coords = if alt < 0.1 {
-                Vector2i::new(0, 11) // water
-            } else {
-                Vector2i::new(1, 0) // grass
-            };
-
-            self.base_mut()
-                .set_cell_ex(position)
-                .source_id(1)
-                .atlas_coords(coords)
-                .done();
-
-            tiles.push((position.into(), coords.into())); // store tile
+        if self.load_chunk(chunk_pos) {
+            return; // already loaded from disk
         }
+
+        let mut tiles = Vec::new();
+        let start_x = chunk_pos.x * CHUNK_SIZE;
+        let start_y = chunk_pos.y * CHUNK_SIZE;
+
+        for x in 0..CHUNK_SIZE {
+            for y in 0..CHUNK_SIZE {
+                let position = Vector2i::new(start_x + x, start_y + y);
+
+                let alt = self.altitude.get_noise_2d(
+                    position.x as f32,
+                    position.y as f32,
+                ) * 10.0;
+
+                let coords = if alt < 0.1 {
+                    Vector2i::new(0, 11) // water
+                } else {
+                    Vector2i::new(1, 0) // grass
+                };
+
+                self.base_mut()
+                    .set_cell_ex(position)
+                    .source_id(1)
+                    .atlas_coords(coords)
+                    .done();
+
+                tiles.push((position.into(), coords.into())); // store tile
+            }
+        }
+
+        let chunk_data = ChunkData {
+            tiles,
+            changed: true, // mark as dirty so it will be saved on unload
+        };
+
+        self.chunk_cache.insert(chunk_pos, chunk_data);
     }
-
-    let chunk_data = ChunkData {
-        tiles,
-        changed: true, // mark as dirty so it will be saved on unload
-    };
-
-    self.chunk_cache.insert(chunk_pos, chunk_data);
-}
 
 
 
@@ -282,82 +284,55 @@ impl Terrain1 {
         }
     }
 
-    fn save_chunk(&mut self, chunk_pos: Vector2i) {
-    let mut save_manager = self
-        .base_mut()
-        .get_tree()
-        .unwrap()
-        .get_root()
-        .unwrap()
-        .get_node_as::<SaveManagerRust>("/root/RustSaveManager1");
+    pub fn save_chunk(&mut self, chunk_pos: Vector2i) {
 
-    let load_game = save_manager.bind_mut().load_game.to_string();
 
-    if let Some(chunk) = self.chunk_cache.get(&chunk_pos) {
-        if !chunk.changed {
-            return;
-        }
-
-        // Root save path
-        let path = save_manager.bind_mut().get_os(); 
-        let base_dir = format!("{}/games/{}/chunk", path, load_game);
-
-        // Ensure directory structure exists
-        if let Some(mut dir) = DirAccess::open(&path) {
-            if !dir.dir_exists("games") {
-                dir.make_dir("games");
+        if let Some(chunk) = self.chunk_cache.get(&chunk_pos) {
+            if !chunk.changed {
+                return;
             }
-            dir.change_dir("games");
 
-            if !dir.dir_exists(&load_game) {
-                dir.make_dir(&load_game);
-            }
-            dir.change_dir(&load_game);
+            // Root save path
+            let path = self.path.clone(); 
 
-            if !dir.dir_exists("chunk") {
-                dir.make_dir("chunk");
-            }
-        }
+            // Final save path
+            let save_path = format!("{}/chunk_{}_{}.dat", path, chunk_pos.x, chunk_pos.y);
 
-        // Final save path
-        let save_path = format!("{}/chunk_{}_{}.dat", base_dir, chunk_pos.x, chunk_pos.y);
-
-        // Save file
-        if let Some(mut file) = FileAccess::open(&save_path, ModeFlags::WRITE) {
-            if let Ok(data) = bincode::serialize(&chunk) {
-                let buffer = PackedByteArray::from(data);
-                file.store_buffer(&buffer);
-                godot_print!("Saved chunk {:?}", chunk_pos);
+            // Save file
+            if let Some(mut file) = FileAccess::open(&save_path, ModeFlags::WRITE) {
+                if let Ok(data) = bincode::serialize(&chunk) {
+                    let buffer = PackedByteArray::from(data);
+                    file.store_buffer(&buffer);
+                    godot_print!("Saved chunk {:?}", chunk_pos);
+                }
             }
         }
     }
-}
 
 
     fn load_chunk(&mut self, chunk_pos: Vector2i) -> bool {
-        let mut save_manager = self.base_mut().get_tree().unwrap().get_root().unwrap()
-                .get_node_as::<SaveManagerRust>("/root/RustSaveManager1");
-        let path = save_manager.bind_mut().get_os();
-        let load_game = save_manager.bind_mut().load_game.to_string();
-        let save_path = format!("{}//games//{}//chunk//chunk_{}_{}.dat", path, load_game, chunk_pos.x, chunk_pos.y);
 
-    if let Some(file) = FileAccess::open(&save_path, ModeFlags::READ) {
-        let buffer = file.get_buffer(file.get_length() as i64);
-        if let Ok(chunk) = bincode::deserialize::<ChunkData>(buffer.as_slice()) {
-            for (pos, coords) in &chunk.tiles {
-                self.base_mut()
-                    .set_cell_ex((*pos).into())
-                    .source_id(1)
-                    .atlas_coords((*coords).into())
-                    .done();
+
+        let path = self.path.clone();
+        let save_path = format!("{}/chunk_{}_{}.dat", path, chunk_pos.x, chunk_pos.y);
+
+        if let Some(file) = FileAccess::open(&save_path, ModeFlags::READ) {
+            let buffer = file.get_buffer(file.get_length() as i64);
+            if let Ok(chunk) = bincode::deserialize::<ChunkData>(buffer.as_slice()) {
+                for (pos, coords) in &chunk.tiles {
+                    self.base_mut()
+                        .set_cell_ex((*pos).into())
+                        .source_id(1)
+                        .atlas_coords((*coords).into())
+                        .done();
+                }
+
+                self.chunk_cache.insert(chunk_pos, chunk);
+                godot_print!("Loaded chunk {:?}", chunk_pos);
+                return true;
             }
-
-            self.chunk_cache.insert(chunk_pos, chunk);
-            godot_print!("Loaded chunk {:?}", chunk_pos);
-            return true;
         }
+        false
     }
-    false
-}
 
 }

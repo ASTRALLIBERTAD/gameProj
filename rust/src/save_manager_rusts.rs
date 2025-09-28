@@ -6,6 +6,7 @@ use godot::classes::{ DirAccess, FileAccess, Node, Time};
 use godot::prelude::*;
 use serde::{Deserialize, Serialize};
 use crate::rustplayer::Rustplayer;
+use crate::terrain::Terrain1;
 
 
 #[derive(Serialize, Deserialize)]
@@ -66,32 +67,42 @@ impl SaveManagerRust {
 
     #[func]
     pub fn save_game_rust(&mut self, name: String) {
+    self.load_game = name.clone().into();
+    self.current_world_name = name.to_godot().into();
 
-        self.load_game = name.clone().into();
+    let base_path = &self.get_os();
+    let folder = "games";
+    let file_saver = format!("{}/{}", base_path, folder);
+    let games_path = format!("{}/{}/{}", base_path, folder, name);
 
-        self.current_world_name = name.to_godot().into();
-        let base_path = &self.get_os();
-        let folder = "games";
-        let file_saver = format!("{}/{}", base_path, folder);
-        let name = name;
-        let games_path = format!("{}/{}/{}", base_path, folder, name);        
-           
-        let mut dir = DirAccess::open(base_path).expect("ok"); 
- 
-        if !dir.dir_exists(folder) {
-                dir.make_dir(folder);
-        } 
-        dir = DirAccess::open(&file_saver).expect("not opened");
+    // Open root directory
+    let mut dir = DirAccess::open(base_path).expect("ok");
 
-        if !dir.dir_exists(&name){
-            dir.make_dir(&name);
-        }
-        if dir != DirAccess::open(&games_path).expect("failed to open"){
-            return;
-        }
-
-        self.set_player_health(20);
+    // Ensure /games exists
+    if !dir.dir_exists(folder) {
+        dir.make_dir(folder);
     }
+
+    // Go inside /games
+    dir = DirAccess::open(&file_saver).expect("failed to open /games");
+
+    // Ensure /games/<world> exists
+    if !dir.dir_exists(&name) {
+        dir.make_dir(&name);
+    }
+
+    // Go inside /games/<world>
+    dir = DirAccess::open(&games_path).expect("failed to open world dir");
+
+    // Ensure /games/<world>/chunk exists
+    if !dir.dir_exists("chunk") {
+        dir.make_dir("chunk");
+    }
+
+    // Set default values for new game
+    self.set_player_health(20);
+}
+
 
     #[func]
     fn save_player_pos(&mut self, name: String){
@@ -140,10 +151,42 @@ impl SaveManagerRust {
             }
         }
 
+         // --- Autosave all dirty chunks ---
+        let mut terrain = self.base()
+            .get_tree()
+            .unwrap()
+            .get_root()
+            .unwrap()
+            .get_node_as::<Terrain1>("/root/main/Terrain/Terrain1");
+        
+            let mut terrain_ref = terrain.bind_mut();
+
+            terrain_ref.path = format!("{}/games/{}/chunk", self.get_os(), self.load_game);
+            let dirty_chunks: Vec<_> = terrain_ref
+            .chunk_cache
+            .iter()
+            .filter_map(|(pos, chunk)| if chunk.changed { Some(*pos) } else { None })
+            .collect();
+
+        for pos in dirty_chunks {
+            terrain_ref.save_chunk(pos);
+        }  
+
     }
 
     #[func]
     fn load_player_pos(&mut self, name: String) {
+
+        let mut terrain = self.base()
+            .get_tree()
+            .unwrap()
+            .get_root()
+            .unwrap()
+            .get_node_as::<Terrain1>("/root/main/Terrain/Terrain1");
+        
+            let mut terrain_ref = terrain.bind_mut();
+
+            terrain_ref.path = format!("{}/games/{}/chunk", self.get_os(), self.load_game);
 
         let base_path = self.get_os();
         let folder = "games";
@@ -222,22 +265,64 @@ impl SaveManagerRust {
         let folder = "games";
         let save_path = format!("{}/{}/{}", base_path, folder, name);
 
-        // Open the directory for deletion
-        let mut dir = DirAccess::open(&save_path).expect("ok");
-        let files = dir.get_files();
-
-        if dir.dir_exists(&save_path) {
-
-            for file in files.to_vec().into_iter() {
-                dir.remove(&format!("{}/{}", save_path, file));
+        if let Some(mut dir) = godot::classes::DirAccess::open(&save_path) {
+            if dir.dir_exists(&save_path) {
+                // Call recursive delete
+                if self.delete_directory_recursive(&save_path) {
+                    godot_print!("Save game '{}' deleted successfully.", name);
+                } else {
+                    godot_error!("Failed to delete save game '{}'.", name);
+                }
+            } else {
+                godot_print!("Save game '{}' not found.", name);
             }
-            dir.remove(&save_path);
-            godot_print!("Save game '{}' deleted successfully.", name);
         } else {
-            godot_print!("Save game '{}' not found.", name);
+            godot_print!("Save game '{}' not found (couldn't open dir).", name);
+        }
+    }
+
+/// Recursively deletes a directory and its contents.
+    fn delete_directory_recursive(&self, path: &str) -> bool {
+        if let Some(mut dir) = godot::classes::DirAccess::open(path) {
+            dir.list_dir_begin();
+
+            loop {
+            let entry = dir.get_next();
+            if entry.is_empty() {
+                break; // no more entries
+            }
+
+            if entry == ".".into() || entry == "..".into() {
+                continue;
+            }
+
+            let full_path = format!("{}/{}", path, entry);
+
+            if dir.current_is_dir() {
+                // recursive call
+                if !self.delete_directory_recursive(&full_path) {
+                    return false;
+                }
+            } else {
+                dir.remove(&full_path);
+            }
         }
 
+
+        dir.list_dir_end();
+
+        // Now delete the empty directory itself
+        if let Some(mut parent) =
+            godot::classes::DirAccess::open(std::path::Path::new(path).parent().unwrap().to_str().unwrap())
+            {
+                parent.remove(path);
+            }
+            true
+        } else {
+            false
+        }
     }
+
 
     #[func]
     fn save_world(&mut self) {
