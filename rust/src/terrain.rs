@@ -171,7 +171,6 @@ impl ITileMapLayer for Terrain1 {
             }
         }
 
-        // Periodic cleanup to prevent memory issues
         self.cleanup_old_chunks();
     }
 
@@ -226,68 +225,54 @@ impl Terrain1 {
     }
 
     fn generate_chunk(&mut self, chunk_pos: Vector2i) {
-        // Skip if already loaded
         if self.loaded_chunks.contains(&chunk_pos) {
             return;
         }
 
-        // Try to load from disk first
         if self.load_chunk(chunk_pos) { 
             self.loaded_chunks.insert(chunk_pos);
             return; 
         }
 
-        // Generate new chunk
         let mut chunk = ChunkData::new();
         let noise_map = self.generate_noise_map(chunk_pos);
 
         let start_x = chunk_pos.x * CHUNK_SIZE as i32;
         let start_y = chunk_pos.y * CHUNK_SIZE as i32;
 
-        // First pass: generate tile data
         for y in 0..CHUNK_SIZE {
             for x in 0..CHUNK_SIZE {
                 let noise = noise_map[ChunkData::index(x as usize, y as usize)];
 
-                let coords = if noise < 0.1 {
-                    V2i { x: 0, y: 11 }
+                let (source_id, coords) = if noise < 0.1 {
+                    // Water
+                    (1, V2i { x: 0, y: 11 })  
                 } else {
-                    V2i { x: 1, y: 0 }
+                    // Grass
+                    (2, V2i { x: 1, y: 0 })   
                 };
 
                 chunk.set(x as usize, y as usize, coords);
+
+                let tile_pos = Vector2i::new(start_x + x as i32, start_y + y as i32);
+                self.base_mut()
+                    .set_cell_ex(tile_pos)
+                    .source_id(source_id)  
+                    .atlas_coords(coords.into())
+                    .done();
             }
         }
 
-        // Second pass: set tiles in tilemap
-        for y in 0..CHUNK_SIZE {
-            for x in 0..CHUNK_SIZE {
-                let coords = chunk.get(x as usize, y as usize);
-                if coords.x >= 0 && coords.y >= 0 {
-                    let tile_pos = Vector2i::new(start_x + x as i32, start_y + y as i32);
-                    // let arr: Array<Vector2i> = Array::new();
-                    // let ti = array![tile_pos];
-                    self.base_mut()
-                        // .set_cells_terrain_connect(&ti, 0, 1);
-                        .set_cell_ex(tile_pos)
-                        .source_id(1)
-                        .atlas_coords(coords.into())
-                        .done();
-                }
-            }
-        }
-
-        // Mark as changed to ensure it gets saved
         chunk.changed = true;
         self.chunk_cache.insert(chunk_pos, chunk);
         self.loaded_chunks.insert(chunk_pos);
     }
 
+
     fn generate_chunk_for_player(&mut self, player_id: i32, pos: Vector2i) {
         let center_chunk = self.get_chunk_coord(pos);
-        let load_radius = 2; // Increased radius for smoother experience
+        let load_radius = 2; 
 
-        // Collect chunks to generate first
         let mut chunks_to_generate = Vec::new();
         let mut chunks_to_track = Vec::new();
         
@@ -296,19 +281,16 @@ impl Terrain1 {
                 let chunk_pos = Vector2i::new(center_chunk.x + dx, center_chunk.y + dy);
                 chunks_to_track.push(chunk_pos);
                 
-                // Generate if not already loaded
                 if !self.loaded_chunks.contains(&chunk_pos) {
                     chunks_to_generate.push(chunk_pos);
                 }
             }
         }
 
-        // Generate chunks first
         for chunk_pos in chunks_to_generate {
             self.generate_chunk(chunk_pos);
         }
 
-        // Then update player tracking
         let player_chunks = self.player_chunks.entry(player_id).or_insert_with(HashSet::new);
         for chunk_pos in chunks_to_track {
             player_chunks.insert(chunk_pos);
@@ -348,12 +330,11 @@ impl Terrain1 {
             self.clear_chunk(chunk_pos);
             self.loaded_chunks.remove(&chunk_pos);
             
-            // Remove from all players' tracking
+    
             for (_, chunks) in self.player_chunks.iter_mut() {
                 chunks.remove(&chunk_pos);
             }
             
-            // Remove from cache if not modified recently
             if let Some(chunk_data) = self.chunk_cache.get(&chunk_pos) {
                 if !chunk_data.changed && chunk_data.last_accessed.elapsed().as_secs() > 300 {
                     self.chunk_cache.remove(&chunk_pos);
@@ -384,7 +365,6 @@ impl Terrain1 {
                 return;
             }
 
-            // Ensure directory exists
             let dir_path = &self.path;
             if !dir_path.is_empty() {
                 if let Some(mut dir) = DirAccess::open(dir_path) {
@@ -392,7 +372,6 @@ impl Terrain1 {
                         dir.make_dir_recursive(".");
                     }
                 } else {
-                    // Try to create the directory
                     if let Some(mut dir) = DirAccess::open("user://") {
                         dir.make_dir_recursive(dir_path);
                     }

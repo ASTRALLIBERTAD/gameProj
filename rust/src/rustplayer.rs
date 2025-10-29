@@ -36,6 +36,8 @@ pub struct Rustplayer {
     #[export]
     pub health: i32,
 
+    input_enabled: bool,
+
 }
 
 #[godot_api]
@@ -49,7 +51,8 @@ impl ICharacterBody2D for Rustplayer {
             item_slot: OnEditor::default(),
             is_open: false,
             heart_ui: OnEditor::default(),
-            health: i32::default()
+            health: i32::default(),
+            input_enabled: false,
         }
     }
 

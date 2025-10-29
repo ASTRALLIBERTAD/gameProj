@@ -75,31 +75,27 @@ impl SaveManagerRust {
     let file_saver = format!("{}/{}", base_path, folder);
     let games_path = format!("{}/{}/{}", base_path, folder, name);
 
-    // Open root directory
     let mut dir = DirAccess::open(base_path).expect("ok");
 
-    // Ensure /games exists
     if !dir.dir_exists(folder) {
         dir.make_dir(folder);
     }
 
-    // Go inside /games
     dir = DirAccess::open(&file_saver).expect("failed to open /games");
 
-    // Ensure /games/<world> exists
     if !dir.dir_exists(&name) {
         dir.make_dir(&name);
     }
 
-    // Go inside /games/<world>
+
     dir = DirAccess::open(&games_path).expect("failed to open world dir");
 
-    // Ensure /games/<world>/chunk exists
+
     if !dir.dir_exists("chunk") {
         dir.make_dir("chunk");
     }
 
-    // Set default values for new game
+
     self.set_player_health(20);
 }
 
@@ -110,16 +106,13 @@ impl SaveManagerRust {
         self.current_world_name = format!("{:?}", name.type_id()).into();
         godot_print!("Current world name: {}", self.current_world_name);
 
-        // Construct save path
         let base_path = self.get_os();
         let folder = "games";
         let save_path = format!("{}/{}/{}/{}.dat", base_path, folder, name, name);
 
-        // Open the file for writing
         match FileAccess::open(&save_path, ModeFlags::WRITE) {
             Some(mut file) => {
                 
-                // Retrieve player position
                 let position = self.get_player().get_global_position();
                 let player_position = PlayerData {
                     position_x: position.x,
@@ -127,10 +120,9 @@ impl SaveManagerRust {
                     health: self.get_player().bind_mut().get_heart_ui().unwrap().bind_mut().current_health,
                 };
 
-                // Serialize the position with a size limit
                 match bincode::serialize(&player_position) {
                     Ok(serialized_data) => {
-                        if serialized_data.len() <= 1048576 { // Example size limit (4KB)
+                        if serialized_data.len() <= 1048576 { // size limit (4KB)
                             let byte_array = PackedByteArray::from(serialized_data);
                             file.store_buffer(&byte_array);
                             godot_print!("Game saved successfully at {}", save_path);
@@ -151,7 +143,6 @@ impl SaveManagerRust {
             }
         }
 
-         // --- Autosave all dirty chunks ---
         let mut terrain = self.base()
             .get_tree()
             .unwrap()
@@ -191,16 +182,13 @@ impl SaveManagerRust {
         let base_path = self.get_os();
         let folder = "games";
         let save_path = format!("{}/{}/{}/{}.dat", base_path, folder, name, name);
-
-        // Open the file for reading
         let file = FileAccess::open(&save_path, ModeFlags::READ);
 
-        // Check if the file was successfully opened
+      
         if let Some(file) = file {
-            // Read the data from the file into a buffer
+            
             let data = file.get_buffer(file.get_length() as i64);
 
-            // Convert PackedByteArray to &[u8] for deserialization
             let data_slice: &[u8] = data.as_slice();
 
             // Deserialize the player position data

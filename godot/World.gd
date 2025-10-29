@@ -59,6 +59,9 @@ func _on_add_player_pressed() -> void:
 func _on_host_pressed() -> void:
 	peer.create_server(5555, 3)
 	multiplayer.multiplayer_peer = peer
+	%World.broadcast()
+	$Broadcaster.start()
+	RoomInfo.name = RustSaveManager1.load_game
 	multiplayer.peer_connected.connect(
 	func(pid):
 		print(pid)
@@ -70,9 +73,6 @@ func _on_host_pressed() -> void:
 			print(pid)
 			get_node(str(pid)).queue_free()
 	)
-	%World.broadcast()
-	$Broadcaster.start()
-	RoomInfo.name = RustSaveManager1.load_game
 	
 	pass # Replace with function body.
 var udp : PacketPeerUDP
@@ -84,6 +84,7 @@ func _on_broadcaster_timeout() -> void:
 	var data = JSON.stringify(RoomInfo)
 	var packet = data.to_ascii_buffer()
 	%World.broadcaster_timeout(packet)
+	print(packet)
 	pass # Replace with function body.
 
 func cleanUp():
