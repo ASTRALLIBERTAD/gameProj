@@ -1,10 +1,16 @@
 use godot::classes::{INode, Node};
 use godot::prelude::*;
 
+use crate::terrain::Terrain1;
+
 #[derive(GodotClass)]
 #[class(base=Node)]
 pub struct MainNode {
     base: Base<Node>,
+    #[export]
+    terrain_scene: OnEditor<Gd<PackedScene>>,
+
+    terrain_node: Gd<Node>,
     
 }
 
@@ -13,16 +19,45 @@ impl INode for MainNode {
     fn init(base: Base<Node>) -> Self {
         Self {
             base,
+            terrain_scene: OnEditor::default(),
+            terrain_node: Node::new_alloc(),
 
         }
+
+        
     }
 
     fn ready(&mut self) {
+        // let scene = self.terrain_scene.instantiate_as::<Node>();
+        
+        // self.base_mut().add_child(&scene);
 
-        let scene = load::<PackedScene>("res://world/terrain_1.scn");
-
-        let instance = scene.instantiate_ex().done().unwrap();
-        self.base_mut().add_child(&instance);
+        // self.terrain_node = scene;
     }
 
+}
+
+#[godot_api]
+impl MainNode {
+
+    #[signal]
+    fn seed_requested(seed: i32);
+
+    #[func]
+    #[rpc(authority, call_remote, reliable)]
+    fn seed(&mut self, seed: i32) {
+
+        self.signals().seed_requested().emit(seed);
+
+        if let Some(mut terrain) = self.base_mut().try_get_node_as::<Terrain1>("/root/main/Terrain/Terrain1") {
+            
+            terrain.bind_mut().sync_seed(seed);
+            
+
+            godot_print!("This is the seed: {}", seed);
+        } else {
+            godot_print!("Could not find Terrain1 node");
+        }
+    }
+    
 }

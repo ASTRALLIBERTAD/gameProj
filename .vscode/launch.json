@@ -1,33 +1,20 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
     "configurations": [
-        {
-            "type": "lldb",
-            "request": "launch",
-            "preLaunchTask": "rust: cargo build",
-            "name": "Cargo launch",
-            "cargo": {
-                "args": [
-                    "build",
-                    "--lib"
-                ]
-            },
-            "args": ["--path", "C:\\Users\\Boss\\Documents\\proj\\proj_godot-rust\\godot\\rust"]
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug",
-            "args": ["--path", "C:\\Users\\Boss\\Documents\\proj\\proj_godot-rust\\godot\\godot"], 
-            "cwd": "${workspaceFolder}",
-            "windows": {
-                "program": "C:\\Users\\Boss\\Documents\\Godot_v4.4.1-stable_win64.exe\\Godot_v4.4.1-stable_win64.exe"
-            }
-        },
-
         
+        {
+            "name": "Debug Project (Godot 4)",
+            "type": "lldb", // type provided by CodeLLDB extension
+            "request": "launch",
+            "preLaunchTask": "rust: cargo build --release", // laptop
+            // "preLaunchTask": "rust: cargo ndk -t arm64-v8a -o path build --profile release-debug", // android
+            "cwd": "${workspaceFolder}/rust",
+            "args": [
+                "-e", // run editor (remove this to launch the scene directly)
+                "-w", // windowed mode
+            ],
+            "windows": {
+                "program": "C:\\Users\\Boss\\Documents\\Godot_v4.5.1-stable_win64.exe\\Godot_v4.5.1-stable_win64.exe",
+            },
+        }
     ]
 }

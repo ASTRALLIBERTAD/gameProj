@@ -1,5 +1,5 @@
 
-use godot::classes::{AnimatedSprite2D, CharacterBody2D, Control, ICharacterBody2D, Input, Label};
+use godot::classes::{AnimatedSprite2D, Camera2D, CharacterBody2D, Control, ICharacterBody2D, Input, Label};
 use godot::obj::{WithBaseField};
 use godot::prelude::*;
 use std::str::FromStr;
@@ -36,7 +36,15 @@ pub struct Rustplayer {
     #[export]
     pub health: i32,
 
+    #[export]
+    camera: OnEditor<Gd<Camera2D>>,
+
     input_enabled: bool,
+
+    target_position: Vector2,
+
+    #[export]
+    pub id: i32,
 
 }
 
@@ -52,11 +60,27 @@ impl ICharacterBody2D for Rustplayer {
             is_open: false,
             heart_ui: OnEditor::default(),
             health: i32::default(),
+            camera: OnEditor::default(),
             input_enabled: false,
+            target_position: Vector2::default(),
+            id: i32::default(),
         }
     }
 
     fn ready(&mut self) {
+
+        let pid = self.base_mut().get_multiplayer_authority();
+
+        self.id = pid;
+
+        godot_print!("Player ID is : {}", self.id);
+        let is_authority = self.base_mut().is_multiplayer_authority();
+
+        
+        if !is_authority {
+            self.camera.make_current();
+
+        } 
 
         // self.heart_ui.bind_mut().heal(self.health);
         // godot_print!(" ito {}", self.health);
@@ -67,66 +91,89 @@ impl ICharacterBody2D for Rustplayer {
         // self.close();
         
     }
-    fn process(&mut self, _delta: f64) {
-        if !self.base_mut().is_multiplayer_authority() {
-            return;
-        }
+    fn process(&mut self, delta: f64) {
+        if self.base_mut().is_multiplayer_authority() {
 
-        let speed: f32 = 100.0;
+            let speed: f32 = 100.0;
 
-        let input = Input::singleton();
+            let input = Input::singleton();
 
-        let direction = Input::get_vector(
-            &input,
-            &StringName::from_str("left").unwrap(),
-            &StringName::from_str("right").unwrap(),
-            &StringName::from_str("up").unwrap(),
-            &StringName::from_str("down").unwrap(),
-        );
+            let direction = Input::get_vector(
+                &input,
+                &StringName::from_str("left").unwrap(),
+                &StringName::from_str("right").unwrap(),
+                &StringName::from_str("up").unwrap(),
+                &StringName::from_str("down").unwrap(),
+            );
 
-        let velocity = direction * speed;
+            let velocity = direction * speed;
 
-        if input.is_action_just_pressed(&StringName::from_str("left").unwrap()) {
-            self.sprite.set_flip_h(true);
-            self.heart_ui.bind_mut().heal(1);
-        }
-        if input.is_action_just_pressed(&StringName::from_str("right").unwrap()) {
-            self.sprite.set_flip_h(false);
-            self.heart_ui.bind_mut().damage(10);
-        }
-        self.base_mut().set_velocity(velocity);
-        self.base_mut().move_and_slide();
-
-        let cord = self.player_cord();
-
-        let y_value = if cord.y == 0.0 {
-            cord.y * 1.0
-        } else {
-            cord.y * -1.0
-        };
-
-        let k = format!("coordinates :{}, {:?}", cord.x, y_value as i32);
-        self.coords.set_text(&k);
-
-        if input.is_action_just_pressed("inventory") {
-            if self.is_open {
-                self.close();
-            } else {
-                self.open();
+            if input.is_action_just_pressed(&StringName::from_str("left").unwrap()) {
+                self.sprite.set_flip_h(true);
+                self.heart_ui.bind_mut().heal(1);
             }
+            if input.is_action_just_pressed(&StringName::from_str("right").unwrap()) {
+                self.sprite.set_flip_h(false);
+                self.heart_ui.bind_mut().damage(10);
+            }
+            self.base_mut().set_velocity(velocity);
+            self.base_mut().move_and_slide();
+
+            let cord = self.player_cord();
+
+            let y_value = if cord.y == 0.0 {
+                cord.y * 1.0
+            } else {
+                cord.y * -1.0
+            };
+
+            let k = format!("coordinates :{}, {:?}", cord.x, y_value as i32);
+            self.coords.set_text(&k);
+
+            if input.is_action_just_pressed("inventory") {
+                if self.is_open {
+                    self.close();
+                } else {
+                    self.open();
+                }
+            }
+
+            let pos = self.base_mut().get_global_position();
+
+            self.base_mut().rpc("update_position", &[Variant::from(pos)]);
+
+        
+        } else {
+            let pos = self.target_position;
+            let smooth_position = self.base_mut().get_global_position().lerp(pos, 10.0 * delta as f32);
+            self.base_mut().set_global_position(smooth_position);
         }
+
+        
+
+        
     }
 }
 
 #[godot_api]
 impl Rustplayer {
+    #[rpc(unreliable, any_peer)]
+    fn update_position(&mut self, pos: Vector2) {
+        self.target_position = pos;
+            // self.base_mut().set_global_position(pos);
+
+
+        godot_print!("RPC connected and the position is : {}", pos);
+    }
+
     #[func]
     pub fn tester(&mut self, amount: i32) {
         godot_print!("connected and the amount is : {}", amount);
     }
 
     fn player_cord(&mut self) -> Vector2 {
-        let scene = self
+        let node_path = self.base_mut().get_path();
+        let mut scene = self
             .base_mut()
             .get_tree()
             .unwrap()
@@ -134,7 +181,11 @@ impl Rustplayer {
             .unwrap()
             .get_node_as::<Terrain1>("/root/main/Terrain/Terrain1");
 
+        
+
         let cord = scene.local_to_map(self.base_mut().get_global_position());
+
+        scene.bind_mut().update_player_position(self.id, cord);
 
         let ko = scene.to_local(Vector2::new(cord.x as f32, cord.y as f32));
         return ko;

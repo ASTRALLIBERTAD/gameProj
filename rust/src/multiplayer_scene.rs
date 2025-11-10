@@ -87,7 +87,7 @@ impl INode for MultiplayerScene {
                     let mut current_info = self.server_info.instantiate_as::<HBoxContainer>();
 
                     
-                    current_info.set_name(&name_str);
+                    current_info.set_name(&name_str.to_string());
 
                     // Access children relative to the instance itself
                     if let Some(mut ip_label) = current_info.try_get_node_as::<Label>("Ip") {

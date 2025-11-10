@@ -1,4 +1,3 @@
-use std::any::Any;
 use std::env::consts::OS;
 
 use godot::classes::file_access::ModeFlags;
@@ -7,6 +6,7 @@ use godot::prelude::*;
 use serde::{Deserialize, Serialize};
 use crate::rustplayer::Rustplayer;
 use crate::terrain::Terrain1;
+use crate::world::Node2dRust;
 
 
 #[derive(Serialize, Deserialize)]
@@ -41,7 +41,6 @@ pub struct SaveManagerRust {
     #[export]
     world_seed: i32,
 
-
     pub player_health: i32,
     
 }
@@ -67,8 +66,8 @@ impl SaveManagerRust {
 
     #[func]
     pub fn save_game_rust(&mut self, name: String) {
-    self.load_game = name.clone().into();
-    self.current_world_name = name.to_godot().into();
+    self.load_game = name.clone().to_godot();
+    self.current_world_name = StringName::from(&name);
 
     let base_path = &self.get_os();
     let folder = "games";
@@ -103,7 +102,7 @@ impl SaveManagerRust {
     #[func]
     fn save_player_pos(&mut self, name: String){
 
-        self.current_world_name = format!("{:?}", name.type_id()).into();
+        self.current_world_name = StringName::from(&name);
         godot_print!("Current world name: {}", self.current_world_name);
 
         let base_path = self.get_os();
@@ -143,14 +142,28 @@ impl SaveManagerRust {
             }
         }
 
+        let world = self.base()
+            .get_tree()
+            .unwrap()
+            .get_root()
+            .unwrap()
+            .get_node_as::<Node2dRust>("/root/main/World");
+        
+            
+
         let mut terrain = self.base()
             .get_tree()
             .unwrap()
             .get_root()
             .unwrap()
             .get_node_as::<Terrain1>("/root/main/Terrain/Terrain1");
+
+        
+
         
             let mut terrain_ref = terrain.bind_mut();
+
+            terrain_ref.player_node_names = world.bind().player_node_names.clone();
 
             terrain_ref.path = format!("{}/games/{}/chunk", self.get_os(), self.load_game);
             let dirty_chunks: Vec<_> = terrain_ref
@@ -162,6 +175,8 @@ impl SaveManagerRust {
         for pos in dirty_chunks {
             terrain_ref.save_chunk(pos);
         }  
+
+
 
     }
 

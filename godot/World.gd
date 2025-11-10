@@ -4,25 +4,20 @@ extends Node2dRust
 var peer = ENetMultiplayerPeer.new()
 
 func _ready() -> void:
-	$AutoSave.start()
+	$AutoSaveTimer.start()
 
 @rpc("any_peer","call_local")
 func add_player(pid):
-	var plyr = preload("res://Player/multiplayers.scn").instantiate()
+	var plyr = preload("res://Player/players.scn").instantiate() as Rustplayer
 	plyr.name = str(pid)
 	add_child(plyr)
+	
+	plyr.set_multiplayer_authority(pid)
 
 func _on_auto_save_timeout() -> void:
 	RustSaveManager1.auto_save()
 	pass 
 
-func _on_loading_pressed() -> void:
-	print(OS.get_user_data_dir())
-	var yt = RustSaveManager1.get_os()
-	$po.text = yt
-	$osl.text = OS.get_name()
-	get_tree().paused = false
-	pass 
 
 func _on_saving_time_timeout() -> void:
 	get_tree().paused = false
@@ -51,10 +46,6 @@ func _on_back_pressed() -> void:
 	get_tree().paused = false
 	pass # Replace with function body.
 
-func _on_add_player_pressed() -> void:
-	peer.create_client("localhost", 55555)
-	multiplayer.multiplayer_peer = peer
-	pass # Replace with function body.
 
 func _on_host_pressed() -> void:
 	peer.create_server(5555, 3)
@@ -62,16 +53,28 @@ func _on_host_pressed() -> void:
 	%World.broadcast()
 	$Broadcaster.start()
 	RoomInfo.name = RustSaveManager1.load_game
+	var id = multiplayer.get_unique_id()
+	$PLAYERS.set_multiplayer_authority(id)
+	
+	
 	multiplayer.peer_connected.connect(
 	func(pid):
 		print(pid)
+		var terrain = get_node("/root/main/Terrain/Terrain1") as Terrain1
+		var seed = terrain.seedser
+		await $"..".rpc("seed", seed)
+		
 		rpc("add_player", pid)
-		multiplayer.get_unique_id()
+		
+		var i = multiplayer.get_unique_id()
+		player_node_names.append(str(pid))
+	
 		)
 	multiplayer.peer_disconnected.connect(
 		func(pid):
 			print(pid)
 			get_node(str(pid)).queue_free()
+			player_node_names.erase(str(pid))
 	)
 	
 	pass # Replace with function body.

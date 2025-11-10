@@ -3,7 +3,6 @@ use godot::classes::{ INode2D, Node2D, PacketPeerUdp};
 use godot::obj::NewGd;
 use godot::prelude::*;
 
-use crate::multiplayer;
 use crate::rustplayer::Rustplayer;
 
 const BROADCAST_PORT: i32 = 8912;
@@ -14,7 +13,9 @@ pub struct Node2dRust {
     base: Base<Node2D>,
     udp: Gd<PacketPeerUdp>,
     #[export]
-    authority_player: OnEditor<Gd<Rustplayer>>
+    authority_player: OnEditor<Gd<Rustplayer>>,
+    #[export]
+    pub player_node_names: Array<GString>,
 
 }
 
@@ -25,7 +26,8 @@ impl INode2D for Node2dRust {
         { 
             base,
             udp: PacketPeerUdp::new_gd(),
-            authority_player: OnEditor::default()
+            authority_player: OnEditor::default(),
+            player_node_names: Array::default(),
         }
     }
     fn ready(&mut self) {

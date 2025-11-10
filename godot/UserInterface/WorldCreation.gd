@@ -20,10 +20,10 @@ func _on_timer_timeout() -> void:
 	if !get_tree() == null:
 		if GameSeed.is_valid_int():
 			RustSaveManager1.world_seed = int(GameSeed)
-			get_tree().root.add_child(world)
-			var uop = world.get_node("/root/main/Terrain/Terrain1") as Terrain1
+			var uop = world.get_node("Terrain/Terrain1") as Terrain1
 			uop.seedser = RustSaveManager1.world_seed
-			#uop.seed_seed(RustSaveManager1.world_seed)
+			print(uop.seedser)
+			get_tree().root.add_child(world)
 			queue_free()
 		elif GameSeed == "":
 			var lp: = RandomNumberGenerator.new()
@@ -31,18 +31,19 @@ func _on_timer_timeout() -> void:
 			var yoj = clampi(ti, -2147483648, 2147483647)
 			RustSaveManager1.world_seed = yoj
 			print(yoj)
-			get_tree().root.add_child(world)
-			var up = world.get_node("/root/main/Terrain/Terrain1") as Terrain1
+			var up = world.get_node("Terrain/Terrain1") as Terrain1
 			up.seedser = yoj
-			#up.seed_seed(yoj)
+			print(up.seedser)
+			get_tree().root.add_child(world)
 			queue_free()
 		else:
 			var t: = hash(GameSeed)
 			RustSaveManager1.world_seed = clampi(t, -2147483648, 2147483647)
-			get_tree().root.add_child(world)
-			var upl = world.get_node("/root/main/Terrain/Terrain1") as Terrain1
-			#upl.seed_seed(RustSaveManager1.world_seed)
+			
+			var upl = world.get_node("Terrain/Terrain1") as Terrain1
 			upl.seedser = RustSaveManager1.world_seed
+			print(upl.seedser)
+			get_tree().root.add_child(world)
 			queue_free()
 		
 		RustSaveManager1.save_game_rust(WorldName)

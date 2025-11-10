@@ -104,17 +104,17 @@ impl Heart {
             if let Ok(mut texture_rect) = i.try_cast::<HeartDisplay>() {
 
                 if texture_rect.bind_mut().get_health() == 2 {
-                    texture_rect.set_texture(&full_heart);
+                    texture_rect.set_texture(&full_heart.clone());
                     godot_print!("full heart");
                 }
 
                 else if texture_rect.bind_mut().get_health() == 1 {
-                    texture_rect.set_texture(&half_heart);
+                    texture_rect.set_texture(&half_heart.clone());
                     godot_print!("half heart");
                 }
 
                 else if texture_rect.bind_mut().get_health() == 0 {
-                    texture_rect.set_texture(&empty_heart);
+                    texture_rect.set_texture(&empty_heart.clone());
                     godot_print!("empty heart");
                 }
 

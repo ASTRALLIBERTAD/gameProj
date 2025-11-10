@@ -45,16 +45,17 @@ func LoadImageTexture(path : String):
 		return
 	return ImageTexture.create_from_image(loadedImage)
 	
-	
 
 
 func _on_timer_timeout() -> void:
 	var world_scene: = preload("res://World.scn").instantiate()
-	get_tree().root.add_child(world_scene)
-	queue_free()
-	RustSaveManager1.load_game(SaveToLoad)
-	var u: Terrain1 = get_node("/root/main/Terrain/Terrain1") as Terrain1
+	var u: Terrain1 = world_scene.get_node("Terrain/Terrain1") as Terrain1
 	u.seedser = GameTerrain
+	
+	get_tree().root.add_child(world_scene)
+	RustSaveManager1.load_game(SaveToLoad)
+	
+	queue_free()
 
 func _on_delete_pressed() -> void:
 	RustSaveManager1.delete_save(SaveToLoad)

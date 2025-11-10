@@ -5,9 +5,9 @@ use godot::global::{randi};
 use godot::obj::WithBaseField;
 use godot::prelude::*;
 use serde::{Serialize, Deserialize};
-use crate::multiplayer::MultiPlayerRust;
-use crate::rustplayer::Rustplayer;
 use lz4_flex::{compress_prepend_size, decompress_size_prepended};
+
+use crate::main_node::MainNode;
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub struct V2i {
@@ -106,6 +106,9 @@ pub struct Terrain1 {
     #[export]
     pub seedser: i32,
     pub max_cached_chunks: usize, // Limit memory usage
+
+    pub player_node_names: Array<GString>,
+
 }
 
 const CHUNK_SIZE: i32 = 16;
@@ -126,52 +129,45 @@ impl ITileMapLayer for Terrain1 {
             path: String::default(),
             seedser: i32::default(),
             max_cached_chunks: DEFAULT_MAX_CACHED_CHUNKS,
+
+            player_node_names: Array::default(),
+
         }
+    }
+
+    fn enter_tree(&mut self) {
+        let callable = self.base_mut().callable("sync_seed");
+
+        let mut main= self.base_mut().get_node_as::<MainNode>("/root/main");
+            
+        main.connect("seed_requested", &callable);
+        
+        
     }
 
     fn ready(&mut self) {
+
+        // if self.base_mut().is_multiplayer_authority() {
+        //     let seed = self.seedser;
+
+        //     self.base_mut().rpc("sync_seed", &[Variant::from(seed)]);
+        //     godot_print!("Syncing seed to clients");
+        // } else {
+        //     godot_print!("Client received seed: {}", self.seedser);
+        // }
+
+        self.altitude.set_seed(self.seedser);
+
         self.moisture.set_seed(randi() as i32);
         self.temperature.set_seed(randi() as i32);
         self.altitude.set_frequency(0.01);
+
+        godot_print!("Terrain1 ready with seed: {}", self.seedser);
+
     }
     
     fn process(&mut self, _delta: f64) {
-        self.altitude.set_seed(self.seedser);
         
-        // main player
-        let label = self.base_mut().get_tree().unwrap().get_root().unwrap()
-            .get_node_as::<Rustplayer>("/root/main/World/PLAYERS");
-        let ypo = label.get_position();
-        let sls = self.base_mut().local_to_map(ypo);
-        
-        self.player_positions.insert(0, sls);
-        self.generate_chunk_for_player(0, sls);
-        self.unload_distant_chunks_for_player(0, sls);
-
-        // multiplayer
-        let tree = self.base_mut().get_tree().unwrap();
-        let root = tree.get_root().unwrap();
-        let mut multiplayer = tree.get_multiplayer().unwrap();
-        let peers = multiplayer.get_peers();
-        
-        if multiplayer.is_server() {
-            for i in peers.to_vec() {
-                let pyr = format!("/root/main/World/{}", i);
-                let y = root.get_node_as::<MultiPlayerRust>(&pyr);
-                if y.is_instance_valid() {
-                    let r = y.get_global_position();
-                    let f = self.base_mut().local_to_map(r);
-                    self.player_positions.insert(i, f);
-                    self.generate_chunk_for_player(i, f);
-                    self.unload_distant_chunks_for_player(i, f);
-                } else {
-                    self.player_positions.remove(&i);
-                    self.player_chunks.remove(&i);
-                }
-            }
-        }
-
-        self.cleanup_old_chunks();
     }
 
     fn input(&mut self, event: Gd<InputEvent>) {
@@ -201,6 +197,24 @@ impl ITileMapLayer for Terrain1 {
 
 #[godot_api]
 impl Terrain1 {
+
+    pub fn sync_seed(&mut self, seed: i32) {
+        self.seedser = seed;
+        self.altitude.set_seed(self.seedser);
+        godot_print!("Terrain1 synced callable seed: {}", seed);
+        
+    }
+
+
+    pub fn update_player_position(&mut self, id: i32, cord: Vector2i) {
+
+        self.player_positions.insert(0, cord);
+        self.generate_chunk_for_player(id, cord);
+        self.unload_distant_chunks_for_player(id, cord);
+
+        self.cleanup_old_chunks();
+    }
+
     fn generate_noise_map(&self, chunk_pos: Vector2i) -> Vec<f32> {
         let mut noise_map = Vec::with_capacity(CHUNK_SIZE as usize * CHUNK_SIZE as usize);
         let start_x = chunk_pos.x * CHUNK_SIZE as i32;
@@ -456,23 +470,23 @@ impl Terrain1 {
         }
     }
 
-    #[func]
-    pub fn set_save_path(&mut self, path: String) {
+    
+    fn set_save_path(&mut self, path: String) {
         self.path = path;
     }
 
-    #[func]
-    pub fn get_loaded_chunk_count(&self) -> i32 {
+    
+    fn get_loaded_chunk_count(&self) -> i32 {
         self.loaded_chunks.len() as i32
     }
 
-    #[func]
-    pub fn get_cached_chunk_count(&self) -> i32 {
+    
+    fn get_cached_chunk_count(&self) -> i32 {
         self.chunk_cache.len() as i32
     }
 
-    #[func]
-    pub fn debug_chunk_info(&self, world_pos: Vector2i) -> String {
+    
+    fn debug_chunk_info(&self, world_pos: Vector2i) -> String {
         let chunk_pos = self.get_chunk_coord(world_pos);
         let is_loaded = self.loaded_chunks.contains(&chunk_pos);
         let is_cached = self.chunk_cache.contains_key(&chunk_pos);
@@ -486,8 +500,8 @@ impl Terrain1 {
         )
     }
 
-    #[func]
-    pub fn force_generate_chunk_at(&mut self, world_pos: Vector2i) {
+    
+    fn force_generate_chunk_at(&mut self, world_pos: Vector2i) {
         let chunk_pos = self.get_chunk_coord(world_pos);
         // Force regeneration by removing from loaded set
         self.loaded_chunks.remove(&chunk_pos);
@@ -495,8 +509,8 @@ impl Terrain1 {
         self.generate_chunk(chunk_pos);
     }
 
-    #[func]
-    pub fn force_save_all_chunks(&mut self) {
+    
+    fn force_save_all_chunks(&mut self) {
         let chunks_to_save: Vec<Vector2i> = self.chunk_cache
             .iter()
             .filter(|(_, chunk)| chunk.changed)
