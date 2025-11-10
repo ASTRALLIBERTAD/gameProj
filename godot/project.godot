@@ -21,6 +21,7 @@ config/icon="res://Assets/PixelUIButtons/PlayButton.png"
 [autoload]
 
 RustSaveManager1="*res://SaveAndLoad/save_manager_rust.scn"
+GlobalNodeManager="*res://autoloads/NodeManager.tscn"
 
 [display]
 

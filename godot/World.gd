@@ -5,6 +5,7 @@ var peer = ENetMultiplayerPeer.new()
 
 func _ready() -> void:
 	$AutoSaveTimer.start()
+	GlobalNodeManager.register_terrain($"../Terrain/Terrain1")
 
 @rpc("any_peer","call_local")
 func add_player(pid):
@@ -62,7 +63,7 @@ func _on_host_pressed() -> void:
 		print(pid)
 		var terrain = get_node("/root/main/Terrain/Terrain1") as Terrain1
 		var seed = terrain.seedser
-		await $"..".rpc("seed", seed)
+		$"..".rpc("seed", seed)
 		
 		rpc("add_player", pid)
 		

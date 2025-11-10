@@ -2,12 +2,14 @@
 use godot::classes::{AnimatedSprite2D, Camera2D, CharacterBody2D, Control, ICharacterBody2D, Input, Label};
 use godot::obj::{WithBaseField};
 use godot::prelude::*;
+use godot::tools::get_autoload_by_name;
 use std::str::FromStr;
 
 use crate::heart::Heart;
 use crate::inventory::Inventory;
 use crate::item_collectibles::Collectibles;
 
+use crate::node_manager::NodeManager;
 use crate::terrain::Terrain1;
 
 #[derive(GodotClass)]
@@ -173,16 +175,17 @@ impl Rustplayer {
 
     fn player_cord(&mut self) -> Vector2 {
         let node_path = self.base_mut().get_path();
-        let mut scene = self
-            .base_mut()
-            .get_tree()
-            .unwrap()
-            .get_root()
-            .unwrap()
-            .get_node_as::<Terrain1>("/root/main/Terrain/Terrain1");
+        // let mut scene = self
+        //     .base_mut()
+        //     .get_tree()
+        //     .unwrap()
+        //     .get_root()
+        //     .unwrap()
+        //     .get_node_as::<Terrain1>("/root/main/Terrain/Terrain1");
 
         
-
+        let mut scene = get_autoload_by_name::<NodeManager>("GlobalNodeManager");
+        let mut scene = scene.bind_mut().get_terrain();
         let cord = scene.local_to_map(self.base_mut().get_global_position());
 
         scene.bind_mut().update_player_position(self.id, cord);

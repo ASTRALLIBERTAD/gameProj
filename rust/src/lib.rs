@@ -14,6 +14,7 @@ mod inv_slot;
 mod heart;
 mod heart_display;
 mod example_terrrain;
+mod node_manager;
 
 use godot::prelude::*;
 

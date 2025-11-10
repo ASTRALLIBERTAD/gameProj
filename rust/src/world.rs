@@ -30,11 +30,6 @@ impl INode2D for Node2dRust {
             player_node_names: Array::default(),
         }
     }
-    fn ready(&mut self) {
-
-        // let unique_id = self.base_mut().get_multiplayer().unwrap().get_unique_id();
-        // self.authority_player.set_multiplayer_authority(unique_id);
-    }
 
 }
 

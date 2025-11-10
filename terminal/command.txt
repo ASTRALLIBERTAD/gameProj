@@ -1,5 +1,6 @@
 [BUILD]
 cargo ndk -t arm64-v8a -o path build --release
+cargo ndk -t arm64-v8a -o ..\godot\lib build --release
 cargo build --release
 
 [error]
