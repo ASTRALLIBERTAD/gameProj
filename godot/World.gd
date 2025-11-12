@@ -2,10 +2,58 @@ extends Node2dRust
 
 @onready var scene = get_tree()
 var peer = ENetMultiplayerPeer.new()
+@onready var terrain = $"../Terrain/Terrain1"
+@onready var debug_label = $TouchControl/TouchControls/Label # Optional: for displaying stats
+
+var update_interval = 0.5
+var time_passed = 0.0
 
 func _ready() -> void:
 	$AutoSaveTimer.start()
-	GlobalNodeManager.register_terrain($"../Terrain/Terrain1")
+	GlobalNodeManager.register_terrain(terrain)
+	terrain.set_performance_mode(true)
+
+func _process(delta):
+	time_passed += delta
+	
+	if time_passed >= update_interval:
+		time_passed = 0.0
+		check_queue_health()
+
+func check_queue_health():
+	var load_queue = terrain.get_queue_size()
+	var unload_queue = terrain.get_unload_queue_size()
+	var save_queue = terrain.get_save_queue_size()
+	var loaded_chunks = terrain.get_loaded_chunk_count()
+	var cached_chunks = terrain.get_cached_chunk_count()
+	
+	# Display stats if you have a debug label
+	if debug_label:
+		debug_label.text = "Loaded: %d | Cached: %d | Load Q: %d | Unload Q: %d | Save Q: %d\nFPS: %d" % [
+			loaded_chunks, cached_chunks, load_queue, unload_queue, save_queue, Engine.get_frames_per_second()
+		]
+	
+	# Warning if queues are backing up
+	if load_queue > 50:
+		push_warning("Chunk load queue backing up: %d chunks" % load_queue)
+	
+	if unload_queue > 30:
+		push_warning("Chunk unload queue backing up: %d chunks" % unload_queue)
+	
+	if save_queue > 40:
+		push_warning("Chunk save queue backing up: %d chunks" % save_queue)
+	
+	# Performance warning if FPS drops
+	if Engine.get_frames_per_second() < 30:
+		push_warning("Low FPS detected: %d" % Engine.get_frames_per_second())
+
+
+func _notification(what):
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		terrain.flush_all_queues()  # Save everything before quit
+		await get_tree().create_timer(0.5).timeout
+		get_tree().quit()
+
 
 @rpc("any_peer","call_local")
 func add_player(pid):
@@ -38,6 +86,7 @@ func _on_save_pressed() -> void:
 	%TouchControls.visible = false
 	%Panel.visible = false
 	%CanvasLayer.visible = false
+	terrain.flush_all_queues()
 	%SavingTime.start()
 	pass # Replace with function body.
 
@@ -61,13 +110,11 @@ func _on_host_pressed() -> void:
 	multiplayer.peer_connected.connect(
 	func(pid):
 		print(pid)
-		var terrain = get_node("/root/main/Terrain/Terrain1") as Terrain1
-		var seed = terrain.seedser
-		$"..".rpc("seed", seed)
+		var seeds = terrain.seedser
+		$"..".rpc("seed", seeds)
 		
 		rpc("add_player", pid)
 		
-		var i = multiplayer.get_unique_id()
 		player_node_names.append(str(pid))
 	
 		)

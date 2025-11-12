@@ -9,9 +9,6 @@ pub struct MainNode {
     base: Base<Node>,
     #[export]
     terrain_scene: OnEditor<Gd<PackedScene>>,
-
-    terrain_node: Gd<Node>,
-    
 }
 
 #[godot_api]
@@ -20,7 +17,6 @@ impl INode for MainNode {
         Self {
             base,
             terrain_scene: OnEditor::default(),
-            terrain_node: Node::new_alloc(),
 
         }
 
@@ -28,11 +24,6 @@ impl INode for MainNode {
     }
 
     fn ready(&mut self) {
-        // let scene = self.terrain_scene.instantiate_as::<Node>();
-        
-        // self.base_mut().add_child(&scene);
-
-        // self.terrain_node = scene;
     }
 
 }

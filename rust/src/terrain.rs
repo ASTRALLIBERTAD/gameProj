@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 use godot::classes::DirAccess;
 use godot::classes::{FastNoiseLite, ITileMapLayer, InputEvent, TileMapLayer, file_access::ModeFlags, FileAccess};
 use godot::global::randi;
@@ -28,8 +28,6 @@ impl From<V2i> for Vector2i {
     }
 }
 
-// Removed SerializableVector2i - use V2i instead for consistency
-
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ChunkData {
     pub tiles: Vec<V2i>,
@@ -52,6 +50,13 @@ const LOAD_RADIUS: i32 = 2;
 const UNLOAD_DISTANCE: i32 = 4;
 const CHUNK_CLEANUP_AGE_SECS: u64 = 600;
 const CHUNK_UNLOAD_AGE_SECS: u64 = 300;
+
+// Multiplayer optimizations
+const MAX_CHUNKS_PER_FRAME: usize = 3;  // Reduced from 4
+const MAX_UNLOADS_PER_FRAME: usize = 2;
+const MAX_SAVES_PER_FRAME: usize = 2;    // Reduced from 3 (disk I/O is expensive)
+const CLEANUP_INTERVAL_FRAMES: u32 = 600;  // Doubled - cleanup less often
+const UNLOAD_INTERVAL_FRAMES: u32 = 120;   // Doubled - check unloads less often
 
 impl ChunkData {
     #[inline]
@@ -103,6 +108,16 @@ pub struct Terrain1 {
     pub seedser: i32,
     pub max_cached_chunks: usize,
     pub player_node_names: Array<GString>,
+    
+    // Multiplayer optimizations
+    pub chunk_load_queue: VecDeque<Vector2i>,
+    pub chunk_unload_queue: VecDeque<Vector2i>,
+    pub chunk_save_queue: VecDeque<Vector2i>,
+    pub frame_counter: u32,
+    pub chunks_generated_this_frame: usize,
+    pub chunks_unloaded_this_frame: usize,
+    pub chunks_saved_this_frame: usize,
+    pub all_players_chunks: HashSet<Vector2i>, // Shared chunk tracking
 }
 
 #[godot_api]
@@ -121,6 +136,14 @@ impl ITileMapLayer for Terrain1 {
             seedser: i32::default(),
             max_cached_chunks: DEFAULT_MAX_CACHED_CHUNKS,
             player_node_names: Array::default(),
+            chunk_load_queue: VecDeque::new(),
+            chunk_unload_queue: VecDeque::new(),
+            chunk_save_queue: VecDeque::new(),
+            frame_counter: 0,
+            chunks_generated_this_frame: 0,
+            chunks_unloaded_this_frame: 0,
+            chunks_saved_this_frame: 0,
+            all_players_chunks: HashSet::new(),
         }
     }
 
@@ -138,7 +161,36 @@ impl ITileMapLayer for Terrain1 {
         godot_print!("Terrain1 ready with seed: {}", self.seedser);
     }
 
-    fn process(&mut self, _delta: f64) {}
+    fn process(&mut self, _delta: f64) {
+        // Don't process anything if no players
+        if self.player_positions.is_empty() {
+            return;
+        }
+        
+        self.frame_counter += 1;
+        self.chunks_generated_this_frame = 0;
+        self.chunks_unloaded_this_frame = 0;
+        self.chunks_saved_this_frame = 0;
+        
+        // Process chunk load queue with frame budget
+        self.process_chunk_queue();
+        
+        // Process unload queue with frame budget
+        self.process_unload_queue();
+        
+        // Process save queue with frame budget
+        self.process_save_queue();
+        
+        // Periodic unloading (less frequent) - just queue chunks, don't process immediately
+        if self.frame_counter % UNLOAD_INTERVAL_FRAMES == 0 {
+            self.queue_distant_chunks_for_unload();
+        }
+        
+        // Periodic cleanup (even less frequent)
+        if self.frame_counter % CLEANUP_INTERVAL_FRAMES == 0 {
+            self.cleanup_old_chunks();
+        }
+    }
 
     fn input(&mut self, event: Gd<InputEvent>) {
         if event.is_action_pressed("click") {
@@ -170,13 +222,113 @@ impl Terrain1 {
     }
 
     pub fn update_player_position(&mut self, id: i32, cord: Vector2i) {
+        let new_chunk = Self::get_chunk_coord_static(cord);
+        let moved_chunk = self.player_positions.get(&id)
+            .map(|&old_pos| Self::get_chunk_coord_static(old_pos) != new_chunk)
+            .unwrap_or(true);
+        
         self.player_positions.insert(id, cord);
-        self.generate_chunk_for_player(id, cord);
-        self.unload_distant_chunks();
-        self.cleanup_old_chunks();
+        
+        if moved_chunk {
+            self.queue_chunks_for_player(id, cord);
+        }
     }
 
-    // Optimized: Pre-allocate and reuse noise map buffer
+    // Queue chunks instead of generating immediately
+    fn queue_chunks_for_player(&mut self, player_id: i32, pos: Vector2i) {
+        let center_chunk = self.get_chunk_coord(pos);
+        let mut new_chunks = Vec::new();
+
+        for dx in -LOAD_RADIUS..=LOAD_RADIUS {
+            for dy in -LOAD_RADIUS..=LOAD_RADIUS {
+                let chunk_pos = Vector2i::new(center_chunk.x + dx, center_chunk.y + dy);
+                
+                // Add to all players tracking
+                self.all_players_chunks.insert(chunk_pos);
+                
+                if !self.loaded_chunks.contains(&chunk_pos) && !self.chunk_load_queue.contains(&chunk_pos) {
+                    // Prioritize closer chunks
+                    let distance = dx.abs() + dy.abs();
+                    new_chunks.push((distance, chunk_pos));
+                }
+            }
+        }
+
+        // Sort by distance (closest first)
+        new_chunks.sort_by_key(|(dist, _)| *dist);
+        
+        // Add to queue front (priority) or back based on distance
+        for (dist, chunk_pos) in new_chunks {
+            if dist <= 1 {
+                self.chunk_load_queue.push_front(chunk_pos);
+            } else {
+                self.chunk_load_queue.push_back(chunk_pos);
+            }
+        }
+
+        // Update player chunk tracking
+        let player_chunks = self.player_chunks.entry(player_id).or_insert_with(HashSet::new);
+        player_chunks.clear();
+        for dx in -LOAD_RADIUS..=LOAD_RADIUS {
+            for dy in -LOAD_RADIUS..=LOAD_RADIUS {
+                player_chunks.insert(Vector2i::new(center_chunk.x + dx, center_chunk.y + dy));
+            }
+        }
+    }
+
+    // Process chunk queue with frame budget
+    fn process_chunk_queue(&mut self) {
+        while self.chunks_generated_this_frame < MAX_CHUNKS_PER_FRAME {
+            let Some(chunk_pos) = self.chunk_load_queue.pop_front() else {
+                break;
+            };
+
+            // Skip if already loaded (might have been loaded by another player)
+            if self.loaded_chunks.contains(&chunk_pos) {
+                continue;
+            }
+
+            self.generate_chunk_immediate(chunk_pos);
+            self.chunks_generated_this_frame += 1;
+        }
+    }
+
+    // Process unload queue with frame budget - CRITICAL for preventing lag spikes
+    fn process_unload_queue(&mut self) {
+        while self.chunks_unloaded_this_frame < MAX_UNLOADS_PER_FRAME {
+            let Some(chunk_pos) = self.chunk_unload_queue.pop_front() else {
+                break;
+            };
+
+            // Queue for saving if changed
+            if let Some(chunk) = self.chunk_cache.get(&chunk_pos) {
+                if chunk.changed {
+                    self.chunk_save_queue.push_back(chunk_pos);
+                }
+            }
+
+            // Clear the chunk from tilemap
+            self.clear_chunk(chunk_pos);
+            self.loaded_chunks.remove(&chunk_pos);
+            self.all_players_chunks.remove(&chunk_pos);
+            
+            self.chunks_unloaded_this_frame += 1;
+        }
+    }
+
+    // Process save queue with frame budget - spread disk I/O across frames
+    fn process_save_queue(&mut self) {
+        while self.chunks_saved_this_frame < MAX_SAVES_PER_FRAME {
+            let Some(chunk_pos) = self.chunk_save_queue.pop_front() else {
+                break;
+            };
+
+            self.save_chunk_immediate(chunk_pos);
+            self.chunks_saved_this_frame += 1;
+        }
+    }
+
+    // Optimized noise generation with pre-allocated buffer
     fn generate_noise_map(&self, chunk_pos: Vector2i) -> Vec<f32> {
         let mut noise_map = Vec::with_capacity(CHUNK_TILES);
         let start_x = chunk_pos.x * CHUNK_SIZE;
@@ -205,33 +357,41 @@ impl Terrain1 {
         Self::get_chunk_coord_static(pos)
     }
 
-    fn generate_chunk(&mut self, chunk_pos: Vector2i) {
+    // Renamed to be explicit about immediate generation
+    fn generate_chunk_immediate(&mut self, chunk_pos: Vector2i) {
         if self.loaded_chunks.contains(&chunk_pos) {
+            if let Some(chunk) = self.chunk_cache.get_mut(&chunk_pos) {
+                chunk.touch();
+            }
             return;
         }
 
+        // Try to load from disk first
         if self.load_chunk(chunk_pos) {
             self.loaded_chunks.insert(chunk_pos);
             return;
         }
 
+        // Generate new chunk
         let mut chunk = ChunkData::new();
         let noise_map = self.generate_noise_map(chunk_pos);
         let start_x = chunk_pos.x * CHUNK_SIZE;
         let start_y = chunk_pos.y * CHUNK_SIZE;
 
+        // Set tiles directly without batching for better performance
         for y in 0..CHUNK_SIZE {
             for x in 0..CHUNK_SIZE {
                 let noise = noise_map[ChunkData::index(x as usize, y as usize)];
                 let (source_id, coords) = if noise < 0.1 {
-                    (1, V2i { x: 0, y: 11 }) // Water
+                    (1, V2i { x: 0, y: 11 })
                 } else {
-                    (2, V2i { x: 1, y: 0 })  // Grass
+                    (2, V2i { x: 1, y: 0 })
                 };
 
-                chunk.set(x as usize, y as usize, coords);
+                chunk.tiles[ChunkData::index(x as usize, y as usize)] = coords;
                 let tile_pos = Vector2i::new(start_x + x, start_y + y);
                 
+                // Direct tile setting - no batching overhead
                 self.base_mut()
                     .set_cell_ex(tile_pos)
                     .source_id(source_id)
@@ -241,48 +401,21 @@ impl Terrain1 {
         }
 
         chunk.changed = true;
+        chunk.last_accessed = std::time::Instant::now();
         self.chunk_cache.insert(chunk_pos, chunk);
         self.loaded_chunks.insert(chunk_pos);
     }
 
-    fn generate_chunk_for_player(&mut self, player_id: i32, pos: Vector2i) {
-        let center_chunk = self.get_chunk_coord(pos);
-        
-        // Pre-allocate with known size
-        let area = ((LOAD_RADIUS * 2 + 1) * (LOAD_RADIUS * 2 + 1)) as usize;
-        let mut chunks_to_generate = Vec::with_capacity(area);
-        let mut chunks_to_track = Vec::with_capacity(area);
-
-        for dx in -LOAD_RADIUS..=LOAD_RADIUS {
-            for dy in -LOAD_RADIUS..=LOAD_RADIUS {
-                let chunk_pos = Vector2i::new(center_chunk.x + dx, center_chunk.y + dy);
-                chunks_to_track.push(chunk_pos);
-                
-                if !self.loaded_chunks.contains(&chunk_pos) {
-                    chunks_to_generate.push(chunk_pos);
-                }
-            }
+    // Queue chunks for unloading instead of unloading immediately
+    fn queue_distant_chunks_for_unload(&mut self) {
+        if self.player_positions.is_empty() {
+            return;
         }
-
-        // Generate chunks
-        for chunk_pos in chunks_to_generate {
-            self.generate_chunk(chunk_pos);
-        }
-
-        // Update player chunk tracking
-        let player_chunks = self.player_chunks.entry(player_id).or_insert_with(HashSet::new);
-        player_chunks.clear();
-        player_chunks.extend(chunks_to_track);
-    }
-
-    // Optimized: Check all players at once instead of per-player
-    fn unload_distant_chunks(&mut self) {
-        let mut chunks_to_unload = Vec::new();
 
         for &chunk_pos in &self.loaded_chunks {
             let mut keep_chunk = false;
 
-            // Check if any player is close enough
+            // Check against all active player positions
             for &player_pos in self.player_positions.values() {
                 let player_chunk_pos = self.get_chunk_coord(player_pos);
                 let dx = (chunk_pos.x - player_chunk_pos.x).abs();
@@ -294,27 +427,8 @@ impl Terrain1 {
                 }
             }
 
-            if !keep_chunk {
-                chunks_to_unload.push(chunk_pos);
-            }
-        }
-
-        // Unload distant chunks
-        for chunk_pos in chunks_to_unload {
-            self.save_chunk(chunk_pos);
-            self.clear_chunk(chunk_pos);
-            self.loaded_chunks.remove(&chunk_pos);
-
-            // Remove from all player tracking
-            for chunks in self.player_chunks.values_mut() {
-                chunks.remove(&chunk_pos);
-            }
-
-            // Remove from cache if old and unchanged
-            if let Some(chunk_data) = self.chunk_cache.get(&chunk_pos) {
-                if !chunk_data.changed && chunk_data.last_accessed.elapsed().as_secs() > CHUNK_UNLOAD_AGE_SECS {
-                    self.chunk_cache.remove(&chunk_pos);
-                }
+            if !keep_chunk && !self.chunk_unload_queue.contains(&chunk_pos) {
+                self.chunk_unload_queue.push_back(chunk_pos);
             }
         }
     }
@@ -323,19 +437,23 @@ impl Terrain1 {
         let start_x = chunk_pos.x * CHUNK_SIZE;
         let start_y = chunk_pos.y * CHUNK_SIZE;
 
+        // Batch clear operations for better performance
+        let empty_coords = Vector2i::new(-1, -1);
+        
         for x in 0..CHUNK_SIZE {
             for y in 0..CHUNK_SIZE {
                 let position = Vector2i::new(start_x + x, start_y + y);
                 self.base_mut().set_cell_ex(position)
                     .source_id(-1)
-                    .atlas_coords(Vector2i::new(-1, -1))
+                    .atlas_coords(empty_coords)
                     .alternative_tile(-1)
                     .done();
             }
         }
     }
 
-    pub fn save_chunk(&mut self, chunk_pos: Vector2i) {
+    // Renamed to indicate immediate save (used by save queue)
+    fn save_chunk_immediate(&mut self, chunk_pos: Vector2i) {
         let Some(chunk) = self.chunk_cache.get_mut(&chunk_pos) else {
             return;
         };
@@ -344,7 +462,6 @@ impl Terrain1 {
             return;
         }
 
-        // Ensure directory exists
         if !self.path.is_empty() {
             if let Some(mut dir) = DirAccess::open(&self.path) {
                 if !dir.dir_exists(".") {
@@ -365,6 +482,17 @@ impl Terrain1 {
                 chunk.changed = false;
             }
         }
+
+        // Remove from cache after saving if old and not loaded
+        if !self.loaded_chunks.contains(&chunk_pos) 
+            && chunk.last_accessed.elapsed().as_secs() > CHUNK_UNLOAD_AGE_SECS {
+            self.chunk_cache.remove(&chunk_pos);
+        }
+    }
+
+    // Keep old function for manual saves
+    pub fn save_chunk(&mut self, chunk_pos: Vector2i) {
+        self.save_chunk_immediate(chunk_pos);
     }
 
     fn load_chunk(&mut self, chunk_pos: Vector2i) -> bool {
@@ -387,7 +515,7 @@ impl Terrain1 {
         let start_x = chunk_pos.x * CHUNK_SIZE;
         let start_y = chunk_pos.y * CHUNK_SIZE;
 
-        // Restore tiles
+        // Batch tile restoration
         for y in 0..CHUNK_SIZE {
             for x in 0..CHUNK_SIZE {
                 let coords = chunk.get(x as usize, y as usize);
@@ -406,7 +534,6 @@ impl Terrain1 {
         true
     }
 
-    // Optimized: Use retain instead of building vectors
     fn cleanup_old_chunks(&mut self) {
         if self.chunk_cache.len() <= self.max_cached_chunks {
             return;
@@ -418,12 +545,12 @@ impl Terrain1 {
             .filter(|(&pos, chunk)| {
                 !chunk.changed 
                 && !self.loaded_chunks.contains(&pos)
+                && !self.all_players_chunks.contains(&pos)
                 && now.duration_since(chunk.last_accessed).as_secs() > CHUNK_CLEANUP_AGE_SECS
             })
             .map(|(&pos, chunk)| (pos, chunk.last_accessed))
             .collect();
 
-        // Sort by age (oldest first)
         old_chunks.sort_by_key(|(_, time)| *time);
 
         let remove_count = (self.chunk_cache.len() - self.max_cached_chunks).min(old_chunks.len());
@@ -432,41 +559,69 @@ impl Terrain1 {
         }
     }
 
+    #[func]
     fn set_save_path(&mut self, path: String) {
         self.path = path;
     }
 
+    #[func]
     #[inline]
     fn get_loaded_chunk_count(&self) -> i32 {
         self.loaded_chunks.len() as i32
     }
 
+    #[func]
     #[inline]
     fn get_cached_chunk_count(&self) -> i32 {
         self.chunk_cache.len() as i32
     }
 
+    #[func]
+    #[inline]
+    fn get_queue_size(&self) -> i32 {
+        self.chunk_load_queue.len() as i32
+    }
+
+    #[func]
+    #[inline]
+    fn get_unload_queue_size(&self) -> i32 {
+        self.chunk_unload_queue.len() as i32
+    }
+
+    #[func]
+    #[inline]
+    fn get_save_queue_size(&self) -> i32 {
+        self.chunk_save_queue.len() as i32
+    }
+
+    #[func]
     fn debug_chunk_info(&self, world_pos: Vector2i) -> String {
         let chunk_pos = self.get_chunk_coord(world_pos);
         let is_loaded = self.loaded_chunks.contains(&chunk_pos);
         let is_cached = self.chunk_cache.contains_key(&chunk_pos);
+        let is_queued = self.chunk_load_queue.contains(&chunk_pos);
         
         format!(
-            "World pos: ({}, {}), Chunk: ({}, {}), Loaded: {}, Cached: {}, Total loaded: {}",
+            "World pos: ({}, {}), Chunk: ({}, {}), Loaded: {}, Cached: {}, Queued: {}, Load Q: {}, Unload Q: {}, Save Q: {}, Players: {}",
             world_pos.x, world_pos.y,
             chunk_pos.x, chunk_pos.y,
-            is_loaded, is_cached,
-            self.loaded_chunks.len()
+            is_loaded, is_cached, is_queued,
+            self.chunk_load_queue.len(),
+            self.chunk_unload_queue.len(),
+            self.chunk_save_queue.len(),
+            self.player_positions.len()
         )
     }
 
+    #[func]
     fn force_generate_chunk_at(&mut self, world_pos: Vector2i) {
         let chunk_pos = self.get_chunk_coord(world_pos);
         self.loaded_chunks.remove(&chunk_pos);
         self.chunk_cache.remove(&chunk_pos);
-        self.generate_chunk(chunk_pos);
+        self.generate_chunk_immediate(chunk_pos);
     }
 
+    #[func]
     fn force_save_all_chunks(&mut self) {
         let chunks_to_save: Vec<_> = self.chunk_cache
             .iter()
@@ -474,8 +629,63 @@ impl Terrain1 {
             .map(|(&pos, _)| pos)
             .collect();
 
+        // Save immediately, bypassing queue for force save
         for chunk_pos in chunks_to_save {
-            self.save_chunk(chunk_pos);
+            self.save_chunk_immediate(chunk_pos);
         }
+    }
+
+    #[func]
+    fn set_performance_mode(&mut self, low_end: bool) {
+        if low_end {
+            self.max_cached_chunks = 300; // Further reduced from 500
+            godot_print!("Performance mode enabled: max_cached_chunks = 300");
+        } else {
+            self.max_cached_chunks = DEFAULT_MAX_CACHED_CHUNKS;
+            godot_print!("Performance mode disabled: max_cached_chunks = 1000");
+        }
+    }
+    
+    // New: Set custom frame budgets for extreme performance tuning
+    #[func]
+    fn set_aggressive_performance_mode(&mut self) {
+        self.max_cached_chunks = 200; // Very aggressive
+        godot_print!("Aggressive performance mode enabled: Chunks will load slower but FPS should improve");
+    }
+
+    #[func]
+    fn flush_all_queues(&mut self) {
+        godot_print!("Flushing all queues...");
+        
+        // Process all pending loads
+        while !self.chunk_load_queue.is_empty() {
+            if let Some(chunk_pos) = self.chunk_load_queue.pop_front() {
+                if !self.loaded_chunks.contains(&chunk_pos) {
+                    self.generate_chunk_immediate(chunk_pos);
+                }
+            }
+        }
+        
+        // Process all pending unloads
+        while !self.chunk_unload_queue.is_empty() {
+            if let Some(chunk_pos) = self.chunk_unload_queue.pop_front() {
+                if let Some(chunk) = self.chunk_cache.get(&chunk_pos) {
+                    if chunk.changed {
+                        self.chunk_save_queue.push_back(chunk_pos);
+                    }
+                }
+                self.clear_chunk(chunk_pos);
+                self.loaded_chunks.remove(&chunk_pos);
+            }
+        }
+        
+        // Process all pending saves
+        while !self.chunk_save_queue.is_empty() {
+            if let Some(chunk_pos) = self.chunk_save_queue.pop_front() {
+                self.save_chunk_immediate(chunk_pos);
+            }
+        }
+        
+        godot_print!("All queues flushed!");
     }
 }
