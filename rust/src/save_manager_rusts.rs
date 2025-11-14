@@ -7,8 +7,6 @@ use godot::tools::get_autoload_by_name;
 use serde::{Deserialize, Serialize};
 use crate::node_manager::NodeManager;
 use crate::rustplayer::Rustplayer;
-use crate::terrain::Terrain1;
-use crate::world::Node2dRust;
 
 
 #[derive(Serialize, Deserialize)]

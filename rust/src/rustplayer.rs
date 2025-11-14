@@ -8,7 +8,6 @@ use crate::heart::Heart;
 use crate::inventory::Inventory;
 use crate::item_collectibles::Collectibles;
 use crate::node_manager::NodeManager;
-use crate::terrain::Terrain1;
 
 #[derive(GodotClass)]
 #[class(base=CharacterBody2D)]
@@ -39,8 +38,6 @@ pub struct Rustplayer {
     #[export]
     camera: OnEditor<Gd<Camera2D>>,
 
-    input_enabled: bool,
-
     target_position: Vector2,
 
     #[export]
@@ -64,7 +61,6 @@ impl ICharacterBody2D for Rustplayer {
             heart_ui: OnEditor::default(),
             health: i32::default(),
             camera: OnEditor::default(),
-            input_enabled: false,
             target_position: Vector2::default(),
             id: i32::default(),
             last_chunk_pos: Vector2i::new(i32::MAX, i32::MAX), // Invalid initial value
