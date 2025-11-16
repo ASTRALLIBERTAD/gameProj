@@ -6,9 +6,14 @@ extends HBoxContainer
 func _ready() -> void:
 	inv.update.connect(updated)
 	updated()
-	
+	for b in range(slots.size()):
+		var btn = slots[b].get_node("CenterContainer/Panel/Button") as Button
+		btn.connect("pressed", func() -> void: _on_slot_pressed(b))
 	pass # Replace with function body.
 
+func _on_slot_pressed(index: int) -> void:
+	$"../CenterContainer".selected_item(index)
+	print("Slot pressed:", index)
 
 func updated():
 	for i in range(slots.size()):

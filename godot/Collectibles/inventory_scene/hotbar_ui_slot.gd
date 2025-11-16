@@ -3,10 +3,10 @@ extends Panel
 @onready var item_visual: Sprite2D = $CenterContainer/Panel/item
 @onready var amount_text: Label = $CenterContainer/Panel/Label
 
-signal out
+#signal out
 
-func _ready() -> void:
-	out.emit()
+#func _ready() -> void:
+	##out.emit()
 
 func update_to_slot(slot: InvSlot):
 	redraw(slot)
@@ -29,5 +29,5 @@ func redraw(slot: InvSlot):
 		amount_text.text = str(t)
 
 func _on_button_pressed() -> void:
-	out.emit()
+	#out.emit()
 	pass # Replace with function body.

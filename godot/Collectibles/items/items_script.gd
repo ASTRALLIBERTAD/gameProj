@@ -17,7 +17,7 @@ func _on_area_2d_body_entered(body: Node2D) -> void:
 			else:
 				print("inventory is full")
 
-@rpc("authority", "reliable")
+@rpc("call_remote", "reliable")
 func self_destroy():
 	self.queue_free()
 

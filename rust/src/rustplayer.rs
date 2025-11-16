@@ -1,10 +1,11 @@
-use godot::classes::{AnimatedSprite2D, Camera2D, CharacterBody2D, Control, ICharacterBody2D, Input, Label};
+use godot::classes::{AnimatedSprite2D, Camera2D, CharacterBody2D, Control, ICharacterBody2D, Input, Label, ResourceLoader};
 use godot::obj::WithBaseField;
 use godot::prelude::*;
 use godot::tools::get_autoload_by_name;
 use std::str::FromStr;
 
 use crate::heart::Heart;
+use crate::inv_slot::InvSlot;
 use crate::inventory::Inventory;
 use crate::item_collectibles::Collectibles;
 use crate::node_manager::NodeManager;
@@ -46,6 +47,10 @@ pub struct Rustplayer {
     // Optimization: Track last chunk position
     last_chunk_pos: Vector2i,
     last_update_time: f64,
+
+    #[export]
+    item_right: OnEditor<Gd<InvSlot>>,
+
 }
 
 #[godot_api]
@@ -65,6 +70,8 @@ impl ICharacterBody2D for Rustplayer {
             id: i32::default(),
             last_chunk_pos: Vector2i::new(i32::MAX, i32::MAX), // Invalid initial value
             last_update_time: 0.0,
+
+            item_right: OnEditor::default()
         }
     }
 
@@ -144,6 +151,16 @@ impl ICharacterBody2D for Rustplayer {
                 self.last_update_time = 0.0;
             }
         }
+
+        let mut loader = load::<Inventory>("res://Collectibles/items/inventory.res");
+
+        
+        
+        // self.base_mut().get_node_and_resource("res://Collectibles/items/inventory.res");
+        // let name = loader.bind_mut().get_slots().get(0).unwrap().get_name();
+        // self.item_right.set_name(name.to_godot());
+
+        // godot_print!("The item name in index 0 is: {}", name)
     }
 }
 
@@ -204,7 +221,11 @@ impl Rustplayer {
 
     #[func]
     fn collect_items(&mut self, items: Gd<Collectibles>, index: i32) {
+
+        
         self.inv.bind_mut().insert(items, index, index);
+
+        
         godot_print!("item index is: {}", index);
         godot_print!("item collected");
     }
