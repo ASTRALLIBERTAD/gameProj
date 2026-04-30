@@ -34,8 +34,8 @@ jobs:
       - name: Run git-fame (tabular)
         run: |
           git fame \
-            --excl ".*\.(png|jpg|jpeg|gif|webp|svg|ico|bmp|tiff|ttf|woff|woff2|eot|otf|mp3|mp4|wav|ogg|pdf|zip|tar|gz|bin|exe|dll|so|o|a|lock)$" \
-            --excl "^(assets|public|static|dist|build)/" \
+            --excl ".*\.(png|jpg|jpeg|gif|webp|svg|ico|bmp|tiff|ttf|woff|woff2|eot|otf|mp3|mp4|wav|ogg|pdf|zip|tar|gz|bin|exe|dll|so|o|a|lock|uid|cfg|lock|toml|import|tmp|godot|cookie)$" \
+            --excl "^(assets|public|static|dist|build|addons|android|.vscode)/" \
             --sort loc \
             . > git-report/ownership.txt
         continue-on-error: true
