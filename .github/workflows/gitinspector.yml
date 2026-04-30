@@ -27,6 +27,11 @@ jobs:
       - name: Clone Gitinspector
         run: git clone --depth=1 https://github.com/ejwa/gitinspector.git /tmp/gitinspector
 
+      - name: Patch Gitinspector for Python 3.8+ compatibility
+        run: |
+          sed -i 's/__translation__.install(True)/__translation__.install()/g' \
+            /tmp/gitinspector/gitinspector/localization.py
+
       - name: Create output directory
         run: mkdir -p gitinspector-report
 
