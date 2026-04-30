@@ -1,4 +1,6 @@
-use godot::classes::{AnimatedSprite2D, Camera2D, CharacterBody2D, Control, ICharacterBody2D, Input, Label, ResourceLoader};
+use godot::classes::{
+    AnimatedSprite2D, Area2D, Camera2D, CharacterBody2D, Control, ICharacterBody2D, Input, Label,
+};
 use godot::obj::WithBaseField;
 use godot::prelude::*;
 use godot::tools::get_autoload_by_name;
@@ -31,10 +33,12 @@ pub struct Rustplayer {
     is_open: bool,
 
     #[export]
+    #[var(get = get_heart_ui)]
     heart_ui: OnEditor<Gd<Heart>>,
 
     #[export]
-    pub health: i32,
+    #[var(get = get_health, set = set_health)]
+    health: i32,
 
     #[export]
     camera: OnEditor<Gd<Camera2D>>,
@@ -51,6 +55,11 @@ pub struct Rustplayer {
     #[export]
     item_right: OnEditor<Gd<InvSlot>>,
 
+    // slash_time: f64,
+    can_slash: bool,
+
+    #[export]
+    attack_area: OnEditor<Gd<Area2D>>,
 }
 
 #[godot_api]
@@ -71,7 +80,10 @@ impl ICharacterBody2D for Rustplayer {
             last_chunk_pos: Vector2i::new(i32::MAX, i32::MAX), // Invalid initial value
             last_update_time: 0.0,
 
-            item_right: OnEditor::default()
+            item_right: OnEditor::default(),
+            // slash_time: 0.2,
+            can_slash: true,
+            attack_area: OnEditor::default(),
         }
     }
 
@@ -119,11 +131,7 @@ impl ICharacterBody2D for Rustplayer {
 
             // Update coordinates display
             let cord = self.get_player_cord_for_display();
-            let y_value = if cord.y == 0.0 {
-                cord.y * 1.0
-            } else {
-                cord.y * -1.0
-            };
+            let y_value = if cord.y == 0.0 { cord.y * 1.0 } else { -cord.y };
 
             let k = format!("coordinates :{}, {:?}", cord.x, y_value as i32);
             self.coords.set_text(&k);
@@ -137,10 +145,21 @@ impl ICharacterBody2D for Rustplayer {
             }
 
             let pos = self.base_mut().get_global_position();
-            self.base_mut().rpc("update_position", &[Variant::from(pos)]);
+            self.base_mut()
+                .rpc("update_position", &[Variant::from(pos)]);
+
+            // attack handling
+            if input.is_action_just_pressed("attack") && self.can_slash {
+                self.can_slash = false;
+                self.attack();
+                godot_print!("Player {} performed an attack!", self.id);
+            }
         } else {
             let pos = self.target_position;
-            let smooth_position = self.base_mut().get_global_position().lerp(pos, 10.0 * delta as f32);
+            let smooth_position = self
+                .base_mut()
+                .get_global_position()
+                .lerp(pos, 10.0 * delta as f32);
             self.base_mut().set_global_position(smooth_position);
 
             // CRITICAL FIX: Remote players also need chunk updates but less frequently
@@ -152,10 +171,8 @@ impl ICharacterBody2D for Rustplayer {
             }
         }
 
-        let mut loader = load::<Inventory>("res://Collectibles/items/inventory.res");
+        // let mut loader = load::<Inventory>("res://Collectibles/items/inventory.res");
 
-        
-        
         // self.base_mut().get_node_and_resource("res://Collectibles/items/inventory.res");
         // let name = loader.bind_mut().get_slots().get(0).unwrap().get_name();
         // self.item_right.set_name(name.to_godot());
@@ -189,7 +206,7 @@ impl Rustplayer {
     fn update_terrain_if_needed(&mut self, _delta: f64) {
         let mut scene = get_autoload_by_name::<NodeManager>("GlobalNodeManager");
         let mut scene = scene.bind_mut().get_terrain();
-        
+
         let pos = self.base_mut().get_global_position();
         let current_chunk = scene.local_to_map(pos);
 
@@ -198,16 +215,16 @@ impl Rustplayer {
             let id = self.base_mut().get_multiplayer_authority();
             scene.bind_mut().update_player_position(id, current_chunk);
             self.last_chunk_pos = current_chunk;
-            
+
             // Optional: Debug logging
             // godot_print!("Player {} moved to chunk ({}, {})", id, current_chunk.x, current_chunk.y);
         }
     }
 
     // Original function kept for compatibility but optimized
-    fn player_cord(&mut self) -> Vector2 {
-        self.get_player_cord_for_display()
-    }
+    // fn player_cord(&mut self) -> Vector2 {
+    //     self.get_player_cord_for_display()
+    // }
 
     fn open(&mut self) {
         self.is_open = true;
@@ -221,11 +238,8 @@ impl Rustplayer {
 
     #[func]
     fn collect_items(&mut self, items: Gd<Collectibles>, index: i32) {
-
-        
         self.inv.bind_mut().insert(items, index, index);
 
-        
         godot_print!("item index is: {}", index);
         godot_print!("item collected");
     }
@@ -239,8 +253,50 @@ impl Rustplayer {
         }
     }
 
-    pub fn player_hp(&mut self, num: i32) {
-        self.heart_ui.bind_mut().heal(num);
-        self.health = num;
+    #[func]
+    pub fn set_health(&mut self, health: i32) {
+        self.heart_ui.bind_mut().heal(health);
+        self.health = health;
+    }
+
+    #[func]
+    pub fn get_health(&self) -> i32 {
+        self.health
+    }
+    //
+    // pub fn player_hp(&mut self, num: i32) {
+    //     self.heart_ui.bind_mut().heal(num);
+    //     self.health = num;
+    // }
+
+    fn attack(&mut self) {
+        self.attack_area.set_monitoring(true);
+        self.attack_area.set_monitorable(true);
+
+        let mut attack_area = self.attack_area.clone();
+        let base = self.base().clone();
+        godot::task::spawn(async move {
+            godot_print!("starting task!");
+            let timer = base.get_tree().create_timer(0.5);
+            Signal::from_object_signal(&timer, "timeout")
+                .to_future::<()>()
+                .await;
+
+            for body in attack_area.get_overlapping_bodies().iter_shared() {
+                godot_print!("Found overlapping body during attack: {}", body);
+                if body.is_in_group("enemy") {
+                    godot_print!("Hit an enemy!");
+                }
+            }
+            godot_print!("wait ended!");
+
+            attack_area.set_monitoring(false);
+            attack_area.set_monitorable(false);
+        });
+    }
+
+    #[func]
+    pub fn get_heart_ui(&self) -> Gd<Heart> {
+        self.heart_ui.clone()
     }
 }

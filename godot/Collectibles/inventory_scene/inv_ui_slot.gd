@@ -22,7 +22,7 @@ func update(slot: InvSlot):
 			amount_text.text = str(t)
 
 func redraw(slot: InvSlot):
-	if slot.item.amount <= 1:
+	if slot.get_item().amount <= 1:
 		amount_text.visible = false
 		var t = slot.item.amount
 		amount_text.text = str(t)

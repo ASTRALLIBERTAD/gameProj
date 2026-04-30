@@ -5,7 +5,7 @@ var WorldName: String
 
 func _on_timer_timeout() -> void:
 	var WorldName = %WorldNameInput.text
-	RustSaveManager1.load_game = WorldName
+	RustSaveManager1.set_current_world_name(WorldName)
 	var GameSeed = %Seed.text.strip_edges()
 	print(WorldName)
 	
@@ -21,8 +21,8 @@ func _on_timer_timeout() -> void:
 		if GameSeed.is_valid_int():
 			RustSaveManager1.world_seed = int(GameSeed)
 			var uop = world.get_node("Terrain/Terrain1") as Terrain1
-			uop.seedser = RustSaveManager1.world_seed
-			print(uop.seedser)
+			uop.world_seed = RustSaveManager1.world_seed
+			print(uop.world_seed)
 			get_tree().root.add_child(world)
 			queue_free()
 		elif GameSeed == "":
@@ -32,8 +32,8 @@ func _on_timer_timeout() -> void:
 			RustSaveManager1.world_seed = yoj
 			print(yoj)
 			var up = world.get_node("Terrain/Terrain1") as Terrain1
-			up.seedser = yoj
-			print(up.seedser)
+			up.world_seed = yoj
+			print(up.world_seed)
 			get_tree().root.add_child(world)
 			queue_free()
 		else:
@@ -41,8 +41,8 @@ func _on_timer_timeout() -> void:
 			RustSaveManager1.world_seed = clampi(t, -2147483648, 2147483647)
 			
 			var upl = world.get_node("Terrain/Terrain1") as Terrain1
-			upl.seedser = RustSaveManager1.world_seed
-			print(upl.seedser)
+			upl.world_seed = RustSaveManager1.world_seed
+			print(upl.world_seed)
 			get_tree().root.add_child(world)
 			queue_free()
 		
@@ -56,15 +56,13 @@ func _on_timer_timeout() -> void:
 
 func _on_backbutton_pressed() -> void:
 	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.scn")
-	pass # Replace with function body.
+
 
 
 func _on_back_pressed() -> void:
 	get_tree().change_scene_to_file("res://SaveAndLoad/LoadMenu.scn")
-	pass # Replace with function body.
+
 
 
 func _on_playbuton_pressed() -> void:
 	$Timer.start()
-	
-	pass # Replace with function body.

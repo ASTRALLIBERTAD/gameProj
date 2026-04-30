@@ -1,4 +1,6 @@
-use godot::classes::{ENetMultiplayerPeer, HBoxContainer, INode, Json, Label, Node, PacketPeerUdp, VBoxContainer};
+use godot::classes::{
+    ENetMultiplayerPeer, HBoxContainer, INode, Json, Label, Node, PacketPeerUdp, VBoxContainer,
+};
 use godot::prelude::*;
 
 const LISTEN_PORT: i32 = 8912;
@@ -18,17 +20,16 @@ pub struct MultiplayerScene {
 #[godot_api]
 impl INode for MultiplayerScene {
     fn init(base: Base<Node>) -> Self {
-        Self { 
+        Self {
             base,
             listener: PacketPeerUdp::new_gd(),
             player: OnEditor::default(),
-            server_info: OnEditor::default()
+            server_info: OnEditor::default(),
         }
     }
 
     fn ready(&mut self) {
         self.set_up();
-
     }
 
     fn exit_tree(&mut self) {
@@ -41,7 +42,6 @@ impl INode for MultiplayerScene {
             let serverport = self.listener.get_packet_port();
             let packet = self.listener.get_packet();
 
-            
             let data = packet.get_string_from_ascii();
 
             let mut json = Json::new_gd();
@@ -49,7 +49,10 @@ impl INode for MultiplayerScene {
 
             if parse_result == godot::global::Error::OK {
                 let room_info = json.get_data();
-                let dict = room_info.to::<Dictionary>();
+                let Ok(dict) = room_info.try_to::<Dictionary<GString, Variant>>() else {
+                    godot_error!("Expected a Dictionary from JSON");
+                    return;
+                };
 
                 godot_print!(
                     "Server IP: {} Server Port: {} Room info: {:?}",
@@ -67,12 +70,10 @@ impl INode for MultiplayerScene {
                     .base_mut()
                     .get_node_as::<VBoxContainer>("CanvasLayer/Panel/VBoxContainer");
 
-                
                 let mut room_exist = false;
 
                 for i in vbox.get_children().iter_shared() {
                     if i.get_name().to_string() == name_str.to_string() {
-                        
                         let ip_label = i.try_get_node_as::<Label>("Ip");
                         if let Some(mut ip_label) = ip_label {
                             ip_label.set_text(&serverip);
@@ -82,11 +83,9 @@ impl INode for MultiplayerScene {
                     }
                 }
 
-                
                 if !room_exist {
                     let mut current_info = self.server_info.instantiate_as::<HBoxContainer>();
 
-                    
                     current_info.set_name(&name_str.to_string());
 
                     // Access children relative to the instance itself
@@ -109,15 +108,11 @@ impl INode for MultiplayerScene {
                 }
             }
         }
-}
-
-
-
+    }
 }
 
 #[godot_api]
 impl MultiplayerScene {
-    
     #[func]
     fn set_up(&mut self) {
         let mut listener = PacketPeerUdp::new_gd();
@@ -131,25 +126,29 @@ impl MultiplayerScene {
         }
 
         listener.set_broadcast_enabled(true);
-   
+
         self.listener = listener;
     }
 
     #[func]
     fn joinby_ip(&mut self, ip: GString) {
         self.base_mut().emit_signal("join_game", &[ip.to_variant()]);
-        
     }
 
     #[func]
     fn d(&mut self, ip: GString) {
         let mut peer = ENetMultiplayerPeer::new_gd();
         let error = peer.create_client(&ip.to_string(), 55555);
-        
+
         if error == godot::global::Error::OK {
-            self.base_mut().get_multiplayer().unwrap().set_multiplayer_peer(&peer);
+            self.base_mut()
+                .get_multiplayer()
+                .unwrap()
+                .set_multiplayer_peer(&peer);
             godot_print!("Connecting {}", ip);
-            self.base_mut().get_tree().unwrap().change_scene_to_file("res://World.scn");
+            self.base_mut()
+                .get_tree()
+                .change_scene_to_file("res://World.scn");
         } else {
             godot_print!("Failed to create client. Error code: {:?}", error);
         }
@@ -157,12 +156,13 @@ impl MultiplayerScene {
 
     #[func]
     fn on_back_pressed(&mut self) {
-        self.base_mut().get_tree().unwrap().change_scene_to_file("res://SaveAndLoad/LoadMenu.scn");
+        self.base_mut()
+            .get_tree()
+            .change_scene_to_file("res://SaveAndLoad/LoadMenu.scn");
     }
 
     #[func]
     fn clean_up(&mut self) {
         self.listener.close();
     }
-
 }

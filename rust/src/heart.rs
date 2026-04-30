@@ -21,13 +21,12 @@ pub struct Heart {
 
     #[export(range = (0.0, 20.0))]
     pub current_health: i32,
-
 }
 
 #[godot_api]
 impl IHBoxContainer for Heart {
     fn init(base: Base<HBoxContainer>) -> Self {
-        Self { 
+        Self {
             base,
             full_heart: OnEditor::default(),
             half_heart: OnEditor::default(),
@@ -37,29 +36,22 @@ impl IHBoxContainer for Heart {
         }
     }
 
-
     fn ready(&mut self) {
-
         let heart_parents = self.base_mut().get_children();
         for i in heart_parents.iter_shared() {
             if let Ok(texture_rect) = i.try_cast::<HeartDisplay>() {
-
                 self.heart_list.push(texture_rect);
                 // Handle the TextureRect here
             }
-            
         }
         godot_print!("Heart list length: {:?}", self.heart_list);
         godot_print!("Heart UI is ready!");
-
     }
 }
 
 #[godot_api]
 impl Heart {
-
-    fn update_health(&mut self, current_health: i32){
-        
+    fn update_health(&mut self, current_health: i32) {
         godot_print!("uppppdattting health");
         godot_print!("current health is www {:?}", current_health);
         let heart_parents = self.base_mut().get_children();
@@ -68,26 +60,23 @@ impl Heart {
         let half_heart = self.half_heart.to_godot();
         let empty_heart = self.empty_heart.to_godot();
 
-        if current_health >= 1{
+        if current_health >= 1 {
             if self.current_health == 20 {
                 return;
-            }
-            else {
-                self.current_health = self.current_health + current_health;
-                godot_print!("Hearts: {:?}", self.current_health);    
+            } else {
+                self.current_health += current_health;
+                godot_print!("Hearts: {:?}", self.current_health);
             }
         }
 
         if current_health <= -1 {
             if self.current_health == 0 {
                 return;
+            } else {
+                self.current_health += current_health;
+                godot_print!("Heartsy: {:?}", self.current_health);
             }
-            else {
-                self.current_health = self.current_health + (current_health);
-                godot_print!("Heartsy: {:?}", self.current_health);    
-            }
-            
-        } 
+        }
 
         godot_print!("heart current {:?}", self.current_health);
 
@@ -99,87 +88,74 @@ impl Heart {
         // else {
         //     self.base_mut().show();
         // }
-        
+
         for i in heart_parents.iter_shared() {
             if let Ok(mut texture_rect) = i.try_cast::<HeartDisplay>() {
-
                 if texture_rect.bind_mut().get_health() == 2 {
                     texture_rect.set_texture(&full_heart.clone());
                     godot_print!("full heart");
-                }
-
-                else if texture_rect.bind_mut().get_health() == 1 {
+                } else if texture_rect.bind_mut().get_health() == 1 {
                     texture_rect.set_texture(&half_heart.clone());
                     godot_print!("half heart");
-                }
-
-                else if texture_rect.bind_mut().get_health() == 0 {
+                } else if texture_rect.bind_mut().get_health() == 0 {
                     texture_rect.set_texture(&empty_heart.clone());
                     godot_print!("empty heart");
                 }
 
                 self.heart_list.push(texture_rect);
             }
-            
         }
-        
-
     }
 
     pub fn damage(&mut self, damage: i32) {
-
         let mut remaining_damage = damage;
 
-        for i in (0..self.heart_list.len()).rev(){
+        for i in (0..self.heart_list.len()).rev() {
             let heart = &mut self.heart_list[i];
             let mut current_heart_health = heart.bind_mut().get_health();
 
-            if current_heart_health == 2{
+            if current_heart_health == 2 {
                 let damage_to_apply = remaining_damage.min(2);
-                current_heart_health -= damage_to_apply as i32;
+                current_heart_health -= damage_to_apply;
                 heart.bind_mut().set_health(current_heart_health);
                 remaining_damage -= damage_to_apply;
-                godot_print!("damage is {:?} and current health {:?}", damage, self.current_health);
-            }
-
-            else if current_heart_health == 1 {
+                godot_print!(
+                    "damage is {:?} and current health {:?}",
+                    damage,
+                    self.current_health
+                );
+            } else if current_heart_health == 1 {
                 let damage_to_apply = remaining_damage.min(1);
                 current_heart_health -= damage_to_apply;
                 heart.bind_mut().set_health(current_heart_health);
                 remaining_damage -= damage_to_apply;
-                godot_print!("damage is {:?} and current health {:?}", damage, self.current_health);
+                godot_print!(
+                    "damage is {:?} and current health {:?}",
+                    damage,
+                    self.current_health
+                );
             }
-
-            
 
             if remaining_damage <= 0 {
                 break;
             }
-
         }
         self.update_health(-damage);
-
-        
     }
 
     pub fn heal(&mut self, heal: i32) {
-        
         let mut remaining_heal = heal;
         let heart_parents = self.base_mut().get_children();
-        for (_i, heart_display) in heart_parents.iter_shared().enumerate() {
+        for heart_display in heart_parents.iter_shared() {
             if let Ok(mut texture_rect) = heart_display.try_cast::<HeartDisplay>() {
-
                 let mut current_heart_health = texture_rect.bind_mut().get_health();
-                
+
                 if current_heart_health == 0 {
                     let heal_to_apply = remaining_heal.min(2);
-                    current_heart_health += heal_to_apply as i32;
+                    current_heart_health += heal_to_apply;
                     texture_rect.bind_mut().set_health(current_heart_health);
                     remaining_heal -= heal_to_apply;
-
-                }
-
-                else if current_heart_health == 1 {
+                } else if current_heart_health == 1 {
                     let heal_to_apply = remaining_heal.min(1);
                     current_heart_health += heal_to_apply;
                     texture_rect.bind_mut().set_health(current_heart_health);
@@ -194,10 +170,7 @@ impl Heart {
             }
         }
 
-
         self.update_health(heal);
-
-        
     }
-
 }
+

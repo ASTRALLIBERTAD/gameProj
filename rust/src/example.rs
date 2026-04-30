@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use godot::classes::{ISprite2D, Sprite2D};
 use godot::prelude::*;
 
@@ -14,7 +16,8 @@ impl ISprite2D for Player {
     }
 
     fn physics_process(&mut self, delta: f64) {
-        let radians = (3.14 * delta) as f32;
+        let radians = PI * delta as f32;
         self.base_mut().rotate(radians);
     }
 }
+

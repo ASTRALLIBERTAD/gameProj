@@ -16,9 +16,9 @@ pub struct Inventory {
 #[godot_api]
 impl IResource for Inventory {
     fn init(base: Base<Resource>) -> Self {
-        Self { 
+        Self {
             base,
-            slots: Array::new()
+            slots: Array::new(),
         }
     }
 }
@@ -30,56 +30,44 @@ impl Inventory {
 
     #[func]
     pub fn insert(&mut self, item: Gd<Collectibles>, index1: i32, index2: i32) {
+        if index1 < 0 {
+            // Try to stack first
+            // stacking loop
+            for mut slot in self.slots.iter_shared() {
+                let slot_ref = slot.bind_mut();
+                let mut existing = slot_ref.get_item();
+                let mut existing_ref = existing.bind_mut();
 
-        let item = Some(item);
-        
-        if index1 < 0{
-            for mut slot in self.slots.iter_shared()  {
-                if slot.bind_mut().get_item().unwrap().bind_mut().get_stackable() == true{
-
-                    if slot.bind_mut().get_item() == item {
-                    
-                        let r = slot.bind_mut().get_item().unwrap().bind_mut().get_amount();
-                        slot.bind_mut().get_item().unwrap().bind_mut().set_amount(r + 1);
-                        self.signals().update().emit();
-                        // self.base_mut().emit_signal("update", &[]);
-                        godot_print!("Item added to inventory!dldl");
-                        return;
-                    }
-                }
-
-            }
-    
-            for mut slot in self.slots.iter_shared()  {
-    
-                if  slot.bind_mut().get_item().unwrap().bind_mut().get_name().is_empty() {
-    
-                    slot.bind_mut().set_item(item).to_godot();
-                    slot.bind_mut().get_item().unwrap().bind_mut().set_amount(1);
+                if existing_ref.is_stackable() && existing_ref.get_name() == item.bind().get_name()
+                {
+                    let amount = existing_ref.get_amount();
+                    existing_ref.set_amount(amount + 1);
+                    drop(existing_ref);
+                    drop(slot_ref);
                     self.signals().update().emit();
-                    // self.base_mut().emit_signal("update", &[]);
-                    godot_print!("Item added to inventory!");
-                    godot_print!("{:?}", slot.bind_mut().get_item());
-                    let r = &self.slots.get(0).unwrap().bind_mut().get_item().unwrap().bind_mut().get_name();
-                    godot_print!("kkk {:?}", r);
-                    
-                    return;                    
+                    return;
                 }
-                
             }
 
-        }
-        else {
-
-            let r = self.slots.get(index1 as usize).unwrap().clone();
-            let b =self.slots.get(index2 as usize).unwrap().clone();
+            // empty slot loop
+            for mut slot in self.slots.iter_shared() {
+                let mut slot_ref = slot.bind_mut();
+                if slot_ref.get_item().bind().get_name().is_empty() {
+                    slot_ref.set_item(item.clone());
+                    drop(slot_ref);
+                    self.signals().update().emit();
+                    return;
+                }
+            }
+            godot_error!("Inventory is full!");
+        } else {
+            // Swap two slots
+            let a = self.slots.get(index1 as usize).unwrap().clone();
+            let b = self.slots.get(index2 as usize).unwrap().clone();
             self.slots.set(index1 as usize, &b);
-            self.slots.set(index2 as usize, &r);
+            self.slots.set(index2 as usize, &a);
             self.signals().update().emit();
-            // self.base_mut().emit_signal("update", &[]);
-
-            godot_print!("index is not less than 0");
+            godot_print!("Swapped slots {} and {}", index1, index2);
         }
-
     }
 }

@@ -41,7 +41,7 @@ impl NodeManager {
     }
 
     pub fn get_terrain(&mut self) -> Gd<Terrain1> {
-        return self.terrain.clone()
+        self.terrain.clone()
     }
 
     #[func]
@@ -50,7 +50,7 @@ impl NodeManager {
     }
 
     pub fn get_world(&mut self) -> Gd<Node2dRust> {
-        return self.world.clone()
+        self.world.clone()
     }
 
     
