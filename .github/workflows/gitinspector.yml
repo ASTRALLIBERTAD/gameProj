@@ -1,4 +1,4 @@
-name: Gitinspector Report
+name: Git Contribution & Ownership Report
 
 on:
   push:
@@ -6,13 +6,12 @@ on:
   pull_request:
     branches: [main, master]
   schedule:
-    # Runs every Monday at 00:00 UTC
     - cron: "0 0 * * 1"
   workflow_dispatch:
 
 jobs:
-  gitinspector:
-    name: Generate Gitinspector Report
+  git-report:
+    name: Generate Contribution & Ownership Report
     runs-on: ubuntu-latest
 
     permissions:
@@ -24,47 +23,110 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Clone Gitinspector
-        run: git clone --depth=1 https://github.com/ejwa/gitinspector.git /tmp/gitinspector
-
-      - name: Patch Gitinspector for Python 3.8+ compatibility
-        run: |
-          sed -i 's/__translation__.install(True)/__translation__.install()/g' \
-            /tmp/gitinspector/gitinspector/localization.py
+      - name: Install git-fame
+        run: pip install git-fame
 
       - name: Create output directory
-        run: mkdir -p gitinspector-report
+        run: mkdir -p git-report
 
-      - name: Run Gitinspector (text)
+      # Ownership & Contribution 
+      # Per-author: lines owned, commits, files touched, % of codebase
+      - name: Run git-fame (tabular)
         run: |
-          python /tmp/gitinspector/gitinspector.py \
-            --format=text \
-            --grading \
-            --timeline \
-            --responsibilities \
-            --since="1 year ago" \
-            --exclude=".*\.(png|jpg|jpeg|gif|webp|svg|ico|bmp|tiff|ttf|woff|woff2|eot|otf|mp3|mp4|wav|ogg|pdf|zip|tar|gz|bin|exe|dll|so|o|a|lock)$|assets/|public/|static/|dist/|build/" \
-            . > gitinspector-report/report.txt
+          git fame \
+            --excl ".*\.(png|jpg|jpeg|gif|webp|svg|ico|bmp|tiff|ttf|woff|woff2|eot|otf|mp3|mp4|wav|ogg|pdf|zip|tar|gz|bin|exe|dll|so|o|a|lock)$" \
+            --excl "^(assets|public|static|dist|build)/" \
+            --sort loc \
+            . > git-report/ownership.txt
         continue-on-error: true
 
-      - name: Run Gitinspector (HTML)
+      - name: Run git-fame (CSV for tooling)
         run: |
-          python /tmp/gitinspector/gitinspector.py \
-            --format=html \
-            --grading \
-            --timeline \
-            --responsibilities \
-            --since="1 year ago" \
-            --exclude=".*\.(png|jpg|jpeg|gif|webp|svg|ico|bmp|tiff|ttf|woff|woff2|eot|otf|mp3|mp4|wav|ogg|pdf|zip|tar|gz|bin|exe|dll|so|o|a|lock)$|assets/|public/|static/|dist/|build/" \
-            . > gitinspector-report/report.html
+          git fame \
+            --excl ".*\.(png|jpg|jpeg|gif|webp|svg|ico|bmp|tiff|ttf|woff|woff2|eot|otf|mp3|mp4|wav|ogg|pdf|zip|tar|gz|bin|exe|dll|so|o|a|lock)$" \
+            --excl "^(assets|public|static|dist|build)/" \
+            --sort loc \
+            --format csv \
+            . > git-report/ownership.csv
         continue-on-error: true
 
-      - name: Print text report to logs
-        run: cat gitinspector-report/report.txt
+      # Per-file ownership breakdown (which author owns the most lines per file)
+      - name: Run git-fame per-file breakdown
+        run: |
+          git fame \
+            --excl ".*\.(png|jpg|jpeg|gif|webp|svg|ico|bmp|tiff|ttf|woff|woff2|eot|otf|mp3|mp4|wav|ogg|pdf|zip|tar|gz|bin|exe|dll|so|o|a|lock)$" \
+            --excl "^(assets|public|static|dist|build)/" \
+            --bytype \
+            --sort loc \
+            . > git-report/ownership-by-type.txt
+        continue-on-error: true
+
+      # Modification History 
+      # Full log: author, date, changed files, insertions/deletions
+      - name: Generate modification log
+        run: |
+          git log \
+            --stat \
+            --no-merges \
+            --date=short \
+            --pretty=format:"commit %H%nauthor %an <%ae>%ndate   %ad%nsubject %s%n" \
+            > git-report/modification-log.txt
+        continue-on-error: true
+
+      # Per-author summary: files they modified and how many times
+      - name: Generate per-author file modification summary
+        run: |
+          {
+            echo "Per-author file modification counts"
+            git log --no-merges --pretty=format:"%an" --name-only \
+              | awk '
+                /^$/ { next }
+                author == "" { author = $0; next }
+                { count[author][$0]++; author = "" }
+                END {
+                  for (a in count)
+                    for (f in count[a])
+                      printf "%s\t%d\t%s\n", a, count[a][f], f
+                }
+              ' \
+              | sort -k1,1 -k2,2rn
+          } > git-report/author-file-modifications.txt
+        continue-on-error: true
+
+      # Generates a CONTRIBUTORS file suitable for LICENSE attribution
+      - name: Generate CONTRIBUTORS list
+        run: |
+          {
+            echo "CONTRIBUTORS"
+            echo "This file lists all contributors to this project."
+            echo "Generated on $(date -u '+%Y-%m-%d %H:%M UTC')"
+            echo "Name | Email | Commits | First Contribution | Last Contribution"
+            git log --no-merges \
+              --pretty=format:"%an|%ae|%ad" \
+              --date=short \
+              | sort | uniq -c \
+              | sort -rn > /tmp/raw.txt
+            git log --no-merges \
+              --pretty=format:"%an <%ae>" \
+              | sort -u \
+              | while read contributor; do
+                  name=$(echo "$contributor" | sed 's/ <.*//')
+                  email=$(echo "$contributor" | grep -oP '<\K[^>]+')
+                  commits=$(git log --no-merges --author="$email" --oneline 2>/dev/null | wc -l)
+                  first=$(git log --no-merges --author="$email" --reverse --pretty=format:"%ad" --date=short 2>/dev/null | head -1)
+                  last=$(git log --no-merges --author="$email" --pretty=format:"%ad" --date=short 2>/dev/null | head -1)
+                  echo "$name | $email | $commits | $first | $last"
+                done
+          } > git-report/CONTRIBUTORS.txt
+        continue-on-error: true
+
+      - name: Print ownership summary to logs
+        run: |
+          echo "===== OWNERSHIP SUMMARY =====" && cat git-report/ownership.txt
 
       - name: Upload report as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gitinspector-report-${{ github.sha }}
-          path: gitinspector-report/
+          name: git-report-${{ github.sha }}
+          path: git-report/
           retention-days: 30
