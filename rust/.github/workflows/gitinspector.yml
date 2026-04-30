@@ -1,0 +1,70 @@
+name: Gitinspector Report
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  schedule:
+    # Runs every Monday at 00:00 UTC
+    - cron: "0 0 * * 1"
+  workflow_dispatch:
+
+jobs:
+  gitinspector:
+    name: Generate Gitinspector Report
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Gitinspector
+        run: pip install gitinspector
+
+      - name: Create output directory
+        run: mkdir -p gitinspector-report
+
+      - name: Run Gitinspector (text)
+        run: |
+          gitinspector \
+            --format=text \
+            --grading \
+            --timeline \
+            --responsibilities \
+            --since="1 year ago" \
+            --exclude=".*\.(png|jpg|jpeg|gif|webp|svg|ico|bmp|tiff|ttf|woff|woff2|eot|otf|mp3|mp4|wav|ogg|pdf|zip|tar|gz|bin|exe|dll|so|o|a|lock)$|assets/|public/|static/|dist/|build/" \
+            . > gitinspector-report/report.txt
+        continue-on-error: true
+
+      - name: Run Gitinspector (HTML)
+        run: |
+          gitinspector \
+            --format=html \
+            --grading \
+            --timeline \
+            --responsibilities \
+            --since="1 year ago" \
+            --exclude=".*\.(png|jpg|jpeg|gif|webp|svg|ico|bmp|tiff|ttf|woff|woff2|eot|otf|mp3|mp4|wav|ogg|pdf|zip|tar|gz|bin|exe|dll|so|o|a|lock)$|assets/|public/|static/|dist/|build/" \
+            . > gitinspector-report/report.html
+        continue-on-error: true
+
+      - name: Print text report to logs
+        run: cat gitinspector-report/report.txt
+
+      - name: Upload report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitinspector-report-${{ github.sha }}
+          path: gitinspector-report/
+          retention-days: 30
