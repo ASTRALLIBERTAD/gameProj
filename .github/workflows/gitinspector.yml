@@ -24,20 +24,15 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install Gitinspector
-        run: pip install git+https://github.com/ejwa/gitinspector.git
+      - name: Clone Gitinspector
+        run: git clone --depth=1 https://github.com/ejwa/gitinspector.git /tmp/gitinspector
 
       - name: Create output directory
         run: mkdir -p gitinspector-report
 
       - name: Run Gitinspector (text)
         run: |
-          gitinspector \
+          python /tmp/gitinspector/gitinspector.py \
             --format=text \
             --grading \
             --timeline \
@@ -49,7 +44,7 @@ jobs:
 
       - name: Run Gitinspector (HTML)
         run: |
-          gitinspector \
+          python /tmp/gitinspector/gitinspector.py \
             --format=html \
             --grading \
             --timeline \
